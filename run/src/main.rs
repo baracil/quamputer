@@ -1,10 +1,10 @@
-use quamputer::circuit::QuantumCircuit;
-use quamputer::gate::gate::Gate::{Not, Hadamard};
-use quamputer::gate::gate::{Gate, cnot, toffoli};
-use quamputer::QDimension;
+
+use quamputer::gate::gate::Gate::{Hadamard};
+
+
 use quamputer::computer::QuantumComputer;
-use std::process::exit;
-use quamputer::state::State;
+
+
 
 fn main() {
     let computer = QuantumComputer::new(2);
