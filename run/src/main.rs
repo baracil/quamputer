@@ -1,5 +1,5 @@
 use quamputer::computer::QuantumComputer;
-use quamputer::gate::Gate::{Hadamard, Not, Swap};
+use quamputer::gate::Gate::{Hadamard, Not, Swap, Z};
 use quamputer::gate::{cnot, cswap};
 use quamputer::measure::Measure;
 
@@ -8,11 +8,13 @@ fn main() {
     let mut circuit_builder = computer.new_circuit_builder();
 
     circuit_builder
+        .start_loop(100)
         .push(Hadamard(0))
         .push(cnot(0,1))
         .push(cnot(1,2))
         .push(Measure::new("q0",0))
-        .push(Measure::new("q1",1));
+        .end_loop()
+    ;
 
 
 
@@ -29,5 +31,6 @@ fn main() {
     println!("result    : {:?}", result.current_state);
     println!("result q0 : {:?}", result.count.get("q0"));
     println!("result q1 : {:?}", result.count.get("q1"));
+    println!("result q2 : {:?}", result.count.get("q2"));
 }
 

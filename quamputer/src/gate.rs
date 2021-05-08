@@ -184,3 +184,6 @@ pub fn toffoli(control1: u8, control2: u8, target: u8) -> ControlledGate {
 pub fn cswap(control:u8, target1:u8,target2:u8) -> ControlledGate {
     Swap(target1,target2).with_one_control(control)
 }
+pub fn fredkin(control:u8, target1:u8,target2:u8) -> ControlledGate {
+    cswap(control,target1,target2)
+}

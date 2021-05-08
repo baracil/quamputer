@@ -2,14 +2,16 @@
 
 * [X] Measure
 * [X] Loops with fix number of iterations
+
 * [ ] Loops with advanced termination predicate
 
 == Gates
 
 * [x] Not Gate
-* [X] Swap
+* [x] Swap
+* [x] Fredkin (CSwap)
 * [x] Pauli X
-* [ ] Pauli Y
+* [x] Pauli Y
 * [x] Pauli Z
 * [x] Hadamard
 * [x] Toffoli
@@ -21,7 +23,6 @@
 * [ ] Ry(θ)
 * [ ] Rz(θ)
 * [ ] Sqrt Swap
-* [ ] Fredkin (CSwap)
 * [ ] Ising XX
 * [ ] Ising YY
 * [ ] Ising ZZ
