@@ -3,8 +3,8 @@ use std::ops::Deref;
 
 
 use std::rc::{Rc, Weak};
-use crate::gate::{QuantumOperation, ExecutionContext};
-use std::collections::VecDeque;
+use crate::gate::{QuantumOperation, ExecutionContext, MeasureCount};
+use std::collections::{VecDeque, HashMap};
 use std::borrow::Borrow;
 
 #[derive(Clone)]
@@ -15,7 +15,7 @@ pub struct QuantumCircuit {
 
 pub struct QuantumLoop {
     circuit:QuantumCircuit,
-    nb_iterations:u32,
+    predicate: Rc<dyn Fn(u32,&HashMap<String,MeasureCount>) -> bool>,
 }
 
 impl Deref for QuantumCircuit {
@@ -42,7 +42,8 @@ impl QuantumOperation for QuantumLoop {
     }
 
     fn apply(&self, context: &mut ExecutionContext) {
-        for i in 0..self.nb_iterations {
+        let mut i = 0;
+        while !(self.predicate)(i,&context.count) {
             self.circuit.apply(context)
         }
     }
@@ -59,12 +60,12 @@ pub struct QuantumCircuitBuilder {
 struct QLoopData {
     nb_qbits: u8,
     operations: Vec<Rc<dyn QuantumOperation>>,
-    nb_iterations: u32,
+    predicate: Rc<dyn Fn(u32,&HashMap<String,MeasureCount>) -> bool>,
 }
 
 impl QLoopData {
     fn build_loop(&self) -> QuantumLoop {
-        QuantumLoop {circuit: QuantumCircuit { nb_qbits: self.nb_qbits, operations: self.operations.clone() }, nb_iterations:self.nb_iterations}
+        QuantumLoop {circuit: QuantumCircuit { nb_qbits: self.nb_qbits, operations: self.operations.clone() }, predicate:self.predicate.clone()}
     }
 }
 
@@ -83,7 +84,13 @@ impl QuantumCircuitBuilder {
     }
 
     pub fn start_loop(&mut self, nb_iterations: u32) -> &mut QuantumCircuitBuilder {
-        let loop_data = QLoopData { nb_qbits: self.nb_qbits, operations: Vec::with_capacity(10), nb_iterations };
+        self.start_advanced_loop(move |i,m|  i>=nb_iterations)
+    }
+
+    pub fn start_advanced_loop<F>(&mut self, predicate: F) -> &mut QuantumCircuitBuilder
+        where  F : Fn(u32,&HashMap<String,MeasureCount>) -> bool + 'static
+    {
+        let loop_data = QLoopData { nb_qbits: self.nb_qbits, operations: Vec::with_capacity(10), predicate: Rc::new(predicate)};
         self.loops.push_back(loop_data);
         self
     }
@@ -118,17 +125,6 @@ impl QuantumCircuitBuilder {
         Ok(self)
     }
 }
-
-
-// pub trait QLoopStarter {
-//     fn start_loop(&mut self) -> QuantumCircuitLoop<Self>;
-// }
-//
-// impl<'a> QLoopStarter for QuantumCircuitBuilder {
-//     fn start_loop(&'a mut self) -> QuantumCircuitLoop<'a, Self> {
-//         self.start_loop()
-//     }
-// }
 
 
 impl QDimension for QuantumCircuit {
