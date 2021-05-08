@@ -4,17 +4,18 @@
 use crate::{QDimension};
 use crate::state::QuantumState;
 use std::f64::consts::FRAC_1_SQRT_2;
+use crate::gate::ExecutionContext;
 
-pub fn apply_controlled_hadamard(control_qbits: &[u8], target: u8, state: &QuantumState) -> QuantumState {
-    let control_mask = state.control_nask(control_qbits);
-    let mask = state.mask(target);
+pub fn apply_controlled_hadamard(control_qbits: &[u8], target: u8, context: &mut ExecutionContext)  {
+    let control_mask = context.control_mask(control_qbits);
+    let mask = context.mask(target);
     let not_mask = !mask;
 
-    let mut result = QuantumState::nil(state.nb_qbits());
+    let mut result = QuantumState::nil(context.nb_qbits());
 
-    let len = state.len();
+    let len = context.nb_amplitudes();
     for i in 0..len {
-        let amplitude = state[i];
+        let amplitude = context.current_state[i];
         let control_set = (i & control_mask) == control_mask;
         if !control_set {
             result[i] += amplitude;
@@ -35,23 +36,23 @@ pub fn apply_controlled_hadamard(control_qbits: &[u8], target: u8, state: &Quant
         }
     };
 
-    result
+    context.current_state = result
 }
 
 
-pub fn apply_controlled_not(control_qbits: &[u8], target: u8, state: &QuantumState) -> QuantumState {
-    let control_mask = state.control_nask(control_qbits);
-    let target_mask = state.mask(target);
+pub fn apply_controlled_not(control_qbits: &[u8], target: u8, context: &mut ExecutionContext) {
+    let control_mask = context.control_mask(control_qbits);
+    let target_mask = context.mask(target);
 
-    let mut result = QuantumState::nil(state.nb_qbits());
+    let mut result = QuantumState::nil(context.nb_qbits());
 
-    let len = state.len();
+    let len = context.nb_amplitudes();
     for i in 0..len {
         let control_set = (i & control_mask) == control_mask;
         let source = if control_set { i ^ target_mask } else { i };
-        result[i] = state[source]
+        result[i] = context.current_state[source]
     }
-    result
+    context.current_state = result;
 }
 
 

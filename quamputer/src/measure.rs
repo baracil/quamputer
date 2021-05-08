@@ -1,6 +1,7 @@
-use crate::gate::QuantumOperation;
+use crate::gate::{QuantumOperation, ExecutionContext, MeasureCount};
 use crate::state::QuantumState;
 use crate::QDimension;
+use crate::gate::State::MEASURED;
 
 pub struct Measure {
     id:String,
@@ -34,8 +35,28 @@ impl QuantumOperation for Measure {
         self.target
     }
 
-    fn apply(&self, input: &QuantumState) -> QuantumState {
-        let select_state = Measure::pick_on_state(input);
-        let output = QuantumState::same_amplitude(input.nb_qbits(), &[select_state]);
+    fn apply(&self, context: &mut ExecutionContext)  {
+
+        let mask = context.mask(self.target);
+
+        let select_state = Measure::pick_on_state(&context.current_state);
+        let output = QuantumState::same_amplitude(context.nb_qbits(), &[select_state]);
+
+        context.current_state = output;
+        context.state = MEASURED(select_state);
+
+        let measured_one = (select_state&mask) == mask;
+
+        match (measured_one,context.count.get_mut(&self.id)) {
+            (true,Some(mc)) => mc.nb_one+=1,
+            (false,Some(mc)) => mc.nb_zero+=1,
+            (true, None) => {
+                context.count.insert(self.id.clone(),MeasureCount{nb_zero:0,nb_one:1});
+            },
+            (false, None) => {
+                context.count.insert(self.id.clone(),MeasureCount{nb_zero:1,nb_one:0});
+            },
+        }
+
     }
 }

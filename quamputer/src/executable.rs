@@ -1,5 +1,7 @@
 use crate::circuit::QuantumCircuit;
 use crate::state::QuantumState;
+use crate::gate::ExecutionContext;
+use std::collections::HashMap;
 
 pub struct Executable {
     circuit: QuantumCircuit,
@@ -11,11 +13,12 @@ impl Executable {
         Self{circuit:circuit.clone()}
     }
 
-    pub fn execute(&self, initial_state:&QuantumState) -> QuantumState {
+    pub fn execute(&self, initial_state:&QuantumState) -> ExecutionContext {
         Execution::new(&self.circuit).execute(initial_state)
     }
 
 }
+
 
 pub struct Execution<'a> {
     circuit:&'a QuantumCircuit,
@@ -27,12 +30,12 @@ impl<'a> Execution<'a> {
         Self{circuit}
     }
 
-    pub fn execute(&self, initial_state:&QuantumState) -> QuantumState {
-        let mut current = QuantumState::from(initial_state);
+    pub fn execute(&self, initial_state:&QuantumState) -> ExecutionContext {
+        let mut context = ExecutionContext::initialize(&initial_state);
         for gate in self.circuit.iter() {
-            current = gate.apply(&current);
+            gate.apply(&mut context);
         };
-        return current;
+        return context;
     }
 
 }

@@ -1,6 +1,7 @@
 use quamputer::computer::QuantumComputer;
 use quamputer::gate::Gate::{Hadamard, Not};
 use quamputer::gate::cnot;
+use quamputer::measure::Measure;
 
 
 fn main() {
@@ -8,7 +9,8 @@ fn main() {
     let mut circuit = computer.new_circuit();
 
     circuit.push(Hadamard(0))
-        .push(Not(1).with_one_control(0));
+        .push(Not(1).with_one_control(0))
+        .push(Measure::new("A",0));
         // there are shortcut for Cnot and Toffoli like cnot(0,1);
 
     let executable = computer.compile(&circuit);
@@ -19,6 +21,7 @@ fn main() {
 
 
     println!("input  : {:?}", initial_state);
-    println!("result : {:?}", result);
+    println!("result : {:?}", result.current_state);
+    println!("result : {:?}", result.count.get("A"));
 }
 

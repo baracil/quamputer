@@ -51,7 +51,7 @@ impl QuantumState {
         return power_of_two(self.nb_qbits - 1 - qbit_idx);
     }
 
-    pub (crate) fn control_nask(&self, control_qbits: &[u8]) -> usize {
+    pub (crate) fn control_mask(&self, control_qbits: &[u8]) -> usize {
         control_qbits.iter()
             .map(|i| self.mask(*i))
             .reduce(|m1, m2| m1 + m2)

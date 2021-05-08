@@ -1,6 +1,10 @@
 use crate::gate::Gate::{Not, X, Hadamard};
 use crate::state::QuantumState;
 use crate::operations::{apply_controlled_not, apply_controlled_hadamard};
+use crate::QDimension;
+use std::collections::HashMap;
+use crate::gate::State::NOT_MEASURED;
+use crate::measure::Measure;
 
 pub trait QuantumOperation {
 
@@ -12,9 +16,52 @@ pub trait QuantumOperation {
 
     /// Apply the current gate operation to the provided state
     /// and return the result.
-    fn apply(&self, input:&QuantumState) -> QuantumState;
+    fn apply(&self, input:&mut ExecutionContext);
 
 }
+
+pub enum State {
+    MEASURED(usize),
+    NOT_MEASURED
+}
+
+#[derive(Debug,Copy, Clone)]
+pub struct MeasureCount {
+    pub nb_zero:u32,
+    pub nb_one:u32,
+}
+
+pub struct ExecutionContext {
+    pub current_state:QuantumState,
+    pub state:State,
+    pub count:HashMap<String,MeasureCount>
+}
+
+impl ExecutionContext {
+
+    pub (crate) fn initialize(initial_state:&QuantumState) -> Self {
+        Self{current_state:QuantumState::from(initial_state), state:NOT_MEASURED, count: HashMap::new()}
+    }
+
+    pub (crate) fn mask(&self, qbit_idx: u8) -> usize {
+        self.current_state.mask(qbit_idx)
+    }
+
+    pub (crate) fn control_mask(&self, control_qbits: &[u8]) -> usize {
+        self.current_state.control_mask(control_qbits)
+    }
+    pub (crate) fn nb_amplitudes(&self) -> usize {
+        self.current_state.len()
+    }
+
+}
+
+impl QDimension for ExecutionContext {
+    fn nb_qbits(&self) -> u8 {
+        self.current_state.nb_qbits()
+    }
+}
+
 
 ///
 /// Gate without any control qbits.
@@ -78,11 +125,11 @@ impl Gate {
         ControlledGate { gate: self.clone(), controls:Vec::from(controls) }
     }
 
-    fn apply_controlled(&self, control_qbits:&[u8], state:&QuantumState) -> QuantumState {
+    fn apply_controlled(&self, control_qbits:&[u8], context:&mut ExecutionContext) {
         match self {
-            Not(target) => apply_controlled_not(control_qbits,*target,state),
-            X(target) => apply_controlled_not(control_qbits,*target,state),
-            Hadamard(target) => apply_controlled_hadamard(control_qbits,*target,state)
+            Not(target) => apply_controlled_not(control_qbits, *target, context),
+            X(target) => apply_controlled_not(control_qbits, *target, context),
+            Hadamard(target) => apply_controlled_hadamard(control_qbits, *target, context)
         }
     }
 
@@ -99,7 +146,7 @@ impl QuantumOperation for Gate {
         }
     }
 
-    fn apply(&self, state: &QuantumState) -> QuantumState {
+    fn apply(&self, state: &mut ExecutionContext)  {
         return self.apply_controlled(&[],state);
     }
 }
@@ -112,7 +159,7 @@ impl QuantumOperation for ControlledGate {
         return max_qbit_gate.max(max_qbit_control);
     }
 
-    fn apply(&self, input: &QuantumState) -> QuantumState {
+    fn apply(&self, input: &mut ExecutionContext) {
         self.gate.apply_controlled(self.controls.as_slice(),input)
     }
 }
