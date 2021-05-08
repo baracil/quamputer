@@ -16,7 +16,7 @@ pub trait QuantumOperation {
 
     /// Apply the current gate operation to the provided state
     /// and return the result.
-    fn apply(&self, input:&mut ExecutionContext);
+    fn apply(&self, context:&mut ExecutionContext);
 
 }
 

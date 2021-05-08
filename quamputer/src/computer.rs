@@ -1,4 +1,4 @@
-use crate::circuit::QuantumCircuit;
+use crate::circuit::{QuantumCircuit, QuantumCircuitBuilder};
 use crate::state::QuantumState;
 use crate::executable::Executable;
 
@@ -15,8 +15,8 @@ impl QuantumComputer {
         Executable::new(circuit)
     }
 
-    pub fn new_circuit(&self) -> QuantumCircuit {
-        QuantumCircuit::new(self.nb_qbits)
+    pub fn new_circuit_builder(&self) -> QuantumCircuitBuilder {
+        QuantumCircuitBuilder::new(self.nb_qbits)
     }
 
     pub fn zero_state(&self) -> QuantumState {

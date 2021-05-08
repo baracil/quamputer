@@ -3,17 +3,20 @@ use quamputer::gate::Gate::{Hadamard, Not};
 use quamputer::gate::cnot;
 use quamputer::measure::Measure;
 
-
 fn main() {
     let computer = QuantumComputer::new(2);
-    let mut circuit = computer.new_circuit();
+    let mut circuit_builder = computer.new_circuit_builder();
 
-    circuit.push(Hadamard(0))
+    circuit_builder.start_loop(2)
+        .push(Hadamard(0))
         .push(Not(1).with_one_control(0))
-        .push(Measure::new("A",0));
-        // there are shortcut for Cnot and Toffoli like cnot(0,1);
+        .end_loop();
 
-    let executable = computer.compile(&circuit);
+
+
+
+
+    let executable = computer.compile(&circuit_builder.build().unwrap());
 
     let initial_state = computer.zero_state();
 

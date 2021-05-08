@@ -1,6 +1,6 @@
 
 mod state;
-mod circuit;
+pub mod circuit;
 pub mod computer;
 pub mod gate;
 mod operations;
