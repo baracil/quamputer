@@ -63,13 +63,13 @@ mod tests_not {
     use num_traits::identities::One;
     use num_traits::Zero;
 
-    use crate::operations::apply_not_gate;
     use crate::state::QuantumState;
+    use crate::operations::apply_controlled_not;
 
     #[test]
     fn not_test_on_zero() {
         let state = QuantumState::zero(3);
-        let result = apply_not_gate(2, &state);
+        let result = apply_controlled_not(&[], 2, &state);
 
         assert!((result[0].sub(Complex64::zero()).norm()) < 1e-6);
         assert!((result[1].sub(Complex64::one()).norm()) < 1e-6);
@@ -84,8 +84,8 @@ mod tests_not {
     #[test]
     fn not_test_on_one() {
         let state = QuantumState::zero(3);
-        let result = apply_not_gate(2, &state);
-        let result = apply_not_gate(1, &result);
+        let result = apply_controlled_not(&[], 2, &state);
+        let result = apply_controlled_not(&[], 1, &result);
 
         assert!((result[0].sub(Complex64::zero()).norm()) < 1e-6);
         assert!((result[1].sub(Complex64::zero()).norm()) < 1e-6);
@@ -103,7 +103,7 @@ mod tests_not {
         state[0] = Complex::zero();
         state[1] = Complex::one();
         state[6] = Complex::one();
-        let result = apply_not_gate(1, &state);
+        let result = apply_controlled_not(&[], 1, &state);
 
         assert!((result[0].sub(Complex64::zero()).norm()) < 1e-6);
         assert!((result[1].sub(Complex64::zero()).norm()) < 1e-6);
@@ -124,13 +124,13 @@ mod tests_toffoli {
     use num_traits::identities::One;
     use num_traits::Zero;
 
-    use crate::operations::{apply_not_gate, apply_toffoli_gate};
     use crate::state::QuantumState;
+    use crate::operations::apply_controlled_not;
 
     #[test]
     fn toffoli_test_on_zero() {
         let state = QuantumState::zero(3);
-        let result = apply_toffoli_gate(0, 1, 2, &state);
+        let result = apply_controlled_not(&[0, 1], 2, &state);
 
         assert!((result[0].sub(Complex64::one()).norm()) < 1e-6);
         assert!((result[1].sub(Complex64::zero()).norm()) < 1e-6);
@@ -149,10 +149,7 @@ mod tests_toffoli {
         state[2] = Complex::one();
         state[6] = Complex::new(2.0, 0.0);
         state[7] = Complex::new(3.0, 0.0);
-        let result = apply_toffoli_gate(0, 1, 2, &state);
-
-        println!("input {:?}", state);
-        println!("input {:?}", result);
+        let result = apply_controlled_not(&[0, 1], 2, &state);
 
         assert!((result[0].sub(Complex64::zero()).norm()) < 1e-6);
         assert!((result[1].sub(Complex64::zero()).norm()) < 1e-6);

@@ -33,7 +33,8 @@ pub enum Gate {
 /// For instance the Toffoli gate is obtained with
 ///
 /// ```
-/// let toffoli = not(2).with_two_controls(0,1);
+/// use quamputer::gate::Gate::Not;
+/// let toffoli = Not(2).with_two_controls(0,1);
 /// ```
 pub struct ControlledGate {
     gate: Gate,
