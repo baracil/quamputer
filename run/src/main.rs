@@ -1,5 +1,5 @@
 use quamputer::circuit::QuantumCircuit;
-use quamputer::gate::gate::Gate::{Not, CNot, Hadamard};
+use quamputer::gate::gate::Gate::{Not, Hadamard};
 use quamputer::gate::gate::{Gate, cnot, toffoli};
 use quamputer::QDimension;
 use quamputer::computer::QuantumComputer;
@@ -12,14 +12,12 @@ fn main() {
 
     let mut circuit = computer.new_circuit();
 
-    circuit.push(Hadamard(0))
-        .push(cnot(0, 1))
-        .push(Hadamard(0));
-    ;
+    circuit.push(Hadamard(1).single_control(0));
+
 
     let executable = computer.compile(&circuit);
 
-    let initial_state = computer.zero_state();
+    let initial_state = computer.same_amplitude(&[0,2]);
     let result = executable.launch(&initial_state);
 
 

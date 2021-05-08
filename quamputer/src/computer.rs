@@ -14,6 +14,7 @@ impl QuantumComputer {
     pub fn zero_state(&self) -> State {
         State::zero(self.nb_qbits)
     }
+
     pub fn same_amplitude(&self, idx:&[usize]) -> State {
         State::same_amplitude(self.nb_qbits,idx)
     }
@@ -43,7 +44,7 @@ impl QuantumComputer {
         Self{nb_qbits}
     }
 
-    pub fn compile(&self, circuit:&QuantumCircuit) -> Executable {
+    pub fn compile<'a>(&self, circuit:&QuantumCircuit) -> Executable {
         Executable{computer:self,circuit:circuit.clone()}
     }
 

@@ -7,12 +7,11 @@ use std::fmt::{Debug, Formatter, Result, Write};
 use std::alloc::handle_alloc_error;
 
 pub struct State {
-    nb_qbits:u8,
-    amplitudes:Vec<Complex64>,
+    nb_qbits: u8,
+    amplitudes: Vec<Complex64>,
 }
 
 impl Debug for State {
-
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let wavefunction = self.amplitudes.iter()
             .enumerate()
@@ -26,8 +25,15 @@ impl Debug for State {
 }
 
 impl State {
-    pub fn mask(&self, qbit_idx:u8) -> usize {
-        return power_of_two(self.nb_qbits-1-qbit_idx);
+    pub fn mask(&self, qbit_idx: u8) -> usize {
+        return power_of_two(self.nb_qbits - 1 - qbit_idx);
+    }
+
+    pub fn control_nask(&self, control_qbits: &[u8]) -> usize {
+        control_qbits.iter()
+            .map(|i| self.mask(*i))
+            .reduce(|m1, m2| m1 + m2)
+            .unwrap_or(0)
     }
 }
 
@@ -47,41 +53,39 @@ impl DerefMut for State {
 
 
 impl State {
-
     pub(crate) fn same_amplitude(nb_qbits: u8, qbit_idx: &[usize]) -> State {
-        let nb_amplitudes= power_of_two(nb_qbits);
+        let nb_amplitudes = power_of_two(nb_qbits);
         let mut amplitudes = Vec::with_capacity(nb_amplitudes);
         amplitudes.resize_with(nb_amplitudes, || Complex64::zero());
 
-        let amplitude = Complex64::new((1.0/qbit_idx.len() as f64).sqrt(), 0.0);
+        let amplitude = Complex64::new((1.0 / qbit_idx.len() as f64).sqrt(), 0.0);
 
         for qbit_idx in qbit_idx {
             amplitudes[*qbit_idx] = amplitude;
         }
 
-        return Self{nb_qbits,amplitudes};
-
+        return Self { nb_qbits, amplitudes };
     }
 
 
-    pub fn zero(nb_quits:u8) -> Self {
-        State::same_amplitude(nb_quits,&[0])
+    pub fn zero(nb_quits: u8) -> Self {
+        State::same_amplitude(nb_quits, &[0])
     }
 
-    pub fn nil(nb_quits:u8) -> Self {
-        let nb_amplitudes= power_of_two(nb_quits);
+    pub fn nil(nb_quits: u8) -> Self {
+        let nb_amplitudes = power_of_two(nb_quits);
         let mut amplitudes = Vec::with_capacity(nb_amplitudes);
         amplitudes.resize_with(nb_amplitudes, || Complex64::zero());
-        Self{nb_qbits:nb_quits,amplitudes}
+        Self { nb_qbits: nb_quits, amplitudes }
     }
 
-    pub fn from(other:&State) -> Self {
-        Self{nb_qbits:other.nb_qbits, amplitudes:other.amplitudes.clone()}
+    pub fn from(other: &State) -> Self {
+        Self { nb_qbits: other.nb_qbits, amplitudes: other.amplitudes.clone() }
     }
 }
 
 impl QDimension for State {
     fn nb_qbits(&self) -> u8 {
-        return self.nb_qbits
+        return self.nb_qbits;
     }
 }

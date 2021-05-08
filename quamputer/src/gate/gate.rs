@@ -1,7 +1,7 @@
-use crate::gate::gate::Gate::{Not, X, CNot, Toffoli, Hadamard};
+use crate::gate::gate::Gate::{Not, X, Hadamard};
 use crate::gate::GateOp;
 use crate::state::State;
-use crate::gate::operations::{apply_not_gate, apply_cnot_gate, apply_toffoli_gate, apply_hadamard_gate};
+use crate::gate::operations::{apply_controlled_not, apply_controlled_hadamard};
 
 #[derive(Copy, Clone)]
 pub enum Gate {
@@ -9,53 +9,83 @@ pub enum Gate {
     X(u8),
     // Y(u8),
     // Z(u8),
-    CNot {control:u8,target:u8},
-    Toffoli {control1:u8, control2:u8, target:u8},
-    Hadamard(u8)
+    Hadamard(u8),
 }
 
+pub struct ControlledGate {
+    gate: Gate,
+    controls: Vec<u8>,
+}
 
 impl Gate {
 
-    pub fn max_qbit_idx(&self) -> u8 {
+    pub fn single_control(&self, control: u8) -> ControlledGate {
+        ControlledGate { gate: self.clone(), controls:vec![control] }
+    }
+
+    pub fn bi_control(&self, control1: u8, control2: u8) -> ControlledGate {
+        ControlledGate { gate: self.clone(), controls:vec![control1,control2] }
+    }
+
+    pub fn multi_control(&self, controls: &[u8]) -> ControlledGate {
+        ControlledGate { gate: self.clone(), controls:Vec::from(controls) }
+    }
+
+    fn apply_controlled(&self, control_qbits:&[u8], state:&State) -> State {
         match self {
-            Not(target) => *target,
-            X(target) => *target,
-            CNot {control,target} => *target.max(control),
-            Toffoli {control1,control2,target}=> *target.max(control1).max(control2),
-            Hadamard(target) => *target
+            Not(target) => apply_controlled_not(control_qbits,*target,state),
+            X(target) => apply_controlled_not(control_qbits,*target,state),
+            Hadamard(target) => apply_controlled_hadamard(control_qbits,*target,state)
         }
     }
+
 }
+
 
 impl GateOp for Gate {
 
-    fn apply(&self, state: &State)  -> State {
+    fn max_qbit_idx(&self) -> u8 {
         match self {
-            Not(target) => apply_not_gate(*target, state),
-            X(target) => apply_not_gate(*target, state),
-            CNot {control, target} => apply_cnot_gate(*control,*target, state),
-            Toffoli{control1,control2, target} => apply_toffoli_gate(*control1, *control2,*target, state),
-            Hadamard(target) => apply_hadamard_gate(*target,state)
-
+            Not(target) => *target,
+            X(target) => *target,
+            Hadamard(target) => *target
         }
     }
 
+    fn apply(&self, state: &State) -> State {
+        return self.apply_controlled(&[],state);
+    }
+}
+
+impl GateOp for ControlledGate {
+
+    fn max_qbit_idx(&self) -> u8 {
+        let max_qbit_gate = self.gate.max_qbit_idx();
+        return self.controls
+            .iter()
+            .reduce(|i1, i2| i1.max(i2))
+            .map(|i| max_qbit_gate.max(*i))
+            .unwrap_or(max_qbit_gate);
+    }
+
+    fn apply(&self, input: &State) -> State {
+        self.gate.apply_controlled(self.controls.as_slice(),input)
+    }
 }
 
 
-pub fn hadamard(target:u8) -> Gate {
+pub fn hadamard(target: u8) -> Gate {
     Hadamard(target)
 }
 
-pub fn pauli_x(target:u8) -> Gate {
+pub fn pauli_x(target: u8) -> Gate {
     X(target)
 }
 
-pub fn cnot(control: u8, target: u8) -> Gate {
-    CNot { control, target}
+pub fn cnot(control: u8, target: u8) -> ControlledGate {
+    Not(target).single_control(control)
 }
 
-pub fn toffoli(control1: u8, control2: u8, target: u8) -> Gate {
-    Toffoli { control1, control2, target}
+pub fn toffoli(control1: u8, control2: u8, target: u8) -> ControlledGate {
+    Not(target).bi_control(control1,control2)
 }
