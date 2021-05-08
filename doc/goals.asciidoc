@@ -1,0 +1,37 @@
+# Quamputer
+
+
+# 
+
+* Quantum Computer :  
+* Quantum Circuit : une succession de porte quantique
+sur un ensemble de q-bit
+
+
+# Goals
+
+* Pouvoir créer un circuit quantique en rust :
+
+```rust
+    let mut circuit = QuantumCircuit::new(4);
+
+    circuit = circuit.push(Hadamard(0))
+                     .push(CNOT {control:0,target:1});
+
+    let mut computer = QuantumComputer::new(circuit.nb_qbits());
+
+    compute.simulate(&circuit);
+```
+
+* Pouvoir écrire et lire un circuit depuis un fichier (format à définir,
+  JSON, XML).
+  
+```rust
+    let mut circuir = QuantumCircuit::load("path/to/circuit_definition_file")
+    let mut computer = QuantumComputer::new(circuit.nb_qbits());
+
+    compute.simulate(&circuit);
+```
+
+* Interface graphique pour créer/charger/modifier/sauvegarder/simuler un circuit
+quantique

@@ -1,0 +1,20 @@
+# Rust API
+
+* OP Gate : define a gate to place in the circuit
+    * Index of the affected qbits
+         * Hadamard(1)
+         * CNOT {control:1, target:2}
+         * Toffoli {control1:1, control2:2, target:3} 
+         * X(1)
+
+* OP Measurement : perform a measurement on a qbit
+         * Measure(1)
+
+* QuantumCircuit
+    * a list of gates and measurements to apply
+      to the state
+    * be able to define loop over a number 
+      (maybe on measurements value or stat)
+      
+* QuantumComputer
+   
