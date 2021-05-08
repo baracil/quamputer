@@ -1,0 +1,27 @@
+= Todo
+
+* [ ] Measure
+* [ ] Loops
+
+== Gates
+
+* [x] Not Gate
+* [x] Pauli X
+* [ ] Pauli Y
+* [ ] Pauli Z
+* [x] Hadamard
+* [x] Toffoli
+* [x] CNot
+* [ ] Sqrt(Not)
+* [ ] Phase Shift (P(ϕ), Z=P(π), S=P(π/2), T=P(π/4))
+* [ ] Rx(θ)
+* [ ] Ry(θ)
+* [ ] Rz(θ)
+* [ ] Swap
+* [ ] Sqrt Swap
+* [ ] Fredkin (CSwap)
+* [ ] Ising XX
+* [ ] Ising YY
+* [ ] Ising ZZ
+* [ ] Deutsch Gate
+

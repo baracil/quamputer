@@ -2,7 +2,7 @@ use crate::gate::Gate::{Not, X, Hadamard};
 use crate::state::QuantumState;
 use crate::operations::{apply_controlled_not, apply_controlled_hadamard};
 
-pub trait GateOp {
+pub trait QuantumOperation {
 
     /// Return the maximal index of the qbits
     /// involved in this gate operation
@@ -89,7 +89,7 @@ impl Gate {
 }
 
 
-impl GateOp for Gate {
+impl QuantumOperation for Gate {
 
     fn max_qbit_idx(&self) -> u8 {
         match self {
@@ -104,7 +104,7 @@ impl GateOp for Gate {
     }
 }
 
-impl GateOp for ControlledGate {
+impl QuantumOperation for ControlledGate {
 
     fn max_qbit_idx(&self) -> u8 {
         let max_qbit_gate = self.gate.max_qbit_idx();

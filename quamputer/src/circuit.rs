@@ -4,17 +4,17 @@ use std::ops::Deref;
 
 
 use std::rc::Rc;
-use crate::gate::GateOp;
+use crate::gate::QuantumOperation;
 
 #[derive(Clone)]
 pub struct QuantumCircuit {
     nb_qbits: u8,
-    gates: Vec<Rc<dyn GateOp>>,
+    gates: Vec<Rc<dyn QuantumOperation>>,
 }
 
 
 impl Deref for QuantumCircuit {
-    type Target = Vec<Rc<dyn GateOp>>;
+    type Target = Vec<Rc<dyn QuantumOperation>>;
 
     fn deref(&self) -> &Self::Target {
         &self.gates
@@ -27,11 +27,11 @@ impl QuantumCircuit {
         return Self { nb_qbits, gates: Vec::with_capacity(10) };
     }
 
-    pub fn push(&mut self, gate: impl GateOp + 'static) -> &mut QuantumCircuit {
+    pub fn push(&mut self, gate: impl QuantumOperation + 'static) -> &mut QuantumCircuit {
         self.push_safe(gate).unwrap()
     }
 
-    pub fn push_safe(&mut self, gate: impl GateOp + 'static) -> Result<&mut QuantumCircuit, &str> {
+    pub fn push_safe(&mut self, gate: impl QuantumOperation + 'static) -> Result<&mut QuantumCircuit, &str> {
         if gate.max_qbit_idx() >= self.nb_qbits {
             return Err("Invalid gate : some qbit indices are too high");
         }

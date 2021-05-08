@@ -1,5 +1,3 @@
-
-
 use quamputer::computer::QuantumComputer;
 use quamputer::gate::Gate::{Hadamard, Not};
 use quamputer::gate::cnot;
