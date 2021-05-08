@@ -1,7 +1,7 @@
 pub mod gate;
 pub mod operations;
 
-use crate::QDimension;
+
 use crate::state::State;
 
 pub trait GateOp {

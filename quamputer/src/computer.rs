@@ -1,6 +1,5 @@
 use crate::circuit::QuantumCircuit;
 use crate::state::State;
-use crate::gate::GateOp;
 
 pub struct QuantumComputer {
     nb_qbits:u8,
@@ -21,13 +20,12 @@ impl QuantumComputer {
 
 }
 
-pub struct Executable<'a> {
-    computer: &'a QuantumComputer,
+pub struct Executable {
     circuit: QuantumCircuit,
 }
 
 
-impl Executable<'_> {
+impl Executable {
 
     pub fn launch(&self, initial_state:&State) -> State {
         let mut current = State::from(initial_state);
@@ -45,7 +43,7 @@ impl QuantumComputer {
     }
 
     pub fn compile<'a>(&self, circuit:&QuantumCircuit) -> Executable {
-        Executable{computer:self,circuit:circuit.clone()}
+        Executable{circuit:circuit.clone()}
     }
 
 }

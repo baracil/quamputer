@@ -1,10 +1,10 @@
-use num_complex::{Complex64, Complex};
+use num_complex::{Complex64};
 use crate::{power_of_two, QDimension};
 use std::ops::{Deref, DerefMut, Add};
-use num_traits::identities::One;
+
 use num_traits::Zero;
-use std::fmt::{Debug, Formatter, Result, Write};
-use std::alloc::handle_alloc_error;
+use std::fmt::{Debug, Formatter, Result};
+
 
 pub struct State {
     nb_qbits: u8,

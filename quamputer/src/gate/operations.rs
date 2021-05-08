@@ -1,7 +1,7 @@
-use std::ops::Not;
-use std::os::linux::raw::stat;
 
-use crate::{power_of_two, QDimension};
+
+
+use crate::{QDimension};
 use crate::state::State;
 
 pub fn apply_controlled_hadamard(control_qbits: &[u8], target: u8, state: &State) -> State {
