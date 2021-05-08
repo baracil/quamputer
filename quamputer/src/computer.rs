@@ -1,40 +1,9 @@
 use crate::circuit::QuantumCircuit;
-use crate::state::State;
+use crate::state::QuantumState;
+use crate::executable::Executable;
 
 pub struct QuantumComputer {
     nb_qbits:u8,
-}
-
-impl QuantumComputer {
-    pub fn new_circuit(&self) -> QuantumCircuit {
-        QuantumCircuit::new(self.nb_qbits)
-    }
-
-    pub fn zero_state(&self) -> State {
-        State::zero(self.nb_qbits)
-    }
-
-    pub fn same_amplitude(&self, idx:&[usize]) -> State {
-        State::same_amplitude(self.nb_qbits,idx)
-    }
-
-}
-
-pub struct Executable {
-    circuit: QuantumCircuit,
-}
-
-
-impl Executable {
-
-    pub fn launch(&self, initial_state:&State) -> State {
-        let mut current = State::from(initial_state);
-        for gate in self.circuit.iter() {
-            current = gate.apply(&current);
-        };
-        return current;
-    }
-
 }
 
 impl QuantumComputer {
@@ -42,8 +11,19 @@ impl QuantumComputer {
         Self{nb_qbits}
     }
 
-    pub fn compile<'a>(&self, circuit:&QuantumCircuit) -> Executable {
-        Executable{circuit:circuit.clone()}
+    pub fn compile(&self, circuit:&QuantumCircuit) -> Executable {
+        Executable::new(circuit)
     }
 
+    pub fn new_circuit(&self) -> QuantumCircuit {
+        QuantumCircuit::new(self.nb_qbits)
+    }
+
+    pub fn zero_state(&self) -> QuantumState {
+        QuantumState::zero(self.nb_qbits)
+    }
+
+    pub fn same_amplitude(&self, qbit_idx:&[usize]) -> QuantumState {
+        QuantumState::same_amplitude(self.nb_qbits, qbit_idx)
+    }
 }

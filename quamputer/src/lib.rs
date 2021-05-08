@@ -1,13 +1,13 @@
 
-
-
-pub mod gate;
-pub mod state;
-pub mod circuit;
+mod state;
+mod circuit;
 pub mod computer;
+pub mod gate;
+mod operations;
+mod executable;
 
-const N:usize = 13;
-const POWER_OF_TWOS:[usize;N] = [1,2,4,8,16,32,64,128,256,512,1024,2048,4096];
+const N:usize = 17;
+const POWER_OF_TWOS:[usize;N] = [1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384,32768,65536];
 
 pub fn power_of_two(pow:u8) -> usize {
     let pow_usize = pow as usize;

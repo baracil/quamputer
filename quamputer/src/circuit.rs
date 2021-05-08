@@ -1,10 +1,10 @@
-use crate::gate::GateOp;
 
 use crate::QDimension;
 use std::ops::Deref;
 
 
 use std::rc::Rc;
+use crate::gate::GateOp;
 
 #[derive(Clone)]
 pub struct QuantumCircuit {
@@ -23,7 +23,7 @@ impl Deref for QuantumCircuit {
 
 
 impl QuantumCircuit {
-    pub fn new(nb_qbits: u8) -> Self {
+    pub(crate) fn new(nb_qbits: u8) -> Self {
         return Self { nb_qbits, gates: Vec::with_capacity(10) };
     }
 
