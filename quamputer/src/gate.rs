@@ -1,6 +1,6 @@
-use crate::gate::Gate::{Not, X, Hadamard};
+use crate::gate::Gate::{Not, X, Hadamard, Swap};
 use crate::state::QuantumState;
-use crate::operations::{apply_controlled_not, apply_controlled_hadamard};
+use crate::operations::{apply_controlled_not, apply_controlled_hadamard, apply_controlled_swap};
 use crate::QDimension;
 use std::collections::HashMap;
 use crate::gate::State::NOT_MEASURED;
@@ -72,6 +72,7 @@ pub enum Gate {
     X(u8),
     // Y(u8),
     // Z(u8),
+    Swap(u8,u8),
     Hadamard(u8),
 }
 
@@ -129,7 +130,8 @@ impl Gate {
         match self {
             Not(target) => apply_controlled_not(control_qbits, *target, context),
             X(target) => apply_controlled_not(control_qbits, *target, context),
-            Hadamard(target) => apply_controlled_hadamard(control_qbits, *target, context)
+            Hadamard(target) => apply_controlled_hadamard(control_qbits, *target, context),
+            Swap(target1,target2) => apply_controlled_swap(control_qbits,*target1, *target2, context)
         }
     }
 
@@ -142,7 +144,8 @@ impl QuantumOperation for Gate {
         match self {
             Not(target) => *target,
             X(target) => *target,
-            Hadamard(target) => *target
+            Hadamard(target) => *target,
+            Swap(target1, target2) => *target1.max(target2),
         }
     }
 
@@ -172,4 +175,8 @@ pub fn cnot(control: u8, target: u8) -> ControlledGate {
 
 pub fn toffoli(control1: u8, control2: u8, target: u8) -> ControlledGate {
     Not(target).with_two_controls(control1, control2)
+}
+
+pub fn cswap(control:u8, target1:u8,target2:u8) -> ControlledGate {
+    Swap(target1,target2).with_one_control(control)
 }

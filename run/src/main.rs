@@ -1,15 +1,17 @@
 use quamputer::computer::QuantumComputer;
-use quamputer::gate::Gate::{Hadamard, Not};
-use quamputer::gate::cnot;
+use quamputer::gate::Gate::{Hadamard, Not, Swap};
+use quamputer::gate::{cnot, cswap};
 use quamputer::measure::Measure;
 
 fn main() {
-    let computer = QuantumComputer::new(2);
+    let computer = QuantumComputer::new(3);
     let mut circuit_builder = computer.new_circuit_builder();
 
-    circuit_builder.start_loop(2)
+    circuit_builder
         .push(Hadamard(0))
-        .push(Not(1).with_one_control(0))
+        .start_loop(2)
+        .push(cnot(0,1))
+        .push(cswap(0,1,2))
         .end_loop();
 
 
