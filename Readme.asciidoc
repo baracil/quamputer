@@ -1,5 +1,12 @@
+= Quamputer : Yet Another Quantum Computer Simulator
+:author: Bastien Aracil
+
+WARNING: Work in Progress
 
 
+== Code Sample
+
+```rust
 use quamputer::computer::QuantumComputer;
 use quamputer::gate::Gate::{Hadamard, Not};
 use quamputer::gate::cnot;
@@ -23,4 +30,11 @@ fn main() {
     println!("input  : {:?}", initial_state);
     println!("result : {:?}", result);
 }
+```
 
+This will print:
+```
+input  : State 2 qbits :  (1.000000,0.000000)x|00> (0.000000,0.000000)x|01> (0.000000,0.000000)x|10> (0.000000,0.000000)x|11>
+result : State 2 qbits :  (0.707107,0.000000)x|00> (0.000000,0.000000)x|01> (0.000000,0.000000)x|10> (0.707107,0.000000)x|11>
+
+```
