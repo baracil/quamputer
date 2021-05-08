@@ -1,15 +1,16 @@
 = Todo
 
-* [ ] Measure
-* [ ] Loops
+* [X] Measure
+* [X] Loops with fix number of iterations
+* [ ] Loops with advanced termination predicate
 
 == Gates
 
 * [x] Not Gate
-* [x] Pauli X
 * [X] Swap
+* [x] Pauli X
 * [ ] Pauli Y
-* [ ] Pauli Z
+* [x] Pauli Z
 * [x] Hadamard
 * [x] Toffoli
 * [x] CNot

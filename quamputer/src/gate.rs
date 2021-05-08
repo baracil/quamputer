@@ -1,6 +1,6 @@
-use crate::gate::Gate::{Not, X, Hadamard, Swap};
+use crate::gate::Gate::{Not, X, Hadamard, Swap, Z, Y};
 use crate::state::QuantumState;
-use crate::operations::{apply_controlled_not, apply_controlled_hadamard, apply_controlled_swap};
+use crate::operations::{apply_controlled_not, apply_controlled_hadamard, apply_controlled_swap, apply_controlled_pauli_x, apply_controlled_pauli_z, apply_controlled_pauli_y};
 use crate::QDimension;
 use std::collections::HashMap;
 use crate::gate::State::NOT_MEASURED;
@@ -70,8 +70,8 @@ impl QDimension for ExecutionContext {
 pub enum Gate {
     Not(u8),
     X(u8),
-    // Y(u8),
-    // Z(u8),
+    Y(u8),
+    Z(u8),
     Swap(u8,u8),
     Hadamard(u8),
 }
@@ -129,7 +129,9 @@ impl Gate {
     fn apply_controlled(&self, control_qbits:&[u8], context:&mut ExecutionContext) {
         match self {
             Not(target) => apply_controlled_not(control_qbits, *target, context),
-            X(target) => apply_controlled_not(control_qbits, *target, context),
+            X(target) => apply_controlled_pauli_x(control_qbits, *target, context),
+            Y(target) => apply_controlled_pauli_y(control_qbits, *target, context),
+            Z(target) => apply_controlled_pauli_z(control_qbits, *target, context),
             Hadamard(target) => apply_controlled_hadamard(control_qbits, *target, context),
             Swap(target1,target2) => apply_controlled_swap(control_qbits,*target1, *target2, context)
         }
@@ -144,6 +146,8 @@ impl QuantumOperation for Gate {
         match self {
             Not(target) => *target,
             X(target) => *target,
+            Y(target) => *target,
+            Z(target) => *target,
             Hadamard(target) => *target,
             Swap(target1, target2) => *target1.max(target2),
         }

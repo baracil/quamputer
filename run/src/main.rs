@@ -9,10 +9,10 @@ fn main() {
 
     circuit_builder
         .push(Hadamard(0))
-        .start_loop(2)
         .push(cnot(0,1))
-        .push(cswap(0,1,2))
-        .end_loop();
+        .push(cnot(1,2))
+        .push(Measure::new("q0",0))
+        .push(Measure::new("q1",1));
 
 
 
@@ -25,8 +25,9 @@ fn main() {
     let result = executable.execute(&initial_state);
 
 
-    println!("input  : {:?}", initial_state);
-    println!("result : {:?}", result.current_state);
-    println!("result : {:?}", result.count.get("A"));
+    println!("input     : {:?}", initial_state);
+    println!("result    : {:?}", result.current_state);
+    println!("result q0 : {:?}", result.count.get("q0"));
+    println!("result q1 : {:?}", result.count.get("q1"));
 }
 

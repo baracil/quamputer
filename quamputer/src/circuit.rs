@@ -107,13 +107,13 @@ impl QuantumCircuitBuilder {
         self.push_safe(gate).unwrap()
     }
 
-    pub fn push_safe(&mut self, gate: impl QuantumOperation + 'static) -> Result<&mut QuantumCircuitBuilder, &str> {
-        if gate.max_qbit_idx() >= self.nb_qbits {
+    pub fn push_safe(&mut self, operation: impl QuantumOperation + 'static) -> Result<&mut QuantumCircuitBuilder, &str> {
+        if operation.max_qbit_idx() >= self.nb_qbits {
             return Err("Invalid gate : some qbit indices are too high");
         }
         match self.loops.back_mut() {
-            Some(loop_data) => loop_data.operations.push(Rc::new(gate)),
-            None => self.operations.push(Rc::new(gate))
+            Some(loop_data) => loop_data.operations.push(Rc::new(operation)),
+            None => self.operations.push(Rc::new(operation))
         }
         Ok(self)
     }
