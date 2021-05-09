@@ -2,7 +2,7 @@ use crate::gate::Gate::{Not, X, Hadamard, Swap, Z, Y};
 use crate::state::QuantumState;
 use crate::QDimension;
 use std::collections::HashMap;
-use crate::gate::State::NOT_MEASURED;
+use crate::gate::State::NotMeasured;
 
 use crate::gate_op::pauli::{apply_controlled_pauli_x, apply_controlled_pauli_y, apply_controlled_pauli_z};
 use crate::gate_op::hadamard::apply_controlled_hadamard;
@@ -23,8 +23,8 @@ pub trait QuantumOperation {
 }
 
 pub enum State {
-    MEASURED(usize),
-    NOT_MEASURED
+    Measured(usize),
+    NotMeasured
 }
 
 #[derive(Debug,Copy, Clone)]
@@ -42,7 +42,7 @@ pub struct ExecutionContext {
 impl ExecutionContext {
 
     pub (crate) fn initialize(initial_state:&QuantumState) -> Self {
-        Self{current_state:QuantumState::from(initial_state), state:NOT_MEASURED, count: HashMap::new()}
+        Self{current_state:QuantumState::from(initial_state), state: NotMeasured, count: HashMap::new()}
     }
 
     pub (crate) fn mask(&self, qbit_idx: u8) -> usize {

@@ -1,7 +1,7 @@
 use crate::state::QuantumState;
 use crate::QDimension;
 use crate::gate::{QuantumOperation, ExecutionContext, MeasureCount};
-use crate::gate::State::MEASURED;
+use crate::gate::State::Measured;
 
 pub struct Measure {
     id:String,
@@ -43,7 +43,7 @@ impl QuantumOperation for Measure {
         let output = QuantumState::same_amplitude(context.nb_qbits(), &[select_state]);
 
         context.current_state = output;
-        context.state = MEASURED(select_state);
+        context.state = Measured(select_state);
 
         let measured_one = (select_state&mask) == mask;
 

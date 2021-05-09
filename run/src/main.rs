@@ -14,9 +14,7 @@ fn main() {
         .push(cnot(1,2))
         .push(Measure::new("q0",0))
         .end_loop()
-    ;
-
-
+        .unwrap();
 
 
 
