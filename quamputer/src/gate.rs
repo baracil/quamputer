@@ -7,7 +7,7 @@ use crate::gate::State::{NotMeasured, Measured};
 use crate::gate_op::pauli::{apply_controlled_pauli_x, apply_controlled_pauli_y, apply_controlled_pauli_z};
 use crate::gate_op::hadamard::apply_controlled_hadamard;
 use crate::gate_op::swap::apply_controlled_swap;
-use num_complex::{Complex64, Complex};
+use num_complex::{Complex64};
 use std::ops::Sub;
 use num_traits::One;
 
@@ -90,7 +90,7 @@ impl ExecutionContext {
         self.current_state[idx]
     }
 
-    pub (crate) fn norm_of_diff(&self, idx:usize, reference:Complex64) -> f64 {
+    pub (crate) fn _norm_of_diff(&self, idx:usize, reference:Complex64) -> f64 {
         self.current_state[idx].sub(reference).norm()
     }
 

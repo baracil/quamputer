@@ -75,7 +75,7 @@ pub fn apply_controlled_pauli_x(control_qbits: &[u8], target: u8, context: &mut 
 #[cfg(test)]
 mod tests_pauli {
     use super::*;
-    use std::ops::{Sub, Neg};
+    use std::ops::{Neg};
     use num_traits::Zero;
     use num_traits::One;
 
@@ -84,8 +84,8 @@ mod tests_pauli {
         let mut context = ExecutionContext::initialize(&QuantumState::same_amplitude(1, &[0]));
         apply_controlled_pauli_y(&[], 0, &mut context);
 
-        assert!(context.norm_of_diff(0, Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(1, Complex64::i()) < 1e-6);
+        assert!(context._norm_of_diff(0, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(1, Complex64::i()) < 1e-6);
     }
 
     #[test]
@@ -93,8 +93,8 @@ mod tests_pauli {
         let mut context = ExecutionContext::initialize(&QuantumState::same_amplitude(1, &[1]));
         apply_controlled_pauli_y(&[], 0, &mut context);
 
-        assert!(context.norm_of_diff(0, Complex64::new(0.0, -1.0)) < 1e-6);
-        assert!(context.norm_of_diff(1, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(0, Complex64::new(0.0, -1.0)) < 1e-6);
+        assert!(context._norm_of_diff(1, Complex64::zero()) < 1e-6);
     }
 
     #[test]
@@ -108,8 +108,8 @@ mod tests_pauli {
         let mut context = ExecutionContext::initialize(&state);
         apply_controlled_pauli_y(&[], 0, &mut context);
 
-        assert!(context.norm_of_diff(0, c2.mul(Complex64::i().neg())) < 1e-6);
-        assert!(context.norm_of_diff(1, c1.mul(Complex64::i())) < 1e-6);
+        assert!(context._norm_of_diff(0, c2.mul(Complex64::i().neg())) < 1e-6);
+        assert!(context._norm_of_diff(1, c1.mul(Complex64::i())) < 1e-6);
     }
 
     #[test]
@@ -117,8 +117,8 @@ mod tests_pauli {
         let mut context = ExecutionContext::initialize(&QuantumState::same_amplitude(1, &[0]));
         apply_controlled_pauli_z(&[], 0, &mut context);
 
-        assert!(context.norm_of_diff(0, Complex64::one()) < 1e-6);
-        assert!(context.norm_of_diff(1, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(0, Complex64::one()) < 1e-6);
+        assert!(context._norm_of_diff(1, Complex64::zero()) < 1e-6);
     }
 
     #[test]
@@ -126,8 +126,8 @@ mod tests_pauli {
         let mut context = ExecutionContext::initialize(&QuantumState::same_amplitude(1, &[1]));
         apply_controlled_pauli_z(&[], 0, &mut context);
 
-        assert!(context.norm_of_diff(0, Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(1, Complex64::new(-1.0, 0.0)) < 1e-6);
+        assert!(context._norm_of_diff(0, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(1, Complex64::new(-1.0, 0.0)) < 1e-6);
 
     }
 
@@ -142,15 +142,15 @@ mod tests_pauli {
         let mut context = ExecutionContext::initialize(&state);
         apply_controlled_pauli_z(&[], 0, &mut context);
 
-        assert!(context.norm_of_diff(0, c1) < 1e-6);
-        assert!(context.norm_of_diff(1, c2.neg()) < 1e-6);
+        assert!(context._norm_of_diff(0, c1) < 1e-6);
+        assert!(context._norm_of_diff(1, c2.neg()) < 1e-6);
     }
 
 }
 
 #[cfg(test)]
 mod tests_not {
-    use std::ops::{Sub};
+    
 
     use num_complex::{Complex, Complex64};
     use num_traits::identities::One;
@@ -165,14 +165,14 @@ mod tests_not {
         let mut context = ExecutionContext::initialize(&QuantumState::zero(3));
         apply_controlled_pauli_x(&[], 2, &mut context);
 
-        assert!(context.norm_of_diff(0,Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(1,Complex64::one()) < 1e-6);
-        assert!(context.norm_of_diff(2,Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(3,Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(4,Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(5,Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(6,Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(7,Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(0, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(1, Complex64::one()) < 1e-6);
+        assert!(context._norm_of_diff(2, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(3, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(4, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(5, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(6, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(7, Complex64::zero()) < 1e-6);
     }
 
     #[test]
@@ -181,14 +181,14 @@ mod tests_not {
         apply_controlled_pauli_x(&[], 2, &mut context);
         apply_controlled_pauli_x(&[], 1, &mut context);
 
-        assert!(context.norm_of_diff(0,Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(1,Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(2,Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(3,Complex64::one()) < 1e-6);
-        assert!(context.norm_of_diff(4,Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(5,Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(6,Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(7,Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(0, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(1, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(2, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(3, Complex64::one()) < 1e-6);
+        assert!(context._norm_of_diff(4, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(5, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(6, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(7, Complex64::zero()) < 1e-6);
     }
 
     #[test]
@@ -201,20 +201,20 @@ mod tests_not {
         let mut context = ExecutionContext::initialize(&state);
         apply_controlled_pauli_x(&[], 1, &mut context);
 
-        assert!(context.norm_of_diff(0,Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(1,Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(2,Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(3,Complex64::one()) < 1e-6);
-        assert!(context.norm_of_diff(4,Complex64::one()) < 1e-6);
-        assert!(context.norm_of_diff(5,Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(6,Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(7,Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(0, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(1, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(2, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(3, Complex64::one()) < 1e-6);
+        assert!(context._norm_of_diff(4, Complex64::one()) < 1e-6);
+        assert!(context._norm_of_diff(5, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(6, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(7, Complex64::zero()) < 1e-6);
     }
 }
 
 #[cfg(test)]
 mod tests_toffoli {
-    use std::ops::Sub;
+    
 
     use num_complex::{Complex, Complex64};
     use num_traits::identities::One;
@@ -230,14 +230,14 @@ mod tests_toffoli {
         let mut context = ExecutionContext::initialize(&state);
         apply_controlled_pauli_x(&[0, 1], 2, &mut context);
 
-        assert!(context.norm_of_diff(0,Complex64::one()) < 1e-6);
-        assert!(context.norm_of_diff(1,Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(2,Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(3,Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(4,Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(5,Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(6,Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(7,Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(0, Complex64::one()) < 1e-6);
+        assert!(context._norm_of_diff(1, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(2, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(3, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(4, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(5, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(6, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(7, Complex64::zero()) < 1e-6);
     }
 
     #[test]
@@ -250,13 +250,13 @@ mod tests_toffoli {
 
         let mut context = ExecutionContext::initialize(&state);
         apply_controlled_pauli_x(&[0, 1], 2, &mut context);
-        assert!(context.norm_of_diff(0,Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(1,Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(2,Complex64::one()) < 1e-6);
-        assert!(context.norm_of_diff(3,Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(4,Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(5,Complex64::zero()) < 1e-6);
-        assert!(context.norm_of_diff(6,Complex64::new(3.0, 0.0)) < 1e-6);
-        assert!(context.norm_of_diff(7,Complex64::new(2.0, 0.0)) < 1e-6);
+        assert!(context._norm_of_diff(0, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(1, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(2, Complex64::one()) < 1e-6);
+        assert!(context._norm_of_diff(3, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(4, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(5, Complex64::zero()) < 1e-6);
+        assert!(context._norm_of_diff(6, Complex64::new(3.0, 0.0)) < 1e-6);
+        assert!(context._norm_of_diff(7, Complex64::new(2.0, 0.0)) < 1e-6);
     }
 }
