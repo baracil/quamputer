@@ -1,6 +1,6 @@
 use quamputer::computer::QuantumComputer;
-use quamputer::gate::Gate::{Hadamard, Not, Swap, Z};
-use quamputer::gate::{cnot, cswap};
+use quamputer::gate::Gate::{Hadamard};
+use quamputer::gate::{cnot};
 use quamputer::measure::Measure;
 
 fn main() {

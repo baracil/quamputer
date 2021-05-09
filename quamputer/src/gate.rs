@@ -3,7 +3,7 @@ use crate::state::QuantumState;
 use crate::QDimension;
 use std::collections::HashMap;
 use crate::gate::State::NOT_MEASURED;
-use crate::measure::Measure;
+
 use crate::gate_op::pauli::{apply_controlled_pauli_x, apply_controlled_pauli_y, apply_controlled_pauli_z};
 use crate::gate_op::hadamard::apply_controlled_hadamard;
 use crate::gate_op::swap::apply_controlled_swap;

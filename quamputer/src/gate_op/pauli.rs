@@ -155,7 +155,7 @@ mod tests_pauli {
 
 #[cfg(test)]
 mod tests_not {
-    use std::ops::{Sub, Neg, Mul};
+    use std::ops::{Sub};
 
     use num_complex::{Complex, Complex64};
     use num_traits::identities::One;
@@ -163,7 +163,7 @@ mod tests_not {
 
     use crate::state::QuantumState;
     use crate::gate::ExecutionContext;
-    use crate::gate_op::pauli::{apply_controlled_pauli_y, apply_controlled_pauli_z, apply_controlled_pauli_x};
+    use crate::gate_op::pauli::{apply_controlled_pauli_x};
 
     #[test]
     fn not_test_on_zero() {

@@ -28,15 +28,15 @@ pub fn apply_controlled_swap(control_qbits: &[u8], target1: u8, target2: u8, con
 
 #[cfg(test)]
 mod tests_not {
-    use std::ops::{Sub, Neg, Mul};
+    use std::ops::{Sub};
 
-    use num_complex::{Complex, Complex64};
+    use num_complex::{Complex64};
     use num_traits::identities::One;
     use num_traits::Zero;
 
     use crate::state::QuantumState;
     use crate::gate::ExecutionContext;
-    use crate::gate_op::pauli::{apply_controlled_pauli_y, apply_controlled_pauli_z};
+    
     use super::*;
 
     #[test]

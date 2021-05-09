@@ -2,9 +2,9 @@ use crate::QDimension;
 use std::ops::Deref;
 
 
-use std::rc::{Rc, Weak};
-use std::collections::{VecDeque, HashMap};
-use std::borrow::Borrow;
+use std::rc::{Rc};
+use std::collections::{VecDeque};
+
 use crate::gate::{QuantumOperation, ExecutionContext};
 
 #[derive(Clone)]
@@ -42,7 +42,7 @@ impl QuantumOperation for QuantumLoop {
     }
 
     fn apply(&self, context: &mut ExecutionContext) {
-        let mut i = 0;
+        let i = 0;
         while !(self.predicate)(i,&context) {
             self.circuit.apply(context)
         }
@@ -84,7 +84,7 @@ impl QuantumCircuitBuilder {
     }
 
     pub fn start_loop(&mut self, nb_iterations: u32) -> &mut QuantumCircuitBuilder {
-        self.start_advanced_loop(move |i,m|  i>=nb_iterations)
+        self.start_advanced_loop(move |i,_m|  i>=nb_iterations)
     }
 
     pub fn start_advanced_loop<F>(&mut self, predicate: F) -> &mut QuantumCircuitBuilder

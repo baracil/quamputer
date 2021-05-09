@@ -1,8 +1,8 @@
 use crate::{QDimension};
 use crate::state::QuantumState;
 use std::f64::consts::FRAC_1_SQRT_2;
-use num_complex::{Complex, Complex64};
-use std::ops::{Neg, Mul};
+
+
 use crate::gate::ExecutionContext;
 
 
