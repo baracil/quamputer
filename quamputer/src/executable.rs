@@ -1,7 +1,7 @@
 use crate::circuit::QuantumCircuit;
 use crate::state::QuantumState;
-use crate::gate::ExecutionContext;
 use std::collections::HashMap;
+use crate::gate::ExecutionContext;
 
 pub struct Executable {
     circuit: QuantumCircuit,

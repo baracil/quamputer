@@ -1,6 +1,6 @@
-use crate::gate::{QuantumOperation, ExecutionContext, MeasureCount};
 use crate::state::QuantumState;
 use crate::QDimension;
+use crate::gate::{QuantumOperation, ExecutionContext, MeasureCount};
 use crate::gate::State::MEASURED;
 
 pub struct Measure {

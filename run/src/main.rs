@@ -8,12 +8,7 @@ fn main() {
     let mut circuit_builder = computer.new_circuit_builder();
 
     circuit_builder
-        .start_advanced_loop(|_,c| {
-            if let Some(m) = c.get("q0") {
-                return m.nb_zero >= 10;
-            }
-            false
-        })
+        .start_advanced_loop(|_,c| c.get_nb_zero("q0") >= 10 )
         .push(Hadamard(0))
         .push(cnot(0,1))
         .push(cnot(1,2))

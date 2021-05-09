@@ -3,9 +3,9 @@ use std::ops::Deref;
 
 
 use std::rc::{Rc, Weak};
-use crate::gate::{QuantumOperation, ExecutionContext, MeasureCount};
 use std::collections::{VecDeque, HashMap};
 use std::borrow::Borrow;
+use crate::gate::{QuantumOperation, ExecutionContext};
 
 #[derive(Clone)]
 pub struct QuantumCircuit {
@@ -15,7 +15,7 @@ pub struct QuantumCircuit {
 
 pub struct QuantumLoop {
     circuit:QuantumCircuit,
-    predicate: Rc<dyn Fn(u32,&HashMap<String,MeasureCount>) -> bool>,
+    predicate: Rc<dyn Fn(u32,&ExecutionContext) -> bool>,
 }
 
 impl Deref for QuantumCircuit {
@@ -43,7 +43,7 @@ impl QuantumOperation for QuantumLoop {
 
     fn apply(&self, context: &mut ExecutionContext) {
         let mut i = 0;
-        while !(self.predicate)(i,&context.count) {
+        while !(self.predicate)(i,&context) {
             self.circuit.apply(context)
         }
     }
@@ -60,7 +60,7 @@ pub struct QuantumCircuitBuilder {
 struct QLoopData {
     nb_qbits: u8,
     operations: Vec<Rc<dyn QuantumOperation>>,
-    predicate: Rc<dyn Fn(u32,&HashMap<String,MeasureCount>) -> bool>,
+    predicate: Rc<dyn Fn(u32,&ExecutionContext) -> bool>,
 }
 
 impl QLoopData {
@@ -88,7 +88,7 @@ impl QuantumCircuitBuilder {
     }
 
     pub fn start_advanced_loop<F>(&mut self, predicate: F) -> &mut QuantumCircuitBuilder
-        where  F : Fn(u32,&HashMap<String,MeasureCount>) -> bool + 'static
+        where  F : Fn(u32,&ExecutionContext) -> bool + 'static
     {
         let loop_data = QLoopData { nb_qbits: self.nb_qbits, operations: Vec::with_capacity(10), predicate: Rc::new(predicate)};
         self.loops.push_back(loop_data);

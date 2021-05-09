@@ -2,8 +2,8 @@
 mod state;
 pub mod circuit;
 pub mod computer;
+pub mod gate_op;
 pub mod gate;
-mod operations;
 mod executable;
 pub mod measure;
 

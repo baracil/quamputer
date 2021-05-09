@@ -1,10 +1,12 @@
 use crate::gate::Gate::{Not, X, Hadamard, Swap, Z, Y};
 use crate::state::QuantumState;
-use crate::operations::{apply_controlled_not, apply_controlled_hadamard, apply_controlled_swap, apply_controlled_pauli_x, apply_controlled_pauli_z, apply_controlled_pauli_y};
 use crate::QDimension;
 use std::collections::HashMap;
 use crate::gate::State::NOT_MEASURED;
 use crate::measure::Measure;
+use crate::gate_op::pauli::{apply_controlled_pauli_x, apply_controlled_pauli_y, apply_controlled_pauli_z};
+use crate::gate_op::hadamard::apply_controlled_hadamard;
+use crate::gate_op::swap::apply_controlled_swap;
 
 pub trait QuantumOperation {
 
@@ -52,6 +54,20 @@ impl ExecutionContext {
     }
     pub (crate) fn nb_amplitudes(&self) -> usize {
         self.current_state.len()
+    }
+
+    pub fn get_nb_zero(&self, variable:&str) -> u32 {
+        match self.count.get(variable) {
+            Some(c) => c.nb_zero,
+            None => 0
+        }
+    }
+
+    pub fn get_nb_one(&self, variable:&str) -> u32 {
+        match self.count.get(variable) {
+            Some(c) => c.nb_one,
+            None => 0
+        }
     }
 
 }
@@ -128,7 +144,7 @@ impl Gate {
 
     fn apply_controlled(&self, control_qbits:&[u8], context:&mut ExecutionContext) {
         match self {
-            Not(target) => apply_controlled_not(control_qbits, *target, context),
+            Not(target) => apply_controlled_pauli_x(control_qbits, *target, context),
             X(target) => apply_controlled_pauli_x(control_qbits, *target, context),
             Y(target) => apply_controlled_pauli_y(control_qbits, *target, context),
             Z(target) => apply_controlled_pauli_z(control_qbits, *target, context),
