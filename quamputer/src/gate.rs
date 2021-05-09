@@ -2,11 +2,14 @@ use crate::gate::Gate::{Not, X, Hadamard, Swap, Z, Y};
 use crate::state::QuantumState;
 use crate::QDimension;
 use std::collections::HashMap;
-use crate::gate::State::NotMeasured;
+use crate::gate::State::{NotMeasured, Measured};
 
 use crate::gate_op::pauli::{apply_controlled_pauli_x, apply_controlled_pauli_y, apply_controlled_pauli_z};
 use crate::gate_op::hadamard::apply_controlled_hadamard;
 use crate::gate_op::swap::apply_controlled_swap;
+use num_complex::{Complex64, Complex};
+use std::ops::Sub;
+use num_traits::One;
 
 pub trait QuantumOperation {
 
@@ -34,12 +37,67 @@ pub struct MeasureCount {
 }
 
 pub struct ExecutionContext {
-    pub current_state:QuantumState,
-    pub state:State,
-    pub count:HashMap<String,MeasureCount>
+    current_state:QuantumState,
+    state:State,
+    count:HashMap<String,MeasureCount>
 }
 
 impl ExecutionContext {
+
+    pub (crate) fn increase_zero(&mut self, id:&String) {
+        self.increase_count(id,|c| c.nb_zero+=1)
+    }
+
+    pub (crate) fn increase_one(&mut self, id:&String) {
+        self.increase_count(id,|c| c.nb_one+=1)
+    }
+
+    fn increase_count(&mut self, id:&String, action:fn (&mut MeasureCount) -> ()) {
+        match self.count.get_mut(id) {
+            Some(c) => (action)(c),
+            None => {
+                let mut count = MeasureCount{nb_one:0,nb_zero:0};
+                (action)(&mut count);
+                self.count.insert(id.clone(),count);
+            }
+        }
+    }
+
+    pub (crate) fn set_measurement(&mut self, select_state:usize) {
+        let mut output = QuantumState::nil(self.nb_qbits());
+        output[select_state] = Complex64::one();
+
+        self.current_state = output;
+        self.state = Measured(select_state);
+    }
+
+    pub (crate) fn pick_on_state(&self) -> usize {
+        let mut target = 1.0-(rand::random::<f64>());
+        for (index, amplitude) in self.current_state.iter().enumerate() {
+            target -= amplitude.norm_sqr();
+            if target<=0.0 {
+                return index;
+            }
+        };
+        self.current_state.len()-1
+    }
+
+    pub fn current_state(&self) -> &QuantumState {
+        &self.current_state
+    }
+
+    pub (crate) fn current_amplitude_at(&self, idx:usize) -> Complex64 {
+        self.current_state[idx]
+    }
+
+    pub (crate) fn norm_of_diff(&self, idx:usize, reference:Complex64) -> f64 {
+        self.current_state[idx].sub(reference).norm()
+    }
+
+    pub (crate) fn set_current_state(&mut self, new_state:QuantumState) {
+        self.current_state = new_state;
+        self.state = NotMeasured;
+    }
 
     pub (crate) fn initialize(initial_state:&QuantumState) -> Self {
         Self{current_state:QuantumState::from(initial_state), state: NotMeasured, count: HashMap::new()}
@@ -54,6 +112,11 @@ impl ExecutionContext {
     }
     pub (crate) fn nb_amplitudes(&self) -> usize {
         self.current_state.len()
+    }
+
+
+    pub fn get_count(&self, variable:&str) -> Option<&MeasureCount> {
+        self.count.get(variable)
     }
 
     pub fn get_nb_zero(&self, variable:&str) -> u32 {

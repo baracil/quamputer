@@ -26,9 +26,9 @@ fn main() {
 
 
     println!("input     : {:?}", initial_state);
-    println!("result    : {:?}", result.current_state);
-    println!("result q0 : {:?}", result.count.get("q0"));
-    println!("result q1 : {:?}", result.count.get("q1"));
-    println!("result q2 : {:?}", result.count.get("q2"));
+    println!("result    : {:?}", result.current_state());
+    println!("result q0 : {:?}", result.get_count("q0"));
+    println!("result q1 : {:?}", result.get_count("q1"));
+    println!("result q2 : {:?}", result.get_count("q2"));
 }
 

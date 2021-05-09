@@ -15,7 +15,7 @@ pub fn apply_controlled_hadamard(control_qbits: &[u8], target: u8, context: &mut
 
     let len = context.nb_amplitudes();
     for src in 0..len {
-        let amplitude = context.current_state[src];
+        let amplitude = context.current_amplitude_at(src);
         let control_set = (src & control_mask) == control_mask;
         if control_set {
             let amplitude = amplitude * FRAC_1_SQRT_2;
@@ -36,5 +36,5 @@ pub fn apply_controlled_hadamard(control_qbits: &[u8], target: u8, context: &mut
         }
     };
 
-    context.current_state = result
+    context.set_current_state(result)
 }

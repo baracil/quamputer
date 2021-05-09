@@ -20,9 +20,9 @@ pub fn apply_controlled_swap(control_qbits: &[u8], target1: u8, target2: u8, con
         } else {
             src
         };
-        result[target] = context.current_state[src];
+        result[target] = context.current_amplitude_at(src);
     }
-    context.current_state = result
+    context.set_current_state(result);
 }
 
 
@@ -43,48 +43,44 @@ mod tests_not {
     fn swap_test_on_00() {
         let mut context = ExecutionContext::initialize(&QuantumState::same_amplitude(2, &[0]));
         apply_controlled_swap(&[], 0, 1, &mut context);
-        let result = context.current_state;
 
-        assert!((result[0].sub(Complex64::one()).norm()) < 1e-6);
-        assert!((result[1].sub(Complex64::zero()).norm()) < 1e-6);
-        assert!((result[2].sub(Complex64::zero()).norm()) < 1e-6);
-        assert!((result[3].sub(Complex64::zero()).norm()) < 1e-6);
+        assert!(context.norm_of_diff(0, Complex64::one()) < 1e-6);
+        assert!(context.norm_of_diff(1, Complex64::zero()) < 1e-6);
+        assert!(context.norm_of_diff(2, Complex64::zero()) < 1e-6);
+        assert!(context.norm_of_diff(3, Complex64::zero()) < 1e-6);
     }
 
     #[test]
     fn swap_test_on_01() {
         let mut context = ExecutionContext::initialize(&QuantumState::same_amplitude(2, &[1]));
         apply_controlled_swap(&[], 0, 1, &mut context);
-        let result = context.current_state;
 
-        assert!((result[0].sub(Complex64::zero()).norm()) < 1e-6);
-        assert!((result[1].sub(Complex64::zero()).norm()) < 1e-6);
-        assert!((result[2].sub(Complex64::one()).norm()) < 1e-6);
-        assert!((result[3].sub(Complex64::zero()).norm()) < 1e-6);
+        assert!(context.norm_of_diff(0,Complex64::zero()) < 1e-6);
+        assert!(context.norm_of_diff(1,Complex64::zero()) < 1e-6);
+        assert!(context.norm_of_diff(2,Complex64::one()) < 1e-6);
+        assert!(context.norm_of_diff(3,Complex64::zero()) < 1e-6);
     }
 
     #[test]
     fn swap_test_on_10() {
         let mut context = ExecutionContext::initialize(&QuantumState::same_amplitude(2, &[2]));
         apply_controlled_swap(&[], 0, 1, &mut context);
-        let result = context.current_state;
 
-        assert!((result[0].sub(Complex64::zero()).norm()) < 1e-6);
-        assert!((result[1].sub(Complex64::one()).norm()) < 1e-6);
-        assert!((result[2].sub(Complex64::zero()).norm()) < 1e-6);
-        assert!((result[3].sub(Complex64::zero()).norm()) < 1e-6);
+        assert!(context.norm_of_diff(0,Complex64::zero()) < 1e-6);
+        assert!(context.norm_of_diff(1,Complex64::one()) < 1e-6);
+        assert!(context.norm_of_diff(2,Complex64::zero()) < 1e-6);
+        assert!(context.norm_of_diff(3,Complex64::zero()) < 1e-6);
     }
 
     #[test]
     fn swap_test_on_11() {
         let mut context = ExecutionContext::initialize(&QuantumState::same_amplitude(2, &[3]));
         apply_controlled_swap(&[], 0, 1, &mut context);
-        let result = context.current_state;
 
-        assert!((result[0].sub(Complex64::zero()).norm()) < 1e-6);
-        assert!((result[1].sub(Complex64::zero()).norm()) < 1e-6);
-        assert!((result[2].sub(Complex64::zero()).norm()) < 1e-6);
-        assert!((result[3].sub(Complex64::one()).norm()) < 1e-6);
+        assert!(context.norm_of_diff(0, Complex64::zero()) < 1e-6);
+        assert!(context.norm_of_diff(1, Complex64::zero()) < 1e-6);
+        assert!(context.norm_of_diff(2, Complex64::zero()) < 1e-6);
+        assert!(context.norm_of_diff(3, Complex64::one()) < 1e-6);
     }
 
 }
