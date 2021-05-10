@@ -1,16 +1,14 @@
-use crate::QDimension;
+use std::collections::VecDeque;
 use std::ops::Deref;
+use std::rc::Rc;
 
-use std::rc::{Rc};
-use std::collections::{VecDeque};
-
-use crate::gate::{ExecutionContext};
-
-use quick_xml::se::to_string;
 use quick_xml::DeError;
-use crate::operation::{QuantumOperation, Condition, LoopPar, CircuitPar};
-use crate::operation::QuantumOperation::{Circuit, Loop};
+use quick_xml::se::to_string;
 
+use crate::gate::ExecutionContext;
+use crate::operation::{CircuitPar, Condition, LoopPar, QuantumOperation};
+use crate::operation::QuantumOperation::{Circuit, Loop};
+use crate::QDimension;
 
 pub struct QuantumCircuitBuilder {
     nb_qbits: u8,
