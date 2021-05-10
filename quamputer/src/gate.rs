@@ -36,10 +36,10 @@ pub enum Gate {
     Z(u8),
     Swap(u8,u8),
     Hadamard(u8),
-    CNot(u8, u8),
-    Toffoli(u8, u8,u8),
-    CSwap(u8, u8, u8),
-    Fredkin(u8,u8, u8),
+    CNot(u8, [u8;1]),
+    Toffoli(u8, [u8;2]),
+    CSwap(u8, u8, [u8;1]),
+    Fredkin(u8,u8, [u8;1]),
 }
 
 ///
@@ -99,10 +99,10 @@ impl Gate {
             Z(target) => apply_controlled_pauli_z(control_qbits, *target, context),
             Hadamard(target) => apply_controlled_hadamard(control_qbits, *target, context),
             Swap(target1, target2) => apply_controlled_swap(control_qbits, *target1, *target2, context),
-            CNot(target, control) => apply_controlled_not(&[*control], *target, context),
-            Toffoli(target, control1, control2) => apply_controlled_not(&[*control1, *control2], *target, context),
-            CSwap(target1, target2, control) => apply_controlled_swap(&[*control], *target1, *target2, context),
-            Fredkin(target1, target2, control) => apply_controlled_swap(&[*control], *target1, *target2, context)
+            CNot(target, controls) => apply_controlled_not(controls, *target, context),
+            Toffoli(target, controls) => apply_controlled_not(controls, *target, context),
+            CSwap(target1, target2, controls) => apply_controlled_swap(controls, *target1, *target2, context),
+            Fredkin(target1, target2, controls) => apply_controlled_swap(control_qbits, *target1, *target2, context)
         }
     }
 }
@@ -117,10 +117,10 @@ impl QuantumOperation for Gate {
             Z(target) => *target,
             Hadamard(target) => *target,
             Swap(target1, target2) => *target1.max(target2),
-            CNot(target, control) => *target.max(control),
-            Toffoli(target, control1, control2) => *target.max(&control1).max(control2),
-            CSwap(target1,target2,control) => *target1.max(target2).max(control),
-            Fredkin(target1,target2,control) => *target1.max(target2).max(control),
+            CNot(target, controls) => *target.max(&controls[0]),
+            Toffoli(target, controls) => *target.max(&controls[0]).max(&controls[1]),
+            CSwap(target1,target2,controls) => *target1.max(target2).max(&controls[0]),
+            Fredkin(target1,target2,controls) => *target1.max(target2).max(&controls[0]),
         }
     }
 

@@ -7,8 +7,10 @@ pub mod gate;
 mod executable;
 pub mod measure;
 
-const N:usize = 17;
-const POWER_OF_TWOS:[usize;N] = [1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384,32768,65536];
+// with 16 qbits, one state holds 1MBytes of data
+
+const N:usize = 21;
+const POWER_OF_TWOS:[usize;N] = [1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384,32768,65536,131072,262144,524288,1048576];
 
 pub fn power_of_two(pow:u8) -> usize {
     let pow_usize = pow as usize;
