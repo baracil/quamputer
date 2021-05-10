@@ -8,8 +8,8 @@ use crate::gate_op::pauli::{apply_controlled_pauli_x, apply_controlled_pauli_y, 
 use crate::gate_op::hadamard::apply_controlled_hadamard;
 use crate::gate_op::swap::apply_controlled_swap;
 use num_complex::{Complex64};
-use std::ops::{Sub, Mul};
-use num_traits::{One, MulAdd};
+use std::ops::{Sub};
+use num_traits::{One};
 
 
 pub trait QuantumOperation {
