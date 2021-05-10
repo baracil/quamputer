@@ -36,4 +36,8 @@ impl QuantumOperation for Measure {
             false => context.increase_zero(&self.id),
         }
     }
+
+    fn check_validity(&self) -> Result<(),String> {
+        Ok(())
+    }
 }

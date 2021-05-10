@@ -1,16 +1,16 @@
-use crate::gate::Gate::{Not, X, Hadamard, Swap, Z, Y, CNot, Toffoli, CSwap, Fredkin};
-use crate::state::QuantumState;
-use crate::QDimension;
 use std::collections::HashMap;
-use crate::gate::State::{NotMeasured, Measured};
+use std::ops::Sub;
 
-use crate::gate_op::pauli::{apply_controlled_pauli_x, apply_controlled_pauli_y, apply_controlled_pauli_z, apply_controlled_not};
+use num_complex::Complex64;
+use num_traits::One;
+
+use crate::gate::Gate::{CNot, CSwap, Fredkin, Hadamard, Not, Swap, Toffoli, X, Y, Z};
+use crate::gate::State::{Measured, NotMeasured};
 use crate::gate_op::hadamard::apply_controlled_hadamard;
+use crate::gate_op::pauli::{apply_controlled_not, apply_controlled_pauli_x, apply_controlled_pauli_y, apply_controlled_pauli_z};
 use crate::gate_op::swap::apply_controlled_swap;
-use num_complex::{Complex64};
-use std::ops::{Sub};
-use num_traits::{One};
-
+use crate::QDimension;
+use crate::state::QuantumState;
 
 pub trait QuantumOperation {
     /// Return the maximal index of the qbits
@@ -22,6 +22,8 @@ pub trait QuantumOperation {
     /// Apply the current gate operation to the provided state
     /// and return the result.
     fn apply(&self, context: &mut ExecutionContext);
+
+    fn check_validity(&self) -> Result<(), String>;
 }
 
 
@@ -34,12 +36,12 @@ pub enum Gate {
     X(u8),
     Y(u8),
     Z(u8),
-    Swap(u8,u8),
+    Swap(u8, u8),
     Hadamard(u8),
-    CNot(u8, [u8;1]),
-    Toffoli(u8, [u8;2]),
-    CSwap(u8, u8, [u8;1]),
-    Fredkin(u8,u8, [u8;1]),
+    CNot(u8, [u8; 1]),
+    Toffoli(u8, [u8; 2]),
+    CSwap(u8, u8, [u8; 1]),
+    Fredkin(u8, u8, [u8; 1]),
 }
 
 ///
@@ -53,6 +55,20 @@ pub enum Gate {
 pub struct ControlledGate {
     gate: Gate,
     controls: Vec<u8>,
+}
+
+pub (crate) fn check_for_no_duplicate(bits:Vec<u8>) -> Result<(), String> {
+    if bits.len()<=1 {
+        return Ok(())
+    }
+    for i in 0..bits.len()-1 {
+        for j in i..bits.len() {
+            if bits[i] == bits[j] {
+                return Err(format!("Duplicate qbit : {} ",bits[i]));
+            }
+        }
+    }
+    Ok(())
 }
 
 impl Gate {
@@ -83,6 +99,41 @@ impl Gate {
     /// ```
     pub fn with_two_controls(&self, control1: u8, control2: u8) -> ControlledGate {
         ControlledGate { gate: self.clone(), controls: vec![control1, control2] }
+    }
+
+    pub fn get_involved_qbits(&self, others:&[u8]) -> Vec<u8> {
+        let mut result =Vec::new();
+        result.extend_from_slice(others);
+        match self {
+            Not(a) => result.push(*a),
+            X(a) => result.push(*a),
+            Y(a) => result.push(*a),
+            Z(a) => result.push(*a),
+            Swap(a, b) => {
+                result.push(*a);
+                result.push(*b);
+            },
+            Hadamard(a) => result.push(*a),
+            CNot(a, b) => {
+                result.push(*a);
+                result.extend_from_slice(b)
+            },
+            Toffoli(a, b) => {
+                result.push(*a);
+                result.extend_from_slice(b)
+            },
+            CSwap(a, b, c) => {
+                result.push(*a);
+                result.push(*b);
+                result.extend_from_slice(c);
+            },
+            Fredkin(a, b, c) => {
+                result.push(*a);
+                result.push(*b);
+                result.extend_from_slice(c);
+            },
+        };
+        result
     }
 
     /// Create a ControlledGate from this gate
@@ -119,13 +170,18 @@ impl QuantumOperation for Gate {
             Swap(target1, target2) => *target1.max(target2),
             CNot(target, controls) => *target.max(&controls[0]),
             Toffoli(target, controls) => *target.max(&controls[0]).max(&controls[1]),
-            CSwap(target1,target2,controls) => *target1.max(target2).max(&controls[0]),
-            Fredkin(target1,target2,controls) => *target1.max(target2).max(&controls[0]),
+            CSwap(target1, target2, controls) => *target1.max(target2).max(&controls[0]),
+            Fredkin(target1, target2, controls) => *target1.max(target2).max(&controls[0]),
         }
     }
 
+
     fn apply(&self, state: &mut ExecutionContext) {
         return self.apply_controlled(&[], state);
+    }
+
+    fn check_validity(&self) -> Result<(),String> {
+        check_for_no_duplicate(self.get_involved_qbits(&[]))
     }
 }
 
@@ -138,6 +194,14 @@ impl QuantumOperation for ControlledGate {
 
     fn apply(&self, input: &mut ExecutionContext) {
         self.gate.apply_controlled(self.controls.as_slice(), input)
+    }
+
+    fn check_validity(&self) -> Result<(),String> {
+        let gate_validity = self.gate.check_validity();
+        if gate_validity.is_err() {
+            return gate_validity;
+        }
+        check_for_no_duplicate(self.gate.get_involved_qbits(self.controls.as_slice()))
     }
 }
 

@@ -3,14 +3,14 @@ use crate::state::QuantumState;
 
 use crate::gate::ExecutionContext;
 
-pub struct Executable {
-    circuit: QuantumCircuit,
+pub struct Executable<'a> {
+    circuit: &'a QuantumCircuit,
 }
 
-impl Executable {
+impl<'a> Executable<'a> {
 
-    pub fn new(circuit:&QuantumCircuit) -> Self {
-        Self{circuit:circuit.clone()}
+    pub fn new(circuit: &'a QuantumCircuit) -> Self {
+        Self{circuit }
     }
 
     pub fn execute(&self, initial_state:&QuantumState) -> ExecutionContext {

@@ -34,6 +34,16 @@ impl QuantumOperation for QuantumCircuit {
     fn apply(&self, context: &mut ExecutionContext) {
         self.operations.iter().for_each(|op| op.apply(context))
     }
+
+    fn check_validity(&self) -> Result<(),String> {
+        for operation in self.operations.iter() {
+            let op_validity = operation.check_validity();
+            if op_validity.is_err() {
+                return op_validity;
+            }
+        }
+        Ok(())
+    }
 }
 
 impl QuantumOperation for QuantumLoop {
@@ -46,6 +56,10 @@ impl QuantumOperation for QuantumLoop {
         while !(self.predicate)(i,&context) {
             self.circuit.apply(context)
         }
+    }
+
+    fn check_validity(&self) -> Result<(),String> {
+        self.circuit.check_validity()
     }
 }
 
@@ -76,9 +90,9 @@ impl QuantumCircuitBuilder {
         return Self {nb_qbits, operations:Vec::new(),loops:VecDeque::new()};
     }
 
-    pub fn build(&mut self) -> Result<QuantumCircuit, &str> {
+    pub fn build(&mut self) -> Result<QuantumCircuit, String> {
         if !self.loops.is_empty() {
-            return Err("Some loops have not been closed");
+            return Err("Some loops have not been closed".to_string());
         }
         Ok(QuantumCircuit{nb_qbits:self.nb_qbits,operations:self.operations.clone()})
     }
@@ -106,18 +120,20 @@ impl QuantumCircuitBuilder {
                 self.operations.push(Rc::new(circuit));
                 Ok(self)
             }
-            (None,_) => Err("No more loop to end".to_string())
+            (None,_) => Err("No more loop to end".to_owned())
         }
     }
 
-    pub fn push(&mut self, gate: impl QuantumOperation + 'static) -> &mut QuantumCircuitBuilder {
-        self.push_safe(gate).unwrap()
-    }
-
-    pub fn push_safe(&mut self, operation: impl QuantumOperation + 'static) -> Result<&mut QuantumCircuitBuilder, &str> {
+    pub fn push(&mut self, operation: impl QuantumOperation + 'static) -> Result<&mut QuantumCircuitBuilder, String> {
         if operation.max_qbit_idx() >= self.nb_qbits {
-            return Err("Invalid gate : some qbit indices are too high");
+            return Err("Invalid operation : some qbit indices are too high".to_string());
         }
+
+        let valid = operation.check_validity();
+        if valid.is_err() {
+            return Err(valid.err().unwrap());
+        }
+
         match self.loops.back_mut() {
             Some(loop_data) => loop_data.operations.push(Rc::new(operation)),
             None => self.operations.push(Rc::new(operation))
