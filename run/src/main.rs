@@ -1,6 +1,5 @@
 use quamputer::computer::QuantumComputer;
-use quamputer::gate::Gate::{Hadamard};
-use quamputer::gate::{cnot};
+use quamputer::gate::Gate::{Hadamard, CNot};
 use quamputer::measure::Measure;
 
 fn main() {
@@ -10,8 +9,8 @@ fn main() {
     circuit_builder
         .start_advanced_loop(|_,c| c.get_nb_zero("q0") >= 10 )
         .push(Hadamard(0))
-        .push(cnot(0,1))
-        .push(cnot(1,2))
+        .push(CNot(0,1))
+        .push(CNot(1,2))
         .push(Measure::new("q0",0))
         .end_loop()
         .unwrap();

@@ -57,6 +57,10 @@ pub fn apply_controlled_pauli_y(control_qbits: &[u8], target: u8, context: &mut 
     context.set_current_state(result)
 }
 
+pub fn apply_controlled_not(control_qbits: &[u8], target: u8, context: &mut ExecutionContext) {
+    apply_controlled_pauli_x(control_qbits,target,context)
+}
+
 pub fn apply_controlled_pauli_x(control_qbits: &[u8], target: u8, context: &mut ExecutionContext) {
     let control_mask = context.control_mask(control_qbits);
     let target_mask = context.mask(target);
