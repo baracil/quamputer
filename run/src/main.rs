@@ -1,5 +1,5 @@
 use quamputer::computer::QuantumComputer;
-use quamputer::gate::Gate::{Hadamard, CNot, Toffoli};
+use quamputer::gate::Gate::{Hadamard, CNot};
 use quamputer::measure::Measure;
 
 fn main() {

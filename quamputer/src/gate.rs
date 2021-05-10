@@ -102,7 +102,7 @@ impl Gate {
             CNot(target, controls) => apply_controlled_not(controls, *target, context),
             Toffoli(target, controls) => apply_controlled_not(controls, *target, context),
             CSwap(target1, target2, controls) => apply_controlled_swap(controls, *target1, *target2, context),
-            Fredkin(target1, target2, controls) => apply_controlled_swap(control_qbits, *target1, *target2, context)
+            Fredkin(target1, target2, controls) => apply_controlled_swap(controls, *target1, *target2, context)
         }
     }
 }
@@ -140,22 +140,6 @@ impl QuantumOperation for ControlledGate {
         self.gate.apply_controlled(self.controls.as_slice(), input)
     }
 }
-
-
-// pub fn cnot(control: u8, target: u8) -> ControlledGate {
-//     Not(target).with_one_control(control)
-// }
-//
-// pub fn toffoli(control1: u8, control2: u8, target: u8) -> ControlledGate {
-//     Not(target).with_two_controls(control1, control2)
-// }
-//
-// pub fn cswap(control:u8, target1:u8,target2:u8) -> ControlledGate {
-//     Swap(target1,target2).with_one_control(control)
-// }
-// pub fn fredkin(control:u8, target1:u8,target2:u8) -> ControlledGate {
-//     cswap(control,target1,target2)
-// }
 
 pub enum State {
     Measured(usize),
