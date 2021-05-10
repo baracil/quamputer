@@ -11,20 +11,7 @@ use crate::gate_op::pauli::{apply_controlled_not, apply_controlled_pauli_x, appl
 use crate::gate_op::swap::apply_controlled_swap;
 use crate::QDimension;
 use crate::state::QuantumState;
-
-pub trait QuantumOperation {
-    /// Return the maximal index of the qbits
-    /// involved in this gate operation
-    /// Used to check if the gate operation
-    /// can be used with a given quantum computer
-    fn max_qbit_idx(&self) -> u8;
-
-    /// Apply the current gate operation to the provided state
-    /// and return the result.
-    fn apply(&self, context: &mut ExecutionContext);
-
-    fn check_validity(&self) -> Result<(), String>;
-}
+use crate::operation::QuantumOperation;
 
 
 ///
@@ -44,6 +31,12 @@ pub enum Gate {
     Fredkin(u8, u8, [u8; 1]),
 }
 
+impl Into<QuantumOperation> for Gate {
+    fn into(self) -> QuantumOperation {
+        crate::operation::QuantumOperation::Gate(self)
+    }
+}
+
 ///
 /// Add some control qbits to a Gate.
 /// For instance the Toffoli gate is obtained with
@@ -52,6 +45,7 @@ pub enum Gate {
 /// use quamputer::gate::Gate::Not;
 /// let toffoli = Not(2).with_two_controls(0,1);
 /// ```
+#[derive(Clone)]
 pub struct ControlledGate {
     gate: Gate,
     controls: Vec<u8>,
@@ -142,14 +136,15 @@ impl Gate {
         ControlledGate { gate: self.clone(), controls: Vec::from(controls) }
     }
 
-    fn apply_controlled(&self, control_qbits: &[u8], context: &mut ExecutionContext) {
+    //TODO missing the use of control_qbits fit Gate with controls
+    pub (crate) fn apply_controlled(&self, extra_control_qbits: &[u8], context: &mut ExecutionContext) {
         match self {
-            Not(target) => apply_controlled_not(control_qbits, *target, context),
-            X(target) => apply_controlled_pauli_x(control_qbits, *target, context),
-            Y(target) => apply_controlled_pauli_y(control_qbits, *target, context),
-            Z(target) => apply_controlled_pauli_z(control_qbits, *target, context),
-            Hadamard(target) => apply_controlled_hadamard(control_qbits, *target, context),
-            Swap(target1, target2) => apply_controlled_swap(control_qbits, *target1, *target2, context),
+            Not(target) => apply_controlled_not(extra_control_qbits, *target, context),
+            X(target) => apply_controlled_pauli_x(extra_control_qbits, *target, context),
+            Y(target) => apply_controlled_pauli_y(extra_control_qbits, *target, context),
+            Z(target) => apply_controlled_pauli_z(extra_control_qbits, *target, context),
+            Hadamard(target) => apply_controlled_hadamard(extra_control_qbits, *target, context),
+            Swap(target1, target2) => apply_controlled_swap(extra_control_qbits, *target1, *target2, context),
             CNot(target, controls) => apply_controlled_not(controls, *target, context),
             Toffoli(target, controls) => apply_controlled_not(controls, *target, context),
             CSwap(target1, target2, controls) => apply_controlled_swap(controls, *target1, *target2, context),
@@ -159,8 +154,8 @@ impl Gate {
 }
 
 
-impl QuantumOperation for Gate {
-    fn max_qbit_idx(&self) -> u8 {
+impl Gate {
+    pub fn max_qbit_idx(&self) -> u8 {
         match self {
             Not(target) => *target,
             X(target) => *target,
@@ -175,28 +170,27 @@ impl QuantumOperation for Gate {
         }
     }
 
-
-    fn apply(&self, state: &mut ExecutionContext) {
-        return self.apply_controlled(&[], state);
+    pub fn apply(&self, input: &mut ExecutionContext) {
+        self.apply_controlled(&[], input)
     }
 
-    fn check_validity(&self) -> Result<(),String> {
+    pub (crate) fn check_validity(&self) -> Result<(),String> {
         check_for_no_duplicate(self.get_involved_qbits(&[]))
     }
 }
 
-impl QuantumOperation for ControlledGate {
-    fn max_qbit_idx(&self) -> u8 {
+impl ControlledGate {
+    pub fn max_qbit_idx(&self) -> u8 {
         let max_qbit_gate = self.gate.max_qbit_idx();
         let max_qbit_control = self.controls.iter().max().cloned().unwrap_or(0);
         return max_qbit_gate.max(max_qbit_control);
     }
 
-    fn apply(&self, input: &mut ExecutionContext) {
+    pub fn apply(&self, input: &mut ExecutionContext) {
         self.gate.apply_controlled(self.controls.as_slice(), input)
     }
 
-    fn check_validity(&self) -> Result<(),String> {
+    pub fn check_validity(&self) -> Result<(),String> {
         let gate_validity = self.gate.check_validity();
         if gate_validity.is_err() {
             return gate_validity;

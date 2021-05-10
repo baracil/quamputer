@@ -6,6 +6,7 @@ pub mod gate_op;
 pub mod gate;
 mod executable;
 pub mod measure;
+pub mod operation;
 
 // with 16 qbits, one state holds 1MBytes of data
 

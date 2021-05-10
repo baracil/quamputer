@@ -1,6 +1,7 @@
-use crate::circuit::{QuantumCircuit, QuantumCircuitBuilder};
+use crate::circuit::{QuantumCircuitBuilder};
 use crate::state::QuantumState;
 use crate::executable::Executable;
+use crate::operation::QuantumOperation;
 
 pub struct QuantumComputer {
     nb_qbits:u8,
@@ -22,7 +23,7 @@ impl QuantumComputer {
 
     /// Compile an executable that can be launch
     /// with a initial state
-    pub fn compile<'a>(&self, circuit:&'a QuantumCircuit) -> Executable<'a> {
+    pub fn compile<'a>(&self, circuit:&'a QuantumOperation) -> Executable<'a> {
         Executable::new(circuit)
     }
 

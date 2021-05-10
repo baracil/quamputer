@@ -1,40 +1,37 @@
-use crate::circuit::QuantumCircuit;
 use crate::state::QuantumState;
 
 use crate::gate::ExecutionContext;
+use crate::operation::QuantumOperation;
 
 pub struct Executable<'a> {
-    circuit: &'a QuantumCircuit,
+    operation: &'a QuantumOperation,
 }
 
 impl<'a> Executable<'a> {
 
-    pub fn new(circuit: &'a QuantumCircuit) -> Self {
-        Self{circuit }
+    pub fn new(operation: &'a QuantumOperation) -> Self {
+        Self{operation }
     }
 
     pub fn execute(&self, initial_state:&QuantumState) -> ExecutionContext {
-        Execution::new(&self.circuit).execute(initial_state)
+        Execution::new(&self.operation).execute(initial_state)
     }
 
 }
 
-
 pub struct Execution<'a> {
-    circuit:&'a QuantumCircuit,
+    operation:&'a QuantumOperation,
 }
 
 impl<'a> Execution<'a> {
 
-    fn new(circuit:&'a QuantumCircuit) -> Execution<'a> {
-        Self{circuit}
+    fn new(operation:&'a QuantumOperation) -> Execution<'a> {
+        Self{operation}
     }
 
     pub fn execute(&self, initial_state:&QuantumState) -> ExecutionContext {
         let mut context = ExecutionContext::initialize(&initial_state);
-        for gate in self.circuit.iter() {
-            gate.apply(&mut context);
-        };
+        self.operation.apply(&mut context);
         return context;
     }
 
