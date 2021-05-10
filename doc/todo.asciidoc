@@ -2,8 +2,17 @@
 
 * [X] Measure
 * [X] Loops with fix number of iterations
+* [X] Loops with advanced termination predicate
 
-* [ ] Loops with advanced termination predicate
+== Export/Import
+* [ ] Define file format to save a circuit
+* [ ] Write a circuit to file
+* [ ] Read a circuit from file
+
+== Quantum Circuit Graphic editor
+* [ ] load / save circuit
+* [ ] Draw circuit
+* [ ] Edit circuit
 
 == Gates
 

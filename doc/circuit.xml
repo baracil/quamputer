@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<circuit xmlns="pero:circuit" nb_qbits="4">
+    <operations>
+        <gate name="hadamard" targets="0"/>
+        <gate name="cnot" targets="1" controls="0"/>
+        <gate name="cnot" targets="2" controls="1"/>
+        <measurement id="q0" target="0"/>
+    </operations>
+</circuit>

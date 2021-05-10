@@ -62,7 +62,7 @@ pub (crate) fn check_for_no_duplicate(bits:Vec<u8>) -> Result<(), String> {
         return Ok(())
     }
     for i in 0..bits.len()-1 {
-        for j in i..bits.len() {
+        for j in i+1..bits.len() {
             if bits[i] == bits[j] {
                 return Err(format!("Duplicate qbit : {} ",bits[i]));
             }

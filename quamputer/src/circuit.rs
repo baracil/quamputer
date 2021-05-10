@@ -7,6 +7,9 @@ use std::collections::{VecDeque};
 
 use crate::gate::{QuantumOperation, ExecutionContext};
 
+use quick_xml::se::to_string;
+use quick_xml::DeError;
+
 #[derive(Clone)]
 pub struct QuantumCircuit {
     nb_qbits: u8,
@@ -24,6 +27,15 @@ impl Deref for QuantumCircuit {
     fn deref(&self) -> &Self::Target {
         &self.operations
     }
+}
+
+
+impl QuantumCircuit {
+
+    pub fn to_xml(&self) -> Result<String, DeError> {
+        todo!()
+    }
+
 }
 
 impl QuantumOperation for QuantumCircuit {

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="pero:circuit" xmlns:p="pero:circuit" blockDefault="#all" elementFormDefault="qualified">
+
+    <xsd:element name="circuit" type="p:Circuit"/>
+
+    <xsd:complexType name="Circuit">
+        <xsd:complexContent>
+            <xsd:extension base="p:QuantumOperation">
+                <xsd:sequence>
+                    <xsd:element name="operations" type="p:Operations"/>
+                </xsd:sequence>
+                <xsd:attribute name="nb_qbits" type="xsd:integer" use="required"/>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="Loop">
+        <xsd:complexContent>
+            <xsd:extension base="p:QuantumOperation">
+                <xsd:sequence>
+                    <xsd:element name="end-of-loop" type="xsd:string"/>
+                    <xsd:element name="circuit" type="p:Circuit"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="Gate">
+        <xsd:attribute name="name" type="xsd:string" use="required"/>
+        <xsd:attribute name="targets" type="xsd:anyType" use="required"/>
+        <xsd:attribute name="controls" type="xsd:anyType" use="optional"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="Measure">
+        <xsd:complexContent>
+            <xsd:extension base="p:QuantumOperation">
+                <xsd:attribute name="id" type="xsd:string" use="required"/>
+                <xsd:attribute name="target" type="xsd:integer" use="required"/>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="QuantumOperation"/>
+
+    <xsd:complexType name="Operations">
+        <xsd:sequence>
+            <xsd:choice maxOccurs="unbounded">
+                <xsd:element name="circuit" minOccurs="1" type="p:Circuit" maxOccurs="unbounded"/>
+                <xsd:element name="loop" minOccurs="1" type="p:Loop" maxOccurs="unbounded"/>
+                <xsd:element name="gate" minOccurs="1" type="p:Gate" maxOccurs="unbounded"/>
+                <xsd:element name="measurement" minOccurs="1" type="p:Measure" maxOccurs="unbounded"/>
+            </xsd:choice>
+        </xsd:sequence>
+    </xsd:complexType>
+
+</xsd:schema>

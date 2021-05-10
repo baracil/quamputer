@@ -9,12 +9,10 @@ fn main() -> Result<(),String> {
 
         let mut circuit_builder = computer.new_circuit_builder();
         circuit_builder
-            .start_advanced_loop(|_,c| c.get_nb_zero("q0") >= 10 )
             .push(Hadamard(0))?
-            .push(CNot(0,[0]))?
-            .push(CNot(1,[2]))?
+            .push(CNot(1,[0]))?
+            .push(CNot(2,[1]))?
             .push(Measure::new("q0",0))?
-            .end_loop()?
             .build()?
     };
 
