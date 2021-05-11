@@ -10,4 +10,5 @@ edition = "2018"
 num-complex = "0.4"
 num-traits = "0.2.14"
 rand= "0.8.3"
+serde = {version="1.0.125", features=["derive"]}
 quick-xml = {version="0.22.0", features=["serialize"]}

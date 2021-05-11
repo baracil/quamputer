@@ -2,7 +2,6 @@ use crate::state::QuantumState;
 use num_complex::Complex64;
 use std::ops::Mul;
 use crate::gate::ExecutionContext;
-use crate::QDimension;
 
 pub fn apply_controlled_pauli_z(control_qbits: &[u8], target: u8, context: &mut ExecutionContext) {
     let control_mask = context.control_mask(control_qbits);

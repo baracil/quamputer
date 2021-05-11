@@ -1,4 +1,3 @@
-use crate::{QDimension};
 use crate::state::QuantumState;
 use std::f64::consts::FRAC_1_SQRT_2;
 

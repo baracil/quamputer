@@ -1,9 +1,30 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<circuit xmlns="pero:circuit" nb_qbits="4">
-    <operations>
-        <gate name="hadamard" targets="0"/>
-        <gate name="cnot" targets="1" controls="0"/>
-        <gate name="cnot" targets="2" controls="1"/>
-        <measurement id="q0" target="0"/>
-    </operations>
-</circuit>
+<Circuit>
+    <CircuitPar nb_qbit="3">
+        <Loop>
+            <LoopPar>
+                <Circuit>
+                    <CircuitPar nb_qbit="3">
+                        <Gate>
+                            <Hadamard>0</Hadamard>
+                        </Gate>
+                        <ControlledGate>
+                            <ControlledGate controls="0">
+                                <Not>1</Not>
+                            </ControlledGate>
+                        </ControlledGate>
+                        <ControlledGate>
+                            <ControlledGate controls="1">
+                                <Not>2</Not>
+                            </ControlledGate>
+                        </ControlledGate>
+                        <Measure>
+                            <MeasurePar id="q0" target="0"/>
+                        </Measure>
+                    </CircuitPar>
+                </Circuit>
+                <MaxZeroSampling>q0</MaxZeroSampling>
+                <MaxZeroSampling>10</MaxZeroSampling>
+            </LoopPar>
+        </Loop>
+    </CircuitPar>
+</Circuit>

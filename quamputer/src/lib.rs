@@ -1,11 +1,10 @@
 
 mod state;
-pub mod circuit;
+pub mod builder;
 pub mod computer;
 pub mod gate_op;
 pub mod gate;
 mod executable;
-pub mod measure;
 pub mod operation;
 
 // with 16 qbits, one state holds 1MBytes of data
@@ -22,10 +21,6 @@ pub fn power_of_two(pow:u8) -> usize {
     }
 }
 
-
-pub trait QDimension {
-    fn nb_qbits(&self) -> u8;
-}
 
 #[cfg(test)]
 mod tests {

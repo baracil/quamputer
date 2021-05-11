@@ -1,7 +1,7 @@
 use crate::state::QuantumState;
 
 use crate::gate::ExecutionContext;
-use crate::operation::QuantumOperation;
+use crate::operation::{QuantumOperation, QOp};
 
 pub struct Executable<'a> {
     operation: &'a QuantumOperation,

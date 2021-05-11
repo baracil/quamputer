@@ -4,20 +4,53 @@ use std::ops::Sub;
 use num_complex::Complex64;
 use num_traits::One;
 
-use crate::gate::Gate::{CNot, CSwap, Fredkin, Hadamard, Not, Swap, Toffoli, X, Y, Z};
+use crate::gate::Gate::{Hadamard, Not, Swap, X, Y, Z};
 use crate::gate::State::{Measured, NotMeasured};
 use crate::gate_op::hadamard::apply_controlled_hadamard;
 use crate::gate_op::pauli::{apply_controlled_not, apply_controlled_pauli_x, apply_controlled_pauli_y, apply_controlled_pauli_z};
 use crate::gate_op::swap::apply_controlled_swap;
-use crate::QDimension;
 use crate::state::QuantumState;
-use crate::operation::QuantumOperation;
+use crate::operation::{QuantumOperation, GatePar};
+use serde::{Serialize, Deserialize};
+use std::cmp::Ordering::Greater;
+use std::process::exit;
+
+
+#[derive(Copy, Clone, Serialize, Deserialize)]
+pub enum GateWithoutControl {
+    Not(u8),
+    X(u8),
+    Y(u8),
+    Z(u8),
+    Swap(u8, u8),
+    Hadamard(u8),
+}
+
+impl GateWithoutControl {
+
+    pub fn get_involved_qbits(&self, others: &[u8]) -> Vec<u8> {
+        let mut result = Vec::new();
+        result.extend_from_slice(others);
+        match self {
+            GateWithoutControl::Not(t) => result.push(*t),
+            GateWithoutControl::X(t) => result.push(*t),
+            GateWithoutControl::Y(t) => result.push(*t),
+            GateWithoutControl::Z(t) => result.push(*t),
+            GateWithoutControl::Swap(t1, t2) => {
+                result.push(*t1);
+                result.push(*t2);
+            }
+            GateWithoutControl::Hadamard(t) => result.push(*t),
+        };
+        result
+    }
+}
 
 
 ///
 /// Gate without any control qbits.
 ///
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Serialize, Deserialize)]
 pub enum Gate {
     Not(u8),
     X(u8),
@@ -31,9 +64,43 @@ pub enum Gate {
     Fredkin(u8, u8, [u8; 1]),
 }
 
+impl Into<GatePar> for Gate {
+    fn into(self) -> GatePar {
+        match self {
+            Not(t) => GatePar { gate: GateWithoutControl::Not(t), control_bits: vec![] },
+            X(t) => GatePar { gate: GateWithoutControl::X(t), control_bits: vec![] },
+            Y(t) => GatePar { gate: GateWithoutControl::Y(t), control_bits: vec![] },
+            Z(t) => GatePar { gate: GateWithoutControl::Z(t), control_bits: vec![] },
+            Swap(t1, t2) => GatePar { gate: GateWithoutControl::Swap(t1,t2), control_bits: vec![] },
+            Hadamard(t) => GatePar { gate: GateWithoutControl::Hadamard(t), control_bits: vec![] },
+            Gate::CNot(t, c) => GatePar { gate: GateWithoutControl::Not(t), control_bits: Vec::from(c) },
+            Gate::Toffoli(t, c) => GatePar { gate: GateWithoutControl::Not(t), control_bits: Vec::from(c) },
+            Gate::CSwap(t1, t2, c) => GatePar { gate: GateWithoutControl::Swap(t1, t2), control_bits: Vec::from(c) },
+            Gate::Fredkin(t1, t2, c) => GatePar { gate: GateWithoutControl::Swap(t1, t2), control_bits: Vec::from(c) },
+        }
+    }
+}
+
 impl Into<QuantumOperation> for Gate {
     fn into(self) -> QuantumOperation {
-        crate::operation::QuantumOperation::Gate(self)
+        return QuantumOperation::Gate(self.into());
+    }
+}
+
+impl From<&Gate> for GatePar {
+    fn from(gate: &Gate) -> Self {
+        match gate {
+            Not(t) => GatePar { gate: GateWithoutControl::Not(*t), control_bits: vec![] },
+            X(t) => GatePar { gate: GateWithoutControl::X(*t), control_bits: vec![] },
+            Y(t) => GatePar { gate: GateWithoutControl::Y(*t), control_bits: vec![] },
+            Z(t) => GatePar { gate: GateWithoutControl::Z(*t), control_bits: vec![] },
+            Swap(t1, t2) => GatePar { gate: GateWithoutControl::Swap(*t1,*t2), control_bits: vec![] },
+            Hadamard(t) => GatePar { gate: GateWithoutControl::Hadamard(*t), control_bits: vec![] },
+            Gate::CNot(t, c) => GatePar { gate: GateWithoutControl::Not(*t), control_bits: Vec::from(*c) },
+            Gate::Toffoli(t, c) => GatePar { gate: GateWithoutControl::Not(*t), control_bits: Vec::from(*c) },
+            Gate::CSwap(t1, t2, c) => GatePar { gate: GateWithoutControl::Swap(*t1, *t2), control_bits: Vec::from(*c) },
+            Gate::Fredkin(t1, t2, c) => GatePar { gate: GateWithoutControl::Swap(*t1, *t2), control_bits: Vec::from(*c) },
+        }
     }
 }
 
@@ -45,20 +112,28 @@ impl Into<QuantumOperation> for Gate {
 /// use quamputer::gate::Gate::Not;
 /// let toffoli = Not(2).with_two_controls(0,1);
 /// ```
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct ControlledGate {
-    gate: Gate,
+    gate: GateWithoutControl,
     controls: Vec<u8>,
 }
 
-pub (crate) fn check_for_no_duplicate(bits:Vec<u8>) -> Result<(), String> {
-    if bits.len()<=1 {
-        return Ok(())
+impl Into<QuantumOperation> for ControlledGate {
+    fn into(self) -> QuantumOperation {
+        let par = GatePar { gate: self.gate, control_bits: self.controls };
+        crate::operation::QuantumOperation::Gate(par)
     }
-    for i in 0..bits.len()-1 {
-        for j in i+1..bits.len() {
+}
+
+
+pub(crate) fn check_for_no_duplicate(bits: Vec<u8>) -> Result<(), String> {
+    if bits.len() <= 1 {
+        return Ok(());
+    }
+    for i in 0..bits.len() - 1 {
+        for j in i + 1..bits.len() {
             if bits[i] == bits[j] {
-                return Err(format!("Duplicate qbit : {} ",bits[i]));
+                return Err(format!("Duplicate qbit : {} ", bits[i]));
             }
         }
     }
@@ -78,7 +153,10 @@ impl Gate {
     /// let toffoli = not.with_two_controls(0,1); // create a Toffoli
     /// ```
     pub fn with_one_control(&self, control: u8) -> ControlledGate {
-        ControlledGate { gate: self.clone(), controls: vec![control] }
+        let gate_par:GatePar = self.into();
+        let mut controls = gate_par.control_bits.clone();
+        controls.push(control);
+        ControlledGate { gate: gate_par.gate, controls }
     }
 
     /// Create a ControlledGate from this gate
@@ -92,111 +170,48 @@ impl Gate {
     /// let toffoli = not.with_two_controls(0,1); // create a Toffoli gate
     /// ```
     pub fn with_two_controls(&self, control1: u8, control2: u8) -> ControlledGate {
-        ControlledGate { gate: self.clone(), controls: vec![control1, control2] }
+        let gate_par:GatePar = self.into();
+        let mut controls = gate_par.control_bits.clone();
+        controls.push(control1);
+        controls.push(control2);
+        ControlledGate { gate: gate_par.gate, controls }
     }
 
-    pub fn get_involved_qbits(&self, others:&[u8]) -> Vec<u8> {
-        let mut result =Vec::new();
-        result.extend_from_slice(others);
-        match self {
-            Not(a) => result.push(*a),
-            X(a) => result.push(*a),
-            Y(a) => result.push(*a),
-            Z(a) => result.push(*a),
-            Swap(a, b) => {
-                result.push(*a);
-                result.push(*b);
-            },
-            Hadamard(a) => result.push(*a),
-            CNot(a, b) => {
-                result.push(*a);
-                result.extend_from_slice(b)
-            },
-            Toffoli(a, b) => {
-                result.push(*a);
-                result.extend_from_slice(b)
-            },
-            CSwap(a, b, c) => {
-                result.push(*a);
-                result.push(*b);
-                result.extend_from_slice(c);
-            },
-            Fredkin(a, b, c) => {
-                result.push(*a);
-                result.push(*b);
-                result.extend_from_slice(c);
-            },
-        };
-        result
-    }
 
     /// Create a ControlledGate from this gate
     /// that uses multiple control qbits
     pub fn with_multi_control(&self, controls: &[u8]) -> ControlledGate {
-        ControlledGate { gate: self.clone(), controls: Vec::from(controls) }
+        let gate_par:GatePar = self.into();
+        let mut c = gate_par.control_bits.clone();
+        c.extend_from_slice(controls);
+        ControlledGate { gate: gate_par.gate, controls:c }
     }
 
-    //TODO missing the use of control_qbits fit Gate with controls
-    pub (crate) fn apply_controlled(&self, extra_control_qbits: &[u8], context: &mut ExecutionContext) {
-        match self {
-            Not(target) => apply_controlled_not(extra_control_qbits, *target, context),
-            X(target) => apply_controlled_pauli_x(extra_control_qbits, *target, context),
-            Y(target) => apply_controlled_pauli_y(extra_control_qbits, *target, context),
-            Z(target) => apply_controlled_pauli_z(extra_control_qbits, *target, context),
-            Hadamard(target) => apply_controlled_hadamard(extra_control_qbits, *target, context),
-            Swap(target1, target2) => apply_controlled_swap(extra_control_qbits, *target1, *target2, context),
-            CNot(target, controls) => apply_controlled_not(controls, *target, context),
-            Toffoli(target, controls) => apply_controlled_not(controls, *target, context),
-            CSwap(target1, target2, controls) => apply_controlled_swap(controls, *target1, *target2, context),
-            Fredkin(target1, target2, controls) => apply_controlled_swap(controls, *target1, *target2, context)
-        }
-    }
 }
 
-
-impl Gate {
+impl GateWithoutControl {
     pub fn max_qbit_idx(&self) -> u8 {
         match self {
-            Not(target) => *target,
-            X(target) => *target,
-            Y(target) => *target,
-            Z(target) => *target,
-            Hadamard(target) => *target,
-            Swap(target1, target2) => *target1.max(target2),
-            CNot(target, controls) => *target.max(&controls[0]),
-            Toffoli(target, controls) => *target.max(&controls[0]).max(&controls[1]),
-            CSwap(target1, target2, controls) => *target1.max(target2).max(&controls[0]),
-            Fredkin(target1, target2, controls) => *target1.max(target2).max(&controls[0]),
+            GateWithoutControl::Not(target) => *target,
+            GateWithoutControl::X(target) => *target,
+            GateWithoutControl::Y(target) => *target,
+            GateWithoutControl::Z(target) => *target,
+            GateWithoutControl::Hadamard(target) => *target,
+            GateWithoutControl::Swap(target1, target2) => *target1.max(target2),
         }
     }
 
-    pub fn apply(&self, input: &mut ExecutionContext) {
-        self.apply_controlled(&[], input)
-    }
-
-    pub (crate) fn check_validity(&self) -> Result<(),String> {
-        check_for_no_duplicate(self.get_involved_qbits(&[]))
-    }
-}
-
-impl ControlledGate {
-    pub fn max_qbit_idx(&self) -> u8 {
-        let max_qbit_gate = self.gate.max_qbit_idx();
-        let max_qbit_control = self.controls.iter().max().cloned().unwrap_or(0);
-        return max_qbit_gate.max(max_qbit_control);
-    }
-
-    pub fn apply(&self, input: &mut ExecutionContext) {
-        self.gate.apply_controlled(self.controls.as_slice(), input)
-    }
-
-    pub fn check_validity(&self) -> Result<(),String> {
-        let gate_validity = self.gate.check_validity();
-        if gate_validity.is_err() {
-            return gate_validity;
+    pub(crate) fn apply_controlled(&self, control_qbits: &[u8], context: &mut ExecutionContext) {
+        match self {
+            GateWithoutControl::Not(target) => apply_controlled_not(control_qbits, *target, context),
+            GateWithoutControl::X(target) => apply_controlled_pauli_x(control_qbits, *target, context),
+            GateWithoutControl::Y(target) => apply_controlled_pauli_y(control_qbits, *target, context),
+            GateWithoutControl::Z(target) => apply_controlled_pauli_z(control_qbits, *target, context),
+            GateWithoutControl::Hadamard(target) => apply_controlled_hadamard(control_qbits, *target, context),
+            GateWithoutControl::Swap(target1, target2) => apply_controlled_swap(control_qbits, *target1, *target2, context),
         }
-        check_for_no_duplicate(self.gate.get_involved_qbits(self.controls.as_slice()))
     }
+
 }
 
 pub enum State {
@@ -217,6 +232,7 @@ pub struct ExecutionContext {
 }
 
 impl ExecutionContext {
+
     pub(crate) fn increase_zero(&mut self, id: &String) {
         self.increase_count(id, |c| c.nb_zero += 1)
     }
@@ -307,8 +323,8 @@ impl ExecutionContext {
     }
 }
 
-impl QDimension for ExecutionContext {
-    fn nb_qbits(&self) -> u8 {
+impl ExecutionContext {
+    pub fn nb_qbits(&self) -> u8 {
         self.current_state.nb_qbits()
     }
 }

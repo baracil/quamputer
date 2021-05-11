@@ -1,5 +1,5 @@
 use num_complex::{Complex64};
-use crate::{power_of_two, QDimension};
+use crate::{power_of_two};
 use std::ops::{Deref, DerefMut, Add};
 
 use num_traits::Zero;
@@ -39,8 +39,8 @@ impl Debug for QuantumState {
     }
 }
 
-impl QDimension for QuantumState {
-    fn nb_qbits(&self) -> u8 {
+impl QuantumState {
+    pub fn nb_qbits(&self) -> u8 {
         return self.nb_qbits;
     }
 }

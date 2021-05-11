@@ -1,6 +1,5 @@
 use crate::state::QuantumState;
 use crate::gate::ExecutionContext;
-use crate::QDimension;
 
 pub fn apply_controlled_swap(control_qbits: &[u8], target1: u8, target2: u8, context: &mut ExecutionContext) {
     let control_mask = context.control_mask(control_qbits);

@@ -1,4 +1,4 @@
-use crate::circuit::{QuantumCircuitBuilder};
+use crate::builder::{QuantumCircuitBuilder};
 use crate::state::QuantumState;
 use crate::executable::Executable;
 use crate::operation::QuantumOperation;
