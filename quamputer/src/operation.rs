@@ -2,8 +2,8 @@ use crate::gate::{ExecutionContext, ControlledGate, check_for_no_duplicate, Gate
 use crate::gate::Gate::{Swap, Not};
 use quick_xml::DeError;
 use serde::{Serialize,Deserialize};
-use serde::de::DeserializeOwned;
-use crate::builder::QuantumCircuitBuilder;
+
+
 use crate::operation::QuantumOperation::{Circuit, Loop, Measure, Gate};
 
 pub trait EndOfLoopPredicate {

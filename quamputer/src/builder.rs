@@ -1,9 +1,9 @@
-use std::collections::VecDeque;
+
 
 use crate::operation::{MeasurePar, QOp};
 use crate::operation::{CircuitPar, Condition, LoopPar, QuantumOperation};
-use crate::operation::Condition::MaxIteration;
-use crate::operation::QuantumOperation::{Circuit, Loop};
+
+use crate::operation::QuantumOperation::{Circuit};
 
 pub struct QuantumCircuitBuilder {
     nb_qbits: u8,

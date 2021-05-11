@@ -12,8 +12,8 @@ use crate::gate_op::swap::apply_controlled_swap;
 use crate::state::QuantumState;
 use crate::operation::{QuantumOperation, GatePar};
 use serde::{Serialize, Deserialize};
-use std::cmp::Ordering::Greater;
-use std::process::exit;
+
+
 
 
 #[derive(Copy, Clone, Serialize, Deserialize)]

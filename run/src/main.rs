@@ -1,7 +1,7 @@
 use quamputer::computer::QuantumComputer;
 use quamputer::gate::Gate::{Hadamard, CNot};
-use quamputer::operation::QuantumOperation::{Measure, Circuit};
-use quamputer::operation::{MeasurePar, cnot, QuantumOperation};
+
+
 use quamputer::operation::Condition::{MaxZeroSampling};
 
 fn main() -> Result<(),String> {
