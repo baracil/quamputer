@@ -24,7 +24,7 @@ impl QuantumComputer {
     /// Compile an executable that can be launch
     /// with a initial state
     pub fn compile<'a>(&self, circuit:&'a QuantumOperation) -> Executable<'a> {
-        Executable::new(circuit)
+        Executable(circuit)
     }
 
 
