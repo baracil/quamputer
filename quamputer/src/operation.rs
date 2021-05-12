@@ -3,11 +3,11 @@ use crate::gate::Gate::{Swap, Not};
 
 
 use crate::operation::QuantumOperation::{Circuit, Loop, Measure, Gate};
-use crate::condition::{EndOfLoopPredicate};
-use std::rc::Rc;
+use crate::condition::{EndOfLoopPredicate, Condition};
+use serde::{Serialize,Deserialize};
 
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum QuantumOperation {
     Circuit(CircuitPar),
     Loop(LoopPar),
@@ -36,6 +36,15 @@ impl From<MeasurePar> for QuantumOperation {
     }
 }
 
+impl QuantumOperation {
+    pub fn to_string(&self) -> serde_json::error::Result<String> {
+        serde_json::to_string(self)
+    }
+
+    pub fn from_string(serialized_operation:&str) -> serde_json::error::Result<Self> {
+        serde_json::from_str::<QuantumOperation>(serialized_operation)
+    }
+}
 
 
 pub fn cnot(target:u8, control:u8) -> ControlledGate {
@@ -54,26 +63,26 @@ pub fn fredkin(target1:u8, target2:u8, control:u8) -> ControlledGate {
 
 
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct MeasurePar {
     pub id:String,
     pub target:u8,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct CircuitPar {
     pub nb_qbit:u8,
     pub operations:Vec<QuantumOperation>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct LoopPar {
     pub operation:Box<QuantumOperation>,
-    pub stop_condition:Rc<dyn EndOfLoopPredicate>,
+    pub stop_condition:Condition,
 }
 
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct GatePar {
     pub gate:GateWithoutControl,
     pub control_bits:Vec<u8>

@@ -1,10 +1,11 @@
 use crate::gate::ExecutionContext;
+use serde::{Serialize,Deserialize};
 
-pub trait EndOfLoopPredicate {
+pub trait EndOfLoopPredicate where Self : Serialize {
     fn is_end_of_loop(&self, nb_iterations:u32, context: &ExecutionContext) -> bool ;
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum Condition {
     MaxIteration(u32),
     MaxZeroSampling(String,u32),

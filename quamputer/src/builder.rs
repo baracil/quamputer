@@ -4,8 +4,7 @@ use crate::operation::{MeasurePar, QOp};
 use crate::operation::{CircuitPar, LoopPar, QuantumOperation};
 
 use crate::operation::QuantumOperation::{Circuit};
-use crate::condition::{EndOfLoopPredicate};
-use std::rc::Rc;
+use crate::condition::{Condition};
 
 pub struct QuantumCircuitBuilder {
     nb_qbits: u8,
@@ -23,8 +22,8 @@ impl QuantumCircuitBuilder {
         circuit.check_validity(self.nb_qbits).map(|()| circuit)
     }
 
-    pub fn push_loop(&mut self, stop_condition:impl EndOfLoopPredicate + 'static, operation:QuantumOperation) -> &mut QuantumCircuitBuilder {
-        self.apply(LoopPar{operation:Box::new(operation), stop_condition:Rc::new(stop_condition) })
+    pub fn push_loop(&mut self, stop_condition:Condition, operation:QuantumOperation) -> &mut QuantumCircuitBuilder {
+        self.apply(LoopPar{operation:Box::new(operation), stop_condition })
     }
 
     pub fn measure(&mut self, id:&str, target:u8) -> &mut QuantumCircuitBuilder {

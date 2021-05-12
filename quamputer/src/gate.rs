@@ -10,12 +10,13 @@ use crate::gate_op::hadamard::apply_controlled_hadamard;
 use crate::gate_op::pauli::{apply_controlled_not, apply_controlled_pauli_x, apply_controlled_pauli_y, apply_controlled_pauli_z};
 use crate::gate_op::swap::apply_controlled_swap;
 use crate::state::QuantumState;
+use serde::{Serialize,Deserialize};
 use crate::operation::{QuantumOperation, GatePar};
 
 
 
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Serialize, Deserialize)]
 pub enum GateWithoutControl {
     Not(u8),
     X(u8),

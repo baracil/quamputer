@@ -1,6 +1,8 @@
 use quamputer::computer::QuantumComputer;
 use quamputer::gate::Gate::{Hadamard, CNot};
 use quamputer::condition::Condition::{MaxZeroSampling};
+use quamputer::operation::QuantumOperation::Circuit;
+use quamputer::operation::QuantumOperation;
 
 
 fn main() -> Result<(),String> {
@@ -12,10 +14,8 @@ fn main() -> Result<(),String> {
             .apply(Hadamard(0))
             .apply(CNot(1, [0]))
             .apply(CNot(2, [1]))
-            .measure("q0", 0)
+            .measure("q0",0)
             .build()?;
-
-
 
         let mut circuit_builder = computer.new_circuit_builder();
         circuit_builder
