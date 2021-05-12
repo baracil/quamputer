@@ -1,34 +1,13 @@
 use crate::gate::{ExecutionContext, ControlledGate, check_for_no_duplicate, GateWithoutControl};
 use crate::gate::Gate::{Swap, Not};
-use quick_xml::DeError;
-use serde::{Serialize,Deserialize};
 
 
 use crate::operation::QuantumOperation::{Circuit, Loop, Measure, Gate};
-
-pub trait EndOfLoopPredicate {
-    fn is_end_of_loop(&self, nb_iterations:u32, context: &ExecutionContext) -> bool ;
-}
+use crate::condition::{EndOfLoopPredicate};
+use std::rc::Rc;
 
 
-#[derive(Clone, Serialize, Deserialize)]
-pub enum Condition {
-    MaxIteration(u32),
-    MaxZeroSampling(String,u32),
-    MaxOneSample(String,u32),
-}
-
-impl EndOfLoopPredicate for Condition {
-    fn is_end_of_loop(&self, nb_iterations: u32, context: &ExecutionContext) -> bool {
-        match self {
-            Condition::MaxIteration(nb) => nb_iterations>=*nb,
-            Condition::MaxZeroSampling(id, nb) => context.get_nb_zero(id)>=*nb,
-            Condition::MaxOneSample(id, nb) => context.get_nb_one(id)>=*nb
-        }
-    }
-}
-
-#[derive(Clone,Serialize, Deserialize)]
+#[derive(Clone)]
 pub enum QuantumOperation {
     Circuit(CircuitPar),
     Loop(LoopPar),
@@ -75,25 +54,26 @@ pub fn fredkin(target1:u8, target2:u8, control:u8) -> ControlledGate {
 
 
 
-#[derive(Clone,Serialize, Deserialize)]
+#[derive(Clone)]
 pub struct MeasurePar {
     pub id:String,
     pub target:u8,
 }
 
-#[derive(Clone,Serialize, Deserialize)]
+#[derive(Clone)]
 pub struct CircuitPar {
     pub nb_qbit:u8,
     pub operations:Vec<QuantumOperation>,
 }
 
-#[derive(Clone,Serialize, Deserialize)]
+#[derive(Clone)]
 pub struct LoopPar {
     pub operation:Box<QuantumOperation>,
-    pub stop_condition:Condition,
+    pub stop_condition:Rc<dyn EndOfLoopPredicate>,
 }
 
-#[derive(Clone,Serialize, Deserialize)]
+
+#[derive(Clone)]
 pub struct GatePar {
     pub gate:GateWithoutControl,
     pub control_bits:Vec<u8>
@@ -190,16 +170,6 @@ impl QOp for GatePar {
     }
 }
 
-
-impl QuantumOperation {
-    pub fn from_string(serialized: &str) -> Result<QuantumOperation, DeError> {
-        quick_xml::de::from_str::<QuantumOperation>(serialized)
-    }
-
-    pub fn to_string(&self) -> Result<String, DeError> {
-        quick_xml::se::to_string(&self)
-    }
-}
 
 impl QOp for QuantumOperation {
 

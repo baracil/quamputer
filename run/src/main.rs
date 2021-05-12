@@ -1,8 +1,7 @@
 use quamputer::computer::QuantumComputer;
 use quamputer::gate::Gate::{Hadamard, CNot};
+use quamputer::condition::Condition::{MaxZeroSampling};
 
-
-use quamputer::operation::Condition::{MaxZeroSampling};
 
 fn main() -> Result<(),String> {
     let computer = QuantumComputer::new(3);

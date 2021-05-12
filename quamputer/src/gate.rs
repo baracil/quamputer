@@ -11,12 +11,11 @@ use crate::gate_op::pauli::{apply_controlled_not, apply_controlled_pauli_x, appl
 use crate::gate_op::swap::apply_controlled_swap;
 use crate::state::QuantumState;
 use crate::operation::{QuantumOperation, GatePar};
-use serde::{Serialize, Deserialize};
 
 
 
 
-#[derive(Copy, Clone, Serialize, Deserialize)]
+#[derive(Copy, Clone)]
 pub enum GateWithoutControl {
     Not(u8),
     X(u8),
@@ -50,7 +49,7 @@ impl GateWithoutControl {
 ///
 /// Gate without any control qbits.
 ///
-#[derive(Copy, Clone, Serialize, Deserialize)]
+#[derive(Copy, Clone)]
 pub enum Gate {
     Not(u8),
     X(u8),
@@ -112,7 +111,7 @@ impl From<&Gate> for GatePar {
 /// use quamputer::gate::Gate::Not;
 /// let toffoli = Not(2).with_two_controls(0,1);
 /// ```
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone)]
 pub struct ControlledGate {
     gate: GateWithoutControl,
     controls: Vec<u8>,

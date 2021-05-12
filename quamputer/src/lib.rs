@@ -1,11 +1,12 @@
 
-mod state;
+pub mod state;
 pub mod builder;
 pub mod computer;
 pub mod gate_op;
 pub mod gate;
-mod executable;
+pub mod executable;
 pub mod operation;
+pub mod condition;
 
 // with 16 qbits, one state holds 1MBytes of data
 
