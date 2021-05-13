@@ -1,17 +1,23 @@
-use crate::state::QuantumState;
-
 use crate::gate::ExecutionContext;
-use crate::operation::{QuantumOperation, QOp};
+use crate::operation::{QOp, QuantumOperation};
+use crate::state::QuantumState;
+use serde::{Serialize,Deserialize};
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct Circuit {
+    pub nb_qbits:u8,
+    pub operations:Vec<QuantumOperation>,
+}
 
 pub struct Executable<'a>(pub &'a QuantumOperation);
 
-impl<'a> Executable<'a> {
+impl Circuit {
     pub fn execute(&self, initial_state:&QuantumState) -> ExecutionContext {
-        Execution(&self.0).execute(initial_state)
+        Execution(&self).execute(initial_state)
     }
 }
 
-struct Execution<'a>(pub &'a QuantumOperation);
+struct Execution<'a>(pub &'a Circuit);
 
 impl<'a> Execution<'a> {
 

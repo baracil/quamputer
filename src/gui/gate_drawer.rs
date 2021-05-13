@@ -1,12 +1,11 @@
 use crate::gui::{Drawable, DrawingPar, draw_all_registers, HEIGHT_SPACING_RATIO};
-use crate::operation::GatePar;
+use crate::operation::Gate;
 use raylib::drawing::RaylibDraw;
 use raylib::math::Vector2;
 use crate::gate::GateWithoutControl;
 use raylib::prelude::Rectangle;
-use std::panic::panic_any;
 
-impl Drawable for GatePar {
+impl Drawable for Gate {
     fn draw(&self, drawer: &mut impl RaylibDraw, pos:Vector2, parameter:&DrawingPar) -> Vector2 {
         let gate_width = self.gate.width(parameter);
         let width = parameter.margin+ gate_width;

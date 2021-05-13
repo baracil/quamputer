@@ -4,7 +4,7 @@ pub mod builder;
 pub mod computer;
 pub mod gate_op;
 pub mod gate;
-pub mod executable;
+pub mod circuit;
 pub mod operation;
 pub mod condition;
 

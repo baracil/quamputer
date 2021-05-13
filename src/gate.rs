@@ -11,7 +11,7 @@ use crate::gate_op::pauli::{apply_controlled_not, apply_controlled_pauli_x, appl
 use crate::gate_op::swap::apply_controlled_swap;
 use crate::state::QuantumState;
 use serde::{Serialize,Deserialize};
-use crate::operation::{QuantumOperation, GatePar};
+use crate::operation::{QuantumOperation};
 
 
 
@@ -64,19 +64,19 @@ pub enum Gate {
     Fredkin(u8, u8, [u8; 1]),
 }
 
-impl Into<GatePar> for Gate {
-    fn into(self) -> GatePar {
+impl Into<crate::operation::Gate> for Gate {
+    fn into(self) -> crate::operation::Gate {
         match self {
-            Not(t) => GatePar { gate: GateWithoutControl::Not(t), control_bits: vec![] },
-            X(t) => GatePar { gate: GateWithoutControl::X(t), control_bits: vec![] },
-            Y(t) => GatePar { gate: GateWithoutControl::Y(t), control_bits: vec![] },
-            Z(t) => GatePar { gate: GateWithoutControl::Z(t), control_bits: vec![] },
-            Swap(t1, t2) => GatePar { gate: GateWithoutControl::Swap(t1,t2), control_bits: vec![] },
-            Hadamard(t) => GatePar { gate: GateWithoutControl::Hadamard(t), control_bits: vec![] },
-            Gate::CNot(t, c) => GatePar { gate: GateWithoutControl::Not(t), control_bits: Vec::from(c) },
-            Gate::Toffoli(t, c) => GatePar { gate: GateWithoutControl::Not(t), control_bits: Vec::from(c) },
-            Gate::CSwap(t1, t2, c) => GatePar { gate: GateWithoutControl::Swap(t1, t2), control_bits: Vec::from(c) },
-            Gate::Fredkin(t1, t2, c) => GatePar { gate: GateWithoutControl::Swap(t1, t2), control_bits: Vec::from(c) },
+            Not(t) => crate::operation::Gate { gate: GateWithoutControl::Not(t), control_bits: vec![] },
+            X(t) => crate::operation::Gate { gate: GateWithoutControl::X(t), control_bits: vec![] },
+            Y(t) => crate::operation::Gate { gate: GateWithoutControl::Y(t), control_bits: vec![] },
+            Z(t) => crate::operation::Gate { gate: GateWithoutControl::Z(t), control_bits: vec![] },
+            Swap(t1, t2) => crate::operation::Gate { gate: GateWithoutControl::Swap(t1, t2), control_bits: vec![] },
+            Hadamard(t) => crate::operation::Gate { gate: GateWithoutControl::Hadamard(t), control_bits: vec![] },
+            Gate::CNot(t, c) => crate::operation::Gate { gate: GateWithoutControl::Not(t), control_bits: Vec::from(c) },
+            Gate::Toffoli(t, c) => crate::operation::Gate { gate: GateWithoutControl::Not(t), control_bits: Vec::from(c) },
+            Gate::CSwap(t1, t2, c) => crate::operation::Gate { gate: GateWithoutControl::Swap(t1, t2), control_bits: Vec::from(c) },
+            Gate::Fredkin(t1, t2, c) => crate::operation::Gate { gate: GateWithoutControl::Swap(t1, t2), control_bits: Vec::from(c) },
         }
     }
 }
@@ -87,19 +87,19 @@ impl Into<QuantumOperation> for Gate {
     }
 }
 
-impl From<&Gate> for GatePar {
+impl From<&Gate> for crate::operation::Gate {
     fn from(gate: &Gate) -> Self {
         match gate {
-            Not(t) => GatePar { gate: GateWithoutControl::Not(*t), control_bits: vec![] },
-            X(t) => GatePar { gate: GateWithoutControl::X(*t), control_bits: vec![] },
-            Y(t) => GatePar { gate: GateWithoutControl::Y(*t), control_bits: vec![] },
-            Z(t) => GatePar { gate: GateWithoutControl::Z(*t), control_bits: vec![] },
-            Swap(t1, t2) => GatePar { gate: GateWithoutControl::Swap(*t1,*t2), control_bits: vec![] },
-            Hadamard(t) => GatePar { gate: GateWithoutControl::Hadamard(*t), control_bits: vec![] },
-            Gate::CNot(t, c) => GatePar { gate: GateWithoutControl::Not(*t), control_bits: Vec::from(*c) },
-            Gate::Toffoli(t, c) => GatePar { gate: GateWithoutControl::Not(*t), control_bits: Vec::from(*c) },
-            Gate::CSwap(t1, t2, c) => GatePar { gate: GateWithoutControl::Swap(*t1, *t2), control_bits: Vec::from(*c) },
-            Gate::Fredkin(t1, t2, c) => GatePar { gate: GateWithoutControl::Swap(*t1, *t2), control_bits: Vec::from(*c) },
+            Not(t) => crate::operation::Gate { gate: GateWithoutControl::Not(*t), control_bits: vec![] },
+            X(t) => crate::operation::Gate { gate: GateWithoutControl::X(*t), control_bits: vec![] },
+            Y(t) => crate::operation::Gate { gate: GateWithoutControl::Y(*t), control_bits: vec![] },
+            Z(t) => crate::operation::Gate { gate: GateWithoutControl::Z(*t), control_bits: vec![] },
+            Swap(t1, t2) => crate::operation::Gate { gate: GateWithoutControl::Swap(*t1, *t2), control_bits: vec![] },
+            Hadamard(t) => crate::operation::Gate { gate: GateWithoutControl::Hadamard(*t), control_bits: vec![] },
+            Gate::CNot(t, c) => crate::operation::Gate { gate: GateWithoutControl::Not(*t), control_bits: Vec::from(*c) },
+            Gate::Toffoli(t, c) => crate::operation::Gate { gate: GateWithoutControl::Not(*t), control_bits: Vec::from(*c) },
+            Gate::CSwap(t1, t2, c) => crate::operation::Gate { gate: GateWithoutControl::Swap(*t1, *t2), control_bits: Vec::from(*c) },
+            Gate::Fredkin(t1, t2, c) => crate::operation::Gate { gate: GateWithoutControl::Swap(*t1, *t2), control_bits: Vec::from(*c) },
         }
     }
 }
@@ -120,7 +120,7 @@ pub struct ControlledGate {
 
 impl Into<QuantumOperation> for ControlledGate {
     fn into(self) -> QuantumOperation {
-        let par = GatePar { gate: self.gate, control_bits: self.controls };
+        let par = crate::operation::Gate { gate: self.gate, control_bits: self.controls };
         crate::operation::QuantumOperation::Gate(par)
     }
 }
@@ -153,7 +153,7 @@ impl Gate {
     /// let toffoli = not.with_two_controls(0,1); // create a Toffoli
     /// ```
     pub fn with_one_control(&self, control: u8) -> ControlledGate {
-        let gate_par:GatePar = self.into();
+        let gate_par:crate::operation::Gate = self.into();
         let mut controls = gate_par.control_bits.clone();
         controls.push(control);
         ControlledGate { gate: gate_par.gate, controls }
@@ -170,7 +170,7 @@ impl Gate {
     /// let toffoli = not.with_two_controls(0,1); // create a Toffoli gate
     /// ```
     pub fn with_two_controls(&self, control1: u8, control2: u8) -> ControlledGate {
-        let gate_par:GatePar = self.into();
+        let gate_par:crate::operation::Gate = self.into();
         let mut controls = gate_par.control_bits.clone();
         controls.push(control1);
         controls.push(control2);
@@ -181,7 +181,7 @@ impl Gate {
     /// Create a ControlledGate from this gate
     /// that uses multiple control qbits
     pub fn with_multi_control(&self, controls: &[u8]) -> ControlledGate {
-        let gate_par:GatePar = self.into();
+        let gate_par:crate::operation::Gate = self.into();
         let mut c = gate_par.control_bits.clone();
         c.extend_from_slice(controls);
         ControlledGate { gate: gate_par.gate, controls:c }

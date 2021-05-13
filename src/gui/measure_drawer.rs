@@ -1,10 +1,10 @@
 use crate::gui::{Drawable, DrawingPar, draw_all_registers, HEIGHT_SPACING_RATIO};
-use crate::operation::MeasurePar;
+use crate::operation::Measure;
 use raylib::prelude::*;
 
 const GOLDEN_RATIO:f32 = 1.618033988749894;
 
-impl Drawable for MeasurePar {
+impl Drawable for Measure {
     fn draw(&self, drawer: &mut impl RaylibDraw, pos: Vector2, parameter:&DrawingPar) -> Vector2 {
         let qbit_target = self.target;
         let gate_height = parameter.register_spacing * HEIGHT_SPACING_RATIO ;

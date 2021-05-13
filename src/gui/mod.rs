@@ -5,11 +5,10 @@ mod measure_drawer;
 
 
 use raylib::prelude::*;
-use crate::operation::{QuantumOperation, CircuitPar, LoopPar, GatePar, MeasurePar};
-use std::panic::panic_any;
+use crate::operation::{QuantumOperation};
 use rs_gui::font::FontInfo;
 
-const HEIGHT_SPACING_RATIO:f32 = 0.8;
+const HEIGHT_SPACING_RATIO:f32 = 0.6;
 
 
 pub struct DrawingPar {
@@ -36,7 +35,6 @@ pub trait Drawable {
 impl Drawable for QuantumOperation {
     fn draw(&self, drawer: &mut impl RaylibDraw, pos: Vector2, parameter:&DrawingPar) -> Vector2 {
         match self {
-            QuantumOperation::Circuit(p) => p.draw(drawer,pos,parameter),
             QuantumOperation::Loop(p) => p.draw(drawer,pos,parameter),
             QuantumOperation::Gate(p) => p.draw(drawer,pos,parameter),
             QuantumOperation::Measure(p) => p.draw(drawer,pos,parameter),
@@ -49,7 +47,7 @@ pub(crate) fn draw_all_registers(drawer: &mut impl RaylibDraw, pos: Vector2, par
     let mut pos_end = pos.clone();
     pos_end.x = pos_start.x+width;
 
-    for i in 0..parameter.nb_qbits {
+    for _i in 0..parameter.nb_qbits {
         drawer.draw_line_ex(pos_start, pos_end, parameter.register_thickness, parameter.foreground_color);
         pos_start.y+=parameter.register_spacing;
         pos_end.y+=parameter.register_spacing;

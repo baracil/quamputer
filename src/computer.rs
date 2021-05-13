@@ -1,20 +1,28 @@
 use crate::builder::{QuantumCircuitBuilder};
 use crate::state::QuantumState;
-use crate::executable::Executable;
+use crate::circuit::{Executable, Circuit};
 use crate::operation::QuantumOperation;
+use crate::gate::Gate::{Hadamard, CNot};
 
 pub struct QuantumComputer {
-    nb_qbits:u8,
+    nb_qbits: u8,
 }
 
 impl QuantumComputer {
-
     /// Create a new computer
-    pub fn new(nb_qbits:u8) -> Self {
-        Self{nb_qbits}
+    pub fn new(nb_qbits: u8) -> Self {
+        Self { nb_qbits }
     }
 
 
+    pub fn bell_state(&self) -> QuantumCircuitBuilder {
+        let mut builder = self.new_circuit_builder();
+        builder.apply(Hadamard(0));
+        for i in 1..self.nb_qbits {
+            builder.apply(CNot(i, [i - 1]));
+        }
+        builder
+    }
 
 
     /// Create a new circuit builder to create
@@ -25,7 +33,7 @@ impl QuantumComputer {
 
     /// Compile an executable that can be launch
     /// with a initial state
-    pub fn compile<'a>(&self, circuit:&'a QuantumOperation) -> Executable<'a> {
+    pub fn compile<'a>(&self, circuit: &'a QuantumOperation) -> Executable<'a> {
         Executable(circuit)
     }
 
@@ -34,7 +42,7 @@ impl QuantumComputer {
         QuantumState::zero(self.nb_qbits)
     }
 
-    pub fn same_amplitude(&self, qbit_idx:&[usize]) -> QuantumState {
+    pub fn same_amplitude(&self, qbit_idx: &[usize]) -> QuantumState {
         QuantumState::same_amplitude(self.nb_qbits, qbit_idx)
     }
     pub fn nb_qbits(&self) -> u8 {

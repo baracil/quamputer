@@ -1,39 +1,31 @@
 use crate::gate::{ExecutionContext, ControlledGate, check_for_no_duplicate, GateWithoutControl};
 use crate::gate::Gate::{Swap, Not};
-
-
-use crate::operation::QuantumOperation::{Circuit, Loop, Measure, Gate};
-use crate::condition::{EndOfLoopPredicate, Condition};
+use crate::condition::{StopCondition};
 use serde::{Serialize,Deserialize};
-use std::collections::HashMap;
+use crate::circuit::Circuit;
 
 
 #[derive(Clone, Serialize, Deserialize)]
 pub enum QuantumOperation {
-    Circuit(CircuitPar),
-    Loop(LoopPar),
-    Gate(GatePar),
-    Measure(MeasurePar),
+    Loop(Loop),
+    Gate(Gate),
+    Measure(Measure),
 }
 
-impl From<CircuitPar> for QuantumOperation {
-    fn from(p: CircuitPar) -> Self {
-        Circuit(p)
+impl From<Loop> for QuantumOperation {
+    fn from(p: Loop) -> Self {
+        QuantumOperation::Loop(p)
     }
 }
-impl From<LoopPar> for QuantumOperation {
-    fn from(p: LoopPar) -> Self {
-        Loop(p)
+
+impl From<Gate> for QuantumOperation {
+    fn from(p: Gate) -> Self {
+        QuantumOperation::Gate(p)
     }
 }
-impl From<GatePar> for QuantumOperation {
-    fn from(p: GatePar) -> Self {
-        Gate(p)
-    }
-}
-impl From<MeasurePar> for QuantumOperation {
-    fn from(p: MeasurePar) -> Self {
-        Measure(p)
+impl From<Measure> for QuantumOperation {
+    fn from(p: Measure) -> Self {
+        QuantumOperation::Measure(p)
     }
 }
 
@@ -63,33 +55,27 @@ pub fn fredkin(target1:u8, target2:u8, control:u8) -> ControlledGate {
 
 
 #[derive(Clone, Serialize, Deserialize)]
-pub struct MeasurePar {
+pub struct Measure {
     pub id:String,
     pub target:u8,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
-pub struct CircuitPar {
-    pub nb_qbit:u8,
-    pub operations:Vec<QuantumOperation>,
-}
-
-#[derive(Clone, Serialize, Deserialize)]
-pub struct LoopPar {
-    pub operation:Box<QuantumOperation>,
-    pub stop_condition:Condition,
+pub struct Loop {
+    pub circuit:Circuit,
+    pub loop_condition: StopCondition,
 }
 
 
 #[derive(Clone, Serialize, Deserialize)]
-pub struct GatePar {
+pub struct Gate {
     pub gate:GateWithoutControl,
     pub control_bits:Vec<u8>,
 }
 
 
 
-impl QOp for  MeasurePar {
+impl QOp for Measure {
     fn max_qbit_idx(&self) -> u8 {
         self.target
     }
@@ -115,9 +101,9 @@ impl QOp for  MeasurePar {
     }
 }
 
-impl QOp for  CircuitPar {
+impl QOp for  Circuit {
     fn max_qbit_idx(&self) -> u8 {
-        self.nb_qbit-1
+        self.nb_qbits-1
     }
 
     fn apply(&self, context: &mut ExecutionContext) {
@@ -136,23 +122,23 @@ impl QOp for  CircuitPar {
 
 }
 
-impl QOp for LoopPar {
+impl QOp for Loop {
     fn max_qbit_idx(&self) -> u8 {
-        self.operation.max_qbit_idx()
+        self.circuit.max_qbit_idx()
     }
     fn apply(&self, context: &mut ExecutionContext) {
         let mut i = 0;
-        while !(self.stop_condition.is_end_of_loop(i, &context)) {
-            self.operation.apply(context);
+        while !(self.loop_condition.is_end_of_loop(i, &context)) {
+            self.circuit.apply(context);
             i+=1;
         }
     }
     fn check_validity(&self, nb_qbits:u8) -> Result<(), String> {
-        self.operation.check_validity(nb_qbits)
+        self.circuit.check_validity(nb_qbits)
     }
 }
 
-impl QOp for GatePar {
+impl QOp for Gate {
     fn max_qbit_idx(&self) -> u8 {
         let max_qbit_idx = self.gate.max_qbit_idx();
         self.control_bits
@@ -187,7 +173,6 @@ impl QOp for QuantumOperation {
     /// can be used with a given quantum computer
     fn max_qbit_idx(&self) -> u8 {
         match self {
-            QuantumOperation::Circuit(p) => p.max_qbit_idx(),
             QuantumOperation::Loop(p) => p.max_qbit_idx(),
             QuantumOperation::Gate(p) => p.max_qbit_idx(),
             QuantumOperation::Measure(p) => p.max_qbit_idx()
@@ -198,7 +183,6 @@ impl QOp for QuantumOperation {
     /// and return the result.
     fn apply(&self, context: &mut ExecutionContext) {
         match self {
-            QuantumOperation::Circuit(p) => p.apply(context),
             QuantumOperation::Loop(p) => p.apply(context),
             QuantumOperation::Gate(p) => p.apply(context),
             QuantumOperation::Measure(p) => p.apply(context)
@@ -207,7 +191,6 @@ impl QOp for QuantumOperation {
 
     fn check_validity(&self, nb_qbits:u8) -> Result<(), String> {
         match self {
-            QuantumOperation::Circuit(p) => p.check_validity(nb_qbits),
             QuantumOperation::Loop(p) => p.check_validity(nb_qbits),
             QuantumOperation::Gate(p) => p.check_validity(nb_qbits),
             QuantumOperation::Measure(p) => p.check_validity(nb_qbits)

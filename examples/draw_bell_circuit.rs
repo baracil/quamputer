@@ -1,11 +1,9 @@
 use raylib::prelude::*;
-use quamputer::builder::QuantumCircuitBuilder;
 use quamputer::computer::QuantumComputer;
 use quamputer::gate::Gate::{Hadamard, CNot, Fredkin, Toffoli};
 use quamputer::gui::{Drawable, DrawingPar};
-use rs_gui::size::Size;
 use rs_gui::font::FontInfo;
-use quamputer::condition::Condition::MaxIteration;
+use quamputer::condition::StopCondition::MaxIteration;
 
 fn main() -> Result<(),String>{
     let (mut rl, thread) = raylib::init()
@@ -17,10 +15,7 @@ fn main() -> Result<(),String>{
 
     let computer = QuantumComputer::new(3);
 
-    let circuit = computer.new_circuit_builder()
-        .apply(Hadamard(0))
-        .apply(CNot(1,[0]))
-        .apply(CNot(2,[1]))
+    let circuit = computer.bell_state()
         .apply(Toffoli(2,[1,0]))
         .apply(Fredkin(0,1,[2]))
         .measure("q0",2)
@@ -28,21 +23,22 @@ fn main() -> Result<(),String>{
 
 
     let circuit = computer.new_circuit_builder()
-        .push_loop(MaxIteration(10),circuit).build()?;
+        .apply_sub_circuit(circuit, MaxIteration(10))
+        .build()?;
 
     let mut camera = Camera2D::default();
     camera.target = Vector2::zero();
     camera.zoom =1.0;
     init_camera(&mut camera, &rl);
 
-    let FontInfo = {
+    let font_info = {
         let font_size = 48;
         let font = rl.load_font_ex(&thread,"/home/Bastien Aracil/fonts/OpenSans-Regular.ttf",font_size, FontLoadEx::Default(200));
         FontInfo::new(font?,font_size)
     };
 
     let parameter = DrawingPar{
-        font:FontInfo,
+        font: font_info,
         nb_qbits:computer.nb_qbits(),
         register_spacing:100.0,
         register_thickness:2.,
@@ -58,7 +54,8 @@ fn main() -> Result<(),String>{
     while !rl.window_should_close() {
         if rl.is_window_resized() {
             init_camera(&mut camera,&rl);
-            screen_size = (rl.get_screen_width(), rl.get_screen_height());
+            screen_size.0 = rl.get_screen_width();
+            screen_size.1 = rl.get_screen_height();
         }
 
         let mut d = rl.begin_drawing(&thread);

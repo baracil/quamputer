@@ -1,12 +1,10 @@
 use crate::gate::ExecutionContext;
 use serde::{Serialize,Deserialize};
 
-pub trait EndOfLoopPredicate where Self : Serialize {
-    fn is_end_of_loop(&self, nb_iterations:u32, context: &ExecutionContext) -> bool ;
-}
 
 #[derive(Clone, Serialize, Deserialize)]
-pub enum Condition {
+pub enum StopCondition {
+    Once(),
     MaxIteration(u32),
     MaxZeroSampling(String,u32),
     MaxOneSample(String,u32),
@@ -16,27 +14,29 @@ pub enum Condition {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Or {
-    rhs:Box<Condition>,
-    lhs:Box<Condition>
+    rhs:Box<StopCondition>,
+    lhs:Box<StopCondition>
 }
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct And {
-    rhs:Box<Condition>,
-    lhs:Box<Condition>
+    rhs:Box<StopCondition>,
+    lhs:Box<StopCondition>
 }
 
 
-impl EndOfLoopPredicate for Condition {
-    fn is_end_of_loop(&self, nb_iterations: u32, context: &ExecutionContext) -> bool {
+impl StopCondition {
+
+    pub fn is_end_of_loop(&self, nb_iterations: u32, context: &ExecutionContext) -> bool {
         match self {
-            Condition::MaxIteration(nb) => nb_iterations>=*nb,
-            Condition::MaxZeroSampling(id, nb) => context.get_nb_zero(id)>=*nb,
-            Condition::MaxOneSample(id, nb) => context.get_nb_one(id)>=*nb,
-            Condition::Or(p) => {
+            StopCondition::Once() => nb_iterations>=1,
+            StopCondition::MaxIteration(nb) => nb_iterations>=*nb,
+            StopCondition::MaxZeroSampling(id, nb) => context.get_nb_zero(id)>=*nb,
+            StopCondition::MaxOneSample(id, nb) => context.get_nb_one(id)>=*nb,
+            StopCondition::Or(p) => {
                 p.lhs.is_end_of_loop(nb_iterations,context) || p.rhs.is_end_of_loop(nb_iterations,context)
             }
-            Condition::And(p) => {
+            StopCondition::And(p) => {
                 p.lhs.is_end_of_loop(nb_iterations,context) && p.rhs.is_end_of_loop(nb_iterations,context)
             }
         }
