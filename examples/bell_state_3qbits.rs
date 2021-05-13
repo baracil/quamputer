@@ -1,8 +1,6 @@
 use quamputer::computer::QuantumComputer;
 use quamputer::gate::Gate::{Hadamard, CNot};
 use quamputer::condition::Condition::{MaxZeroSampling};
-use quamputer::operation::QuantumOperation::Circuit;
-use quamputer::operation::QuantumOperation;
 
 
 fn main() -> Result<(),String> {

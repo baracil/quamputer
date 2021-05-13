@@ -15,6 +15,8 @@ impl QuantumComputer {
     }
 
 
+
+
     /// Create a new circuit builder to create
     /// circuit this computer can run
     pub fn new_circuit_builder(&self) -> QuantumCircuitBuilder {
@@ -34,5 +36,8 @@ impl QuantumComputer {
 
     pub fn same_amplitude(&self, qbit_idx:&[usize]) -> QuantumState {
         QuantumState::same_amplitude(self.nb_qbits, qbit_idx)
+    }
+    pub fn nb_qbits(&self) -> u8 {
+        self.nb_qbits
     }
 }

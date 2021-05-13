@@ -5,6 +5,7 @@ use crate::gate::Gate::{Swap, Not};
 use crate::operation::QuantumOperation::{Circuit, Loop, Measure, Gate};
 use crate::condition::{EndOfLoopPredicate, Condition};
 use serde::{Serialize,Deserialize};
+use std::collections::HashMap;
 
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -61,8 +62,6 @@ pub fn fredkin(target1:u8, target2:u8, control:u8) -> ControlledGate {
 }
 
 
-
-
 #[derive(Clone, Serialize, Deserialize)]
 pub struct MeasurePar {
     pub id:String,
@@ -85,7 +84,7 @@ pub struct LoopPar {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct GatePar {
     pub gate:GateWithoutControl,
-    pub control_bits:Vec<u8>
+    pub control_bits:Vec<u8>,
 }
 
 

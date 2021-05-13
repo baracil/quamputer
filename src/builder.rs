@@ -13,7 +13,7 @@ pub struct QuantumCircuitBuilder {
 
 impl QuantumCircuitBuilder {
 
-    pub(crate) fn new(nb_qbits: u8) -> Self {
+    pub (crate) fn new(nb_qbits: u8) -> Self {
         return Self {nb_qbits, operations:Vec::new()};
     }
 
