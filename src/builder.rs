@@ -1,14 +1,14 @@
 
 
-use crate::operation::{Measure, QOp};
-use crate::operation::{Loop, QuantumOperation};
+use crate::operation::{Measure, QuantumOperation};
+use crate::operation::{Loop, CircuitElement};
 
 use crate::condition::{StopCondition};
 use crate::circuit::Circuit;
 
 pub struct QuantumCircuitBuilder {
     nb_qbits: u8,
-    operations: Vec<QuantumOperation>,
+    operations: Vec<CircuitElement>,
 }
 
 impl QuantumCircuitBuilder {
@@ -30,7 +30,7 @@ impl QuantumCircuitBuilder {
         self.apply(Measure{id:id.to_string(),target})
     }
 
-    pub fn apply(&mut self, operation: impl Into<QuantumOperation>) -> &mut QuantumCircuitBuilder {
+    pub fn apply(&mut self, operation: impl Into<CircuitElement>) -> &mut QuantumCircuitBuilder {
         self.operations.push(operation.into());
         self
     }

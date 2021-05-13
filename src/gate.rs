@@ -11,7 +11,7 @@ use crate::gate_op::pauli::{apply_controlled_not, apply_controlled_pauli_x, appl
 use crate::gate_op::swap::apply_controlled_swap;
 use crate::state::QuantumState;
 use serde::{Serialize,Deserialize};
-use crate::operation::{QuantumOperation};
+use crate::operation::{CircuitElement};
 
 
 
@@ -81,9 +81,9 @@ impl Into<crate::operation::Gate> for Gate {
     }
 }
 
-impl Into<QuantumOperation> for Gate {
-    fn into(self) -> QuantumOperation {
-        return QuantumOperation::Gate(self.into());
+impl Into<CircuitElement> for Gate {
+    fn into(self) -> CircuitElement {
+        return CircuitElement::Gate(self.into());
     }
 }
 
@@ -118,10 +118,10 @@ pub struct ControlledGate {
     controls: Vec<u8>,
 }
 
-impl Into<QuantumOperation> for ControlledGate {
-    fn into(self) -> QuantumOperation {
+impl Into<CircuitElement> for ControlledGate {
+    fn into(self) -> CircuitElement {
         let par = crate::operation::Gate { gate: self.gate, control_bits: self.controls };
-        crate::operation::QuantumOperation::Gate(par)
+        crate::operation::CircuitElement::Gate(par)
     }
 }
 

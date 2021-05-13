@@ -6,36 +6,36 @@ use crate::circuit::Circuit;
 
 
 #[derive(Clone, Serialize, Deserialize)]
-pub enum QuantumOperation {
+pub enum CircuitElement {
     Loop(Loop),
     Gate(Gate),
     Measure(Measure),
 }
 
-impl From<Loop> for QuantumOperation {
+impl From<Loop> for CircuitElement {
     fn from(p: Loop) -> Self {
-        QuantumOperation::Loop(p)
+        CircuitElement::Loop(p)
     }
 }
 
-impl From<Gate> for QuantumOperation {
+impl From<Gate> for CircuitElement {
     fn from(p: Gate) -> Self {
-        QuantumOperation::Gate(p)
+        CircuitElement::Gate(p)
     }
 }
-impl From<Measure> for QuantumOperation {
+impl From<Measure> for CircuitElement {
     fn from(p: Measure) -> Self {
-        QuantumOperation::Measure(p)
+        CircuitElement::Measure(p)
     }
 }
 
-impl QuantumOperation {
+impl CircuitElement {
     pub fn to_string(&self) -> serde_json::error::Result<String> {
         serde_json::to_string(self)
     }
 
     pub fn from_string(serialized_operation:&str) -> serde_json::error::Result<Self> {
-        serde_json::from_str::<QuantumOperation>(serialized_operation)
+        serde_json::from_str::<CircuitElement>(serialized_operation)
     }
 }
 
@@ -75,7 +75,7 @@ pub struct Gate {
 
 
 
-impl QOp for Measure {
+impl QuantumOperation for Measure {
     fn max_qbit_idx(&self) -> u8 {
         self.target
     }
@@ -101,7 +101,7 @@ impl QOp for Measure {
     }
 }
 
-impl QOp for  Circuit {
+impl QuantumOperation for  Circuit {
     fn max_qbit_idx(&self) -> u8 {
         self.nb_qbits-1
     }
@@ -122,7 +122,7 @@ impl QOp for  Circuit {
 
 }
 
-impl QOp for Loop {
+impl QuantumOperation for Loop {
     fn max_qbit_idx(&self) -> u8 {
         self.circuit.max_qbit_idx()
     }
@@ -138,7 +138,7 @@ impl QOp for Loop {
     }
 }
 
-impl QOp for Gate {
+impl QuantumOperation for Gate {
     fn max_qbit_idx(&self) -> u8 {
         let max_qbit_idx = self.gate.max_qbit_idx();
         self.control_bits
@@ -165,7 +165,7 @@ impl QOp for Gate {
 }
 
 
-impl QOp for QuantumOperation {
+impl QuantumOperation for CircuitElement {
 
     /// Return the maximal index of the qbits
     /// involved in this gate operation
@@ -173,9 +173,9 @@ impl QOp for QuantumOperation {
     /// can be used with a given quantum computer
     fn max_qbit_idx(&self) -> u8 {
         match self {
-            QuantumOperation::Loop(p) => p.max_qbit_idx(),
-            QuantumOperation::Gate(p) => p.max_qbit_idx(),
-            QuantumOperation::Measure(p) => p.max_qbit_idx()
+            CircuitElement::Loop(p) => p.max_qbit_idx(),
+            CircuitElement::Gate(p) => p.max_qbit_idx(),
+            CircuitElement::Measure(p) => p.max_qbit_idx()
         }
     }
 
@@ -183,22 +183,22 @@ impl QOp for QuantumOperation {
     /// and return the result.
     fn apply(&self, context: &mut ExecutionContext) {
         match self {
-            QuantumOperation::Loop(p) => p.apply(context),
-            QuantumOperation::Gate(p) => p.apply(context),
-            QuantumOperation::Measure(p) => p.apply(context)
+            CircuitElement::Loop(p) => p.apply(context),
+            CircuitElement::Gate(p) => p.apply(context),
+            CircuitElement::Measure(p) => p.apply(context)
         }
     }
 
     fn check_validity(&self, nb_qbits:u8) -> Result<(), String> {
         match self {
-            QuantumOperation::Loop(p) => p.check_validity(nb_qbits),
-            QuantumOperation::Gate(p) => p.check_validity(nb_qbits),
-            QuantumOperation::Measure(p) => p.check_validity(nb_qbits)
+            CircuitElement::Loop(p) => p.check_validity(nb_qbits),
+            CircuitElement::Gate(p) => p.check_validity(nb_qbits),
+            CircuitElement::Measure(p) => p.check_validity(nb_qbits)
         }
     }
 }
 
-pub trait QOp {
+pub trait QuantumOperation {
     fn max_qbit_idx(&self) -> u8;
     fn apply(&self, context: &mut ExecutionContext);
     fn check_validity(&self, nb_qbits:u8) -> Result<(), String>;

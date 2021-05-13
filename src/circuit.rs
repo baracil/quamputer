@@ -1,15 +1,15 @@
 use crate::gate::ExecutionContext;
-use crate::operation::{QOp, QuantumOperation};
+use crate::operation::{QuantumOperation, CircuitElement};
 use crate::state::QuantumState;
 use serde::{Serialize,Deserialize};
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Circuit {
     pub nb_qbits:u8,
-    pub operations:Vec<QuantumOperation>,
+    pub operations:Vec<CircuitElement>,
 }
 
-pub struct Executable<'a>(pub &'a QuantumOperation);
+pub struct Executable<'a>(pub &'a CircuitElement);
 
 impl Circuit {
     pub fn execute(&self, initial_state:&QuantumState) -> ExecutionContext {

@@ -5,7 +5,7 @@ mod measure_drawer;
 
 
 use raylib::prelude::*;
-use crate::operation::{QuantumOperation};
+use crate::operation::{CircuitElement};
 use rs_gui::font::FontInfo;
 
 const HEIGHT_SPACING_RATIO:f32 = 0.6;
@@ -32,12 +32,12 @@ pub trait Drawable {
     fn draw(&self, drawer: &mut impl RaylibDraw, pos: Vector2, parameter:&DrawingPar) -> Vector2 ;
 }
 
-impl Drawable for QuantumOperation {
+impl Drawable for CircuitElement {
     fn draw(&self, drawer: &mut impl RaylibDraw, pos: Vector2, parameter:&DrawingPar) -> Vector2 {
         match self {
-            QuantumOperation::Loop(p) => p.draw(drawer,pos,parameter),
-            QuantumOperation::Gate(p) => p.draw(drawer,pos,parameter),
-            QuantumOperation::Measure(p) => p.draw(drawer,pos,parameter),
+            CircuitElement::Loop(p) => p.draw(drawer, pos, parameter),
+            CircuitElement::Gate(p) => p.draw(drawer, pos, parameter),
+            CircuitElement::Measure(p) => p.draw(drawer, pos, parameter),
         }
     }
 }
