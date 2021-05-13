@@ -6,7 +6,7 @@ use serde::{Serialize,Deserialize};
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Circuit {
     pub nb_qbits:u8,
-    pub operations:Vec<CircuitElement>,
+    pub elements:Vec<CircuitElement>,
 }
 
 pub struct Executable<'a>(pub &'a CircuitElement);

@@ -18,12 +18,12 @@ impl QuantumCircuitBuilder {
     }
 
     pub fn build(&self) -> Result<Circuit, String> {
-        let circuit = Circuit{nb_qbits:self.nb_qbits,operations:self.operations.clone()};
+        let circuit = Circuit{nb_qbits:self.nb_qbits, elements:self.operations.clone()};
         circuit.check_validity(self.nb_qbits).map(|()| circuit)
     }
 
     pub fn apply_sub_circuit(&mut self, circuit:impl Into<Circuit>, loop_condition: StopCondition) -> &mut QuantumCircuitBuilder {
-        self.apply(Loop{circuit:circuit.into(), loop_condition})
+        self.apply(Loop{circuit:circuit.into(), stop_condition: loop_condition })
     }
 
     pub fn measure(&mut self, id:&str, target:u8) -> &mut QuantumCircuitBuilder {

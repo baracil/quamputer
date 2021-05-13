@@ -1,6 +1,6 @@
 use crate::builder::{QuantumCircuitBuilder};
 use crate::state::QuantumState;
-use crate::circuit::{Executable, Circuit};
+use crate::circuit::{Executable};
 use crate::operation::CircuitElement;
 use crate::gate::Gate::{Hadamard, CNot};
 

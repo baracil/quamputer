@@ -1,24 +1,22 @@
-use crate::gui::{Drawable, DrawingPar, Width};
+use crate::gui::{Drawable, DrawingPar};
 use raylib::prelude::*;
 use crate::circuit::Circuit;
+use crate::gui::gui_circuit::GuiCircuit;
 
-impl Drawable for Circuit {
-
-    fn layout(&mut self, parameter: &DrawingPar) -> Width {
-        let width = self.operations.iter_mut()
+impl Drawable for GuiCircuit {
+    fn layout(&mut self, parameter: &DrawingPar) -> f32 {
+        let width = self.elements.iter_mut()
             .map(|o| o.layout(parameter))
-            .sum()
-        ;
+            .sum();
+        self.gui_data.width = width;
         width
     }
 
-    fn draw(&self, drawer: &mut impl RaylibDraw, pos:Vector2, parameter:&DrawingPar) -> Vector2 {
+    fn draw(&self, drawer: &mut impl RaylibDraw, pos: Vector2, parameter: &DrawingPar) {
         let mut pos = pos.clone();
-        for operation in self.operations.iter() {
-            pos = operation.draw(drawer,pos, parameter);
+        for operation in self.elements.iter() {
+            operation.draw(drawer, pos, parameter);
+            pos.x += operation.gui_data().width
         };
-        pos
     }
-
-
 }

@@ -53,7 +53,7 @@ pub struct Measure {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Loop {
     pub circuit:Circuit,
-    pub loop_condition: StopCondition,
+    pub stop_condition: StopCondition,
 }
 
 
@@ -97,11 +97,11 @@ impl QuantumOperation for  Circuit {
     }
 
     fn apply(&self, context: &mut ExecutionContext) {
-        self.operations.iter().for_each(|op| op.apply(context))
+        self.elements.iter().for_each(|op| op.apply(context))
     }
 
     fn check_validity(&self, nb_qbits:u8) -> Result<(), String> {
-        for operation in self.operations.iter() {
+        for operation in self.elements.iter() {
             let op_validity = operation.check_validity(nb_qbits);
             if op_validity.is_err() {
                 return op_validity;
@@ -118,7 +118,7 @@ impl QuantumOperation for Loop {
     }
     fn apply(&self, context: &mut ExecutionContext) {
         let mut i = 0;
-        while !(self.loop_condition.is_end_of_loop(i, &context)) {
+        while !(self.stop_condition.is_end_of_loop(i, &context)) {
             self.circuit.apply(context);
             i+=1;
         }
