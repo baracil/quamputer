@@ -29,16 +29,6 @@ impl From<Measure> for CircuitElement {
     }
 }
 
-impl CircuitElement {
-    pub fn to_string(&self) -> serde_json::error::Result<String> {
-        serde_json::to_string(self)
-    }
-
-    pub fn from_string(serialized_operation:&str) -> serde_json::error::Result<Self> {
-        serde_json::from_str::<CircuitElement>(serialized_operation)
-    }
-}
-
 
 pub fn cnot(target:u8, control:u8) -> ControlledGate {
     Not(target).with_one_control(control)

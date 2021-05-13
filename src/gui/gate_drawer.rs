@@ -1,4 +1,4 @@
-use crate::gui::{Drawable, DrawingPar, draw_all_registers, HEIGHT_SPACING_RATIO};
+use crate::gui::{Drawable, DrawingPar, draw_all_registers, HEIGHT_SPACING_RATIO, Width};
 use crate::operation::Gate;
 use raylib::drawing::RaylibDraw;
 use raylib::math::Vector2;
@@ -6,21 +6,27 @@ use crate::gate::GateWithoutControl;
 use raylib::prelude::Rectangle;
 
 impl Drawable for Gate {
+    fn layout(&mut self, parameter: &DrawingPar) -> Width {
+        let gate_width = self.gate.gate_width(parameter);
+        let width = parameter.margin + gate_width.0;
+        Width(width)
+    }
+
     fn draw(&self, drawer: &mut impl RaylibDraw, pos:Vector2, parameter:&DrawingPar) -> Vector2 {
-        let gate_width = self.gate.width(parameter);
-        let width = parameter.margin+ gate_width;
+        let gate_width = self.gate.gate_width(parameter);
+        let width = gate_width.0 + parameter.margin;
 
         draw_all_registers(drawer,pos,parameter,width);
 
-        draw_control_qbits(drawer,pos,parameter,gate_width, self.gate.qbit_target(),&self.control_bits);
+//        draw_control_qbits(drawer,pos,parameter,gate_width, self.gate.qbit_target(),&self.control_bits);
 
 
         self.gate.draw(drawer,pos,parameter)
     }
 }
 
-fn draw_control_qbits(drawer: &mut impl RaylibDraw, pos:Vector2, parameter:&DrawingPar, gate_width:f32, target:u8,control_bits:&[u8]) {
-    let cpos_start = Vector2::new(pos.x + parameter.margin + gate_width*0.5, pos.y + parameter.qbit_y_offset(target)) ;
+fn draw_control_qbits(drawer: &mut impl RaylibDraw, pos:Vector2, parameter:&DrawingPar, gate_width:Width, target:u8,control_bits:&[u8]) {
+    let cpos_start = Vector2::new(pos.x + parameter.margin + gate_width.0*0.5, pos.y + parameter.qbit_y_offset(target)) ;
     let mut cpos_end = cpos_start.clone();
     let radius = parameter.register_spacing*0.06;
 
@@ -35,8 +41,20 @@ fn draw_control_qbits(drawer: &mut impl RaylibDraw, pos:Vector2, parameter:&Draw
 
 }
 
+impl GateWithoutControl {
 
-impl Drawable for GateWithoutControl {
+    pub fn gate_width(&self, parameter: &DrawingPar) -> Width {
+        let factor:f32 = match self {
+            GateWithoutControl::Not(_) => 0.5,
+            GateWithoutControl::Swap(_, _) => 0.5,
+            GateWithoutControl::X(_) => 1.0,
+            GateWithoutControl::Y(_) => 1.0,
+            GateWithoutControl::Z(_) => 1.0,
+            GateWithoutControl::Hadamard(_) => 1.0
+        };
+        return Width(parameter.register_spacing*factor*HEIGHT_SPACING_RATIO)
+    }
+
     fn draw(&self, drawer: &mut impl RaylibDraw, pos: Vector2, parameter: &DrawingPar) -> Vector2 {
         match self {
             GateWithoutControl::X(target) => draw_gate_with_letter(drawer,pos,parameter,target,"X"),
@@ -50,45 +68,10 @@ impl Drawable for GateWithoutControl {
     }
 }
 
-impl GateWithoutControl {
-    fn width(&self, parameter:&DrawingPar) -> f32 {
-        match self {
-            GateWithoutControl::Not(_) => compute_not_gate_width(parameter),
-            GateWithoutControl::X(_) => compute_gate_with_letter_width(parameter),
-            GateWithoutControl::Y(_) => compute_gate_with_letter_width(parameter),
-            GateWithoutControl::Z(_) => compute_gate_with_letter_width(parameter),
-            GateWithoutControl::Swap(_, _) => compute_swap_gate_width(parameter),
-            GateWithoutControl::Hadamard(_) => compute_gate_with_letter_width(parameter),
-        }
-    }
-
-    fn qbit_target(&self) -> u8 {
-        match self {
-            GateWithoutControl::Not(t) => *t,
-            GateWithoutControl::X(t) => *t,
-            GateWithoutControl::Y(t) => *t,
-            GateWithoutControl::Z(t) => *t,
-            GateWithoutControl::Swap(t, _) => *t,
-            GateWithoutControl::Hadamard(t) => *t,
-        }
-    }
-}
-
-fn compute_gate_with_letter_width(parameter: &DrawingPar) -> f32 {
-    parameter.register_spacing*HEIGHT_SPACING_RATIO
-}
-fn compute_swap_gate_width(parameter: &DrawingPar) -> f32 {
-    parameter.register_spacing*HEIGHT_SPACING_RATIO*0.5
-
-}
-fn compute_not_gate_width(parameter: &DrawingPar) -> f32 {
-    parameter.register_spacing*HEIGHT_SPACING_RATIO*0.5
-}
-
 
 fn draw_gate_with_letter(drawer: &mut impl RaylibDraw, pos: Vector2, parameter: &DrawingPar, target: &u8, letter: &str) -> Vector2 {
     let target_y_pos = pos.y + parameter.qbit_y_offset(*target);
-    let gate_size = compute_gate_with_letter_width(parameter);
+    let gate_size = parameter.register_spacing*HEIGHT_SPACING_RATIO;
 
     let gate = Rectangle::new(pos.x+parameter.margin, target_y_pos-gate_size*0.5,gate_size,gate_size);
 
@@ -110,7 +93,7 @@ fn draw_gate_with_letter(drawer: &mut impl RaylibDraw, pos: Vector2, parameter: 
 
 fn draw_not_gate(drawer: &mut impl RaylibDraw, pos: Vector2, parameter: &DrawingPar, target: &u8) -> Vector2 {
     let target_y_pos = pos.y + (*target as f32) * parameter.register_spacing;
-    let circle_radius = compute_not_gate_width(parameter)*0.5;
+    let circle_radius = parameter.register_spacing*0.5*HEIGHT_SPACING_RATIO*0.5;
 
     let center = Vector2::new(pos.x+parameter.margin+circle_radius, target_y_pos);
 
@@ -134,7 +117,7 @@ fn draw_not_gate(drawer: &mut impl RaylibDraw, pos: Vector2, parameter: &Drawing
 fn draw_swap_gate(drawer: &mut impl RaylibDraw, pos: Vector2, parameter: &DrawingPar, target1: &u8, target2: &u8) -> Vector2 {
     let target_y_pos1 = pos.y + (*target1 as f32) * parameter.register_spacing;
     let target_y_pos2 = pos.y + (*target2 as f32) * parameter.register_spacing;
-    let size = compute_not_gate_width(parameter)*0.5;
+    let size = parameter.register_spacing*0.5*HEIGHT_SPACING_RATIO*0.5;
 
 
     let pos1 = Vector2::new(pos.x + parameter.margin+size, target_y_pos1);

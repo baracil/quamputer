@@ -1,9 +1,13 @@
-use crate::gui::{Drawable, DrawingPar};
+use crate::gui::{Drawable, DrawingPar, Width};
 use crate::operation::Loop;
 use raylib::drawing::RaylibDraw;
 use raylib::math::{Vector2, Rectangle};
 
 impl Drawable for Loop {
+
+    fn layout(&mut self, parameter: &DrawingPar) -> Width {
+        todo!()
+    }
 
     fn draw(&self, drawer: &mut impl RaylibDraw, pos:Vector2, parameter:&DrawingPar) -> Vector2 {
         let mut pos_final = {

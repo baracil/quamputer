@@ -7,8 +7,19 @@ mod measure_drawer;
 use raylib::prelude::*;
 use crate::operation::{CircuitElement};
 use rs_gui::font::FontInfo;
+use std::iter::Sum;
+use std::ops::Add;
 
 const HEIGHT_SPACING_RATIO:f32 = 0.6;
+
+pub struct Width(f32);
+
+impl Sum for Width {
+    fn sum<I: Iterator<Item=Width>>(iter: I) -> Self {
+        let result = iter.map(|w| w.0).sum();
+        Width(result)
+    }
+}
 
 
 pub struct DrawingPar {
@@ -29,10 +40,20 @@ impl DrawingPar {
 
 
 pub trait Drawable {
+    fn layout(&mut self,parameter:&DrawingPar) -> Width;
     fn draw(&self, drawer: &mut impl RaylibDraw, pos: Vector2, parameter:&DrawingPar) -> Vector2 ;
 }
 
 impl Drawable for CircuitElement {
+
+    fn layout(&mut self, parameter: &DrawingPar) -> Width {
+        match self {
+            CircuitElement::Loop(p) => p.layout(parameter),
+            CircuitElement::Gate(p) => p.layout(parameter),
+            CircuitElement::Measure(p) => p.layout(parameter)
+        }
+    }
+
     fn draw(&self, drawer: &mut impl RaylibDraw, pos: Vector2, parameter:&DrawingPar) -> Vector2 {
         match self {
             CircuitElement::Loop(p) => p.draw(drawer, pos, parameter),
@@ -40,6 +61,8 @@ impl Drawable for CircuitElement {
             CircuitElement::Measure(p) => p.draw(drawer, pos, parameter),
         }
     }
+
+
 }
 
 pub(crate) fn draw_all_registers(drawer: &mut impl RaylibDraw, pos: Vector2, parameter:&DrawingPar, width:f32) {

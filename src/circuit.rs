@@ -15,7 +15,18 @@ impl Circuit {
     pub fn execute(&self, initial_state:&QuantumState) -> ExecutionContext {
         Execution(&self).execute(initial_state)
     }
+
+    pub fn to_string(&self) -> serde_json::error::Result<String> {
+        serde_json::to_string(self)
+    }
+
+    pub fn from_string(serialized_operation:&str) -> serde_json::error::Result<Self> {
+        serde_json::from_str::<Circuit>(serialized_operation)
+    }
 }
+
+
+
 
 struct Execution<'a>(pub &'a Circuit);
 
