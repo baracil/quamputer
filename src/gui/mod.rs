@@ -23,7 +23,21 @@ pub struct DrawingPar {
     pub background_color:Color
 }
 
+
 impl DrawingPar {
+
+    pub fn scale(&self,factor:f32) -> Self {
+        DrawingPar{
+            font:FontInfo{font:self.font.font.clone(),size:self.font.size*factor},
+            nb_qbits:self.nb_qbits,
+            register_spacing:self.register_spacing*factor,
+            register_thickness:self.register_thickness*factor,
+            margin:self.margin*factor,
+            foreground_color:self.foreground_color,
+            background_color:self.background_color,
+        }
+    }
+
     pub fn qbit_y_offset(&self, qbit_idx:u8) -> f32 {
         (qbit_idx as f32) * self.register_spacing
     }

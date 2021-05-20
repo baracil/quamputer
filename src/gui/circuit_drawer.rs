@@ -30,7 +30,7 @@ impl GuiRoot {
             let mut texture = loading_result.unwrap();
             {
                 let mut tm = rdh.begin_texture_mode(rt, &mut texture);
-                self.circuit.draw(&mut tm, Vector2::new(0.0,parameter.register_spacing), parameter, true);
+                self.circuit.draw(&mut tm, Vector2::new(0.0,parameter.register_spacing), &parameter, true);
             }
             self.texture = Some(texture)
         }
@@ -44,7 +44,7 @@ impl GuiRoot {
             Some(t) => {
                 let mut texture_pos = pos.clone();
                 texture_pos.y -= parameter.register_spacing;
-                drawer.draw_texture_ex(t,texture_pos,0.0,1.0,Color::VIOLET)
+                drawer.draw_texture_ex(t,texture_pos,0.0,1.0,Color::WHITE)
             }
         }
     }
