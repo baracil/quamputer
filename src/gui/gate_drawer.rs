@@ -1,9 +1,7 @@
 use crate::gui::{Drawable, DrawingPar, draw_all_registers, HEIGHT_SPACING_RATIO};
-use crate::operation::Gate;
 use raylib::drawing::RaylibDraw;
 use raylib::math::Vector2;
 use crate::gate::GateWithoutControl;
-use raylib::prelude::Rectangle;
 use crate::gui::gui_circuit::{GuiGate, GuiGateData};
 use std::panic::panic_any;
 use rs_gui::size::Size;
@@ -20,6 +18,7 @@ impl Drawable for GuiGate {
             None => {
                 self.gui_data.outline.width = 0.0;
                 self.gui_data.outline.height = 0.0;
+                self.gui_data.text_size = Size::new(0.0,0.0);
                 self.gui_data.text_position = Vector2::default();
             }
             Some(t) => {
@@ -28,6 +27,7 @@ impl Drawable for GuiGate {
                 self.gui_data.outline.y = gate_y_center-gate_size*0.5;
                 self.gui_data.outline.width = gate_size;
                 self.gui_data.outline.height = gate_size;
+                self.gui_data.text_size = size;
                 self.gui_data.text_position.x = self.gui_data.outline.x + (self.gui_data.outline.width - size.width())*0.5;
                 self.gui_data.text_position.y = self.gui_data.outline.y + (self.gui_data.outline.height - size.height())*0.5;
             }
@@ -41,32 +41,44 @@ impl Drawable for GuiGate {
         width
     }
 
-    fn draw(&self, drawer: &mut impl RaylibDraw, pos:Vector2, parameter:&DrawingPar) {
+    fn draw(&self, drawer: &mut impl RaylibDraw, pos:Vector2, parameter:&DrawingPar, flipped:bool) {
         let width = self.gui_data.width;
-        draw_all_registers(drawer,pos,parameter,width);
 
-        let center = pos.clone() + self.gui_data.center;
-        draw_control_qbits(drawer,parameter,&center,&self.control_bits);
+        draw_all_registers(drawer,pos,parameter,width,flipped);
+
+        self.draw_control_qbits(drawer,parameter,&pos,&self.control_bits,flipped);
 
 
-        self.gate.draw(drawer,pos,parameter,&self.gui_data);
-    }
-}
-
-fn draw_control_qbits(drawer: &mut impl RaylibDraw, parameter:&DrawingPar, center:&Vector2, control_bits:&[u8]) {
-    let mut cpos_end = center.clone();
-    let radius = parameter.register_spacing*0.06;
-
-    for control_bit in control_bits {
-        cpos_end.y = parameter.qbit_y_offset(*control_bit);
-        drawer.draw_line_ex(center,cpos_end,parameter.register_thickness, parameter.foreground_color);
-
-        drawer.draw_circle_v(cpos_end,radius,parameter.foreground_color);
+        self.gate.draw(drawer,pos,parameter,&self.gui_data,flipped);
     }
 
 
+}
+
+impl GuiGate {
+
+    fn draw_control_qbits(&self, drawer: &mut impl RaylibDraw, parameter:&DrawingPar, pos:&Vector2, control_bits:&[u8], flipped:bool) {
+        let mut center = *pos+self.gui_data.center;
+        let mut cpos_end = center.clone();
+        let radius = parameter.register_spacing*0.06;
+
+        parameter.flip_vector(&mut center,flipped);
+
+        for control_bit in control_bits {
+            cpos_end.y = pos.y+parameter.qbit_y_offset(*control_bit);
+
+            parameter.flip_vector(&mut cpos_end,flipped);
+
+            drawer.draw_line_ex(center,cpos_end,parameter.register_thickness, parameter.foreground_color);
+            drawer.draw_circle_v(cpos_end,radius,parameter.foreground_color);
+        }
+
+
+
+    }
 
 }
+
 
 impl GateWithoutControl {
 
@@ -104,37 +116,44 @@ impl GateWithoutControl {
         }
     }
 
-    fn draw(&self, drawer: &mut impl RaylibDraw, pos: Vector2, parameter: &DrawingPar, gui_data:&GuiGateData) {
+    fn draw(&self, drawer: &mut impl RaylibDraw, pos: Vector2, parameter: &DrawingPar, gui_data:&GuiGateData, flipped:bool) {
         match self {
-            GateWithoutControl::X(target) => draw_gate_with_text(drawer, pos, parameter, gui_data),
-            GateWithoutControl::Y(target) => draw_gate_with_text(drawer, pos, parameter, gui_data),
-            GateWithoutControl::Z(target) => draw_gate_with_text(drawer, pos, parameter, gui_data),
-            GateWithoutControl::Hadamard(target) => draw_gate_with_text(drawer, pos, parameter, gui_data),
+            GateWithoutControl::X(_) => draw_gate_with_text(drawer, pos, parameter, gui_data,flipped),
+            GateWithoutControl::Y(_) => draw_gate_with_text(drawer, pos, parameter, gui_data,flipped),
+            GateWithoutControl::Z(_) => draw_gate_with_text(drawer, pos, parameter, gui_data,flipped),
+            GateWithoutControl::Hadamard(_) => draw_gate_with_text(drawer, pos, parameter, gui_data,flipped),
 
-            GateWithoutControl::Not(target) => draw_not_gate(drawer,pos,parameter,gui_data),
-            GateWithoutControl::Swap(target1, target2) => draw_swap_gate(drawer,pos,parameter,gui_data, target1,target2),
+            GateWithoutControl::Not(_) => draw_not_gate(drawer,pos,parameter,gui_data, flipped),
+            GateWithoutControl::Swap(target1, target2) => draw_swap_gate(drawer,pos,parameter,gui_data, target1,target2, flipped),
         }
     }
 }
 
 
-fn draw_gate_with_text(drawer: &mut impl RaylibDraw, pos: Vector2, parameter: &DrawingPar, gui_data:&GuiGateData) {
+fn draw_gate_with_text(drawer: &mut impl RaylibDraw, pos: Vector2, parameter: &DrawingPar, gui_data:&GuiGateData, flipped:bool) {
     let mut gate = gui_data.outline.clone();
-    gate.x +=pos.x;
-    gate.y +=pos.y;
+    gate.x += pos.x;
+    gate.y += pos.y;
+
+    parameter.flip_rectangle(&mut gate,flipped);
 
     drawer.draw_rectangle_rec(gate,parameter.background_color);
     drawer.draw_rectangle_lines_ex(gate,parameter.register_thickness as i32, parameter.foreground_color);
 
+
+
     if let Some(text) = &gui_data.text {
-        let position = pos+gui_data.text_position;
+        let mut position = pos+gui_data.text_position;
+        let center_y = parameter.flip_y(position.y + gui_data.text_size.height()*0.5, flipped) - gui_data.text_size.height()*0.5;
+        position.y = center_y;
         parameter.font.draw_text(drawer,text,&position,0.0,parameter.foreground_color);
     }
 }
 
-fn draw_not_gate(drawer: &mut impl RaylibDraw, pos: Vector2, parameter: &DrawingPar, gui_data:&GuiGateData) {
+fn draw_not_gate(drawer: &mut impl RaylibDraw, pos: Vector2, parameter: &DrawingPar, gui_data:&GuiGateData, flipped:bool) {
     let circle_radius = gui_data.gate_size*0.5;
-    let center = pos+gui_data.center;
+    let mut center = pos+gui_data.center;
+    parameter.flip_vector(&mut center,flipped);
 
     drawer.draw_circle_sector_lines(center,circle_radius,0,360,32,parameter.foreground_color);
 
@@ -147,12 +166,11 @@ fn draw_not_gate(drawer: &mut impl RaylibDraw, pos: Vector2, parameter: &Drawing
     pos2.y += circle_radius;
     drawer.draw_line_ex(pos1,pos2,parameter.register_thickness, parameter.foreground_color);
 
-
 }
 
-fn draw_swap_gate(drawer: &mut impl RaylibDraw, pos: Vector2, parameter: &DrawingPar, gui_data:&GuiGateData, target1: &u8, target2: &u8) {
-    let target_y_pos1 = pos.y + parameter.qbit_y_offset(*target1);
-    let target_y_pos2 = pos.y + parameter.qbit_y_offset(*target2);
+fn draw_swap_gate(drawer: &mut impl RaylibDraw, pos: Vector2, parameter: &DrawingPar, gui_data:&GuiGateData, target1: &u8, target2: &u8, flipped:bool) {
+    let target_y_pos1 = parameter.flip_y(pos.y + parameter.qbit_y_offset(*target1),flipped);
+    let target_y_pos2 = parameter.flip_y(pos.y + parameter.qbit_y_offset(*target2),flipped);
     let size = gui_data.gate_size*0.5;
 
 

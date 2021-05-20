@@ -1,0 +1,24 @@
+@startuml
+
+!include circuit.iuml
+!include guicircuit.iuml
+
+skinparam handwritten false
+
+
+
+CircuitElement ..|> Loop
+CircuitElement ..|> Gate
+CircuitElement ..|> Measure
+Circuit -- CircuitElement
+
+GuiCircuitElement ..|> GuiLoop
+GuiCircuitElement ..|> GuiGate
+GuiCircuitElement ..|> GuiMeasure
+
+
+GuiCircuit -- GuiCircuitElement
+
+Circuit .right. GuiCircuit : <convert>
+
+@enduml

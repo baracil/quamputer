@@ -1,0 +1,31 @@
+@startuml
+
+
+interface CircuitElement
+
+class Circuit
+class Loop
+class Gate
+class Measure
+class Circuit {
+    nb_qbit:u8
+    elements:CircuitElement[]
+}
+
+class Loop {
+    circuit:Circuit,
+    stop_condition:StopCondition
+}
+
+class Measure {
+    id:String,
+    target:u8
+}
+
+class Gate {
+    type:GateWithoutControl,
+    controls:u8[]
+}
+
+
+@enduml

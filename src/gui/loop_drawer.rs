@@ -1,10 +1,7 @@
 use crate::gui::{Drawable, DrawingPar, draw_all_registers};
-use crate::operation::Loop;
 use raylib::drawing::RaylibDraw;
-use raylib::math::{Vector2, Rectangle};
+use raylib::math::{Vector2};
 use crate::gui::gui_circuit::GuiLoop;
-use std::panic::panic_any;
-use raylib::prelude::Color;
 
 impl Drawable for GuiLoop {
 
@@ -20,18 +17,18 @@ impl Drawable for GuiLoop {
         self.gui_data.width
     }
 
-    fn draw(&self, drawer: &mut impl RaylibDraw, pos:Vector2, parameter:&DrawingPar) {
+    fn draw(&self, drawer: &mut impl RaylibDraw, pos:Vector2, parameter:&DrawingPar, flipped:bool) {
         let mut rect = self.gui_data.outline.clone();
         rect.x += pos.x;
         rect.y += pos.y;
         drawer.draw_rectangle_rec(rect, self.gui_data.outline_background);
         drawer.draw_rectangle_lines_ex(rect, parameter.register_thickness as i32, parameter.foreground_color);
 
-        draw_all_registers(drawer,pos,parameter,self.gui_data.width);
+        draw_all_registers(drawer,pos,parameter,self.gui_data.width,flipped);
 
         let mut pos = pos.clone();
         pos.x += parameter.margin;
-        self.circuit.draw(drawer,pos, parameter);
+        self.circuit.draw(drawer,pos, parameter,flipped);
 
 
     }

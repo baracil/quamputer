@@ -1,0 +1,36 @@
+@startuml
+
+
+interface GuiCircuitElement
+
+class GuiCircuit
+class GuiLoop
+class GuiGate
+class GuiMeasure
+
+class GuiCircuit {
+    data:GuiCircuitData,
+    nb_qbit:u8
+    elements:GuiCircuitElement[]
+}
+
+class GuiLoop {
+    data:GuiLoopData,
+    circuit:GuiCircuit,
+    stop_condition:StopCondition
+}
+
+class GuiMeasure {
+    data:GuiMeasureData,
+    id:String,
+    target:u8
+}
+
+class GuiGate {
+    data:GuiGateData,
+    type:GateWithoutControl,
+    controls:u8[]
+}
+
+
+@enduml

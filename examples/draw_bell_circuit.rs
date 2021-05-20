@@ -1,13 +1,12 @@
 use raylib::prelude::*;
 use quamputer::computer::QuantumComputer;
 use quamputer::gate::Gate::{Fredkin, Toffoli, Hadamard, CNot};
-use quamputer::gui::{Drawable, DrawingPar};
+use quamputer::gui::{ DrawingPar};
 use rs_gui::font::FontInfo;
 use quamputer::condition::StopCondition::MaxIteration;
-use quamputer::gui::gui_circuit::{GuiCircuit, GuiCircuitData};
-use std::thread::current;
-use rs_gui::gui::Gui;
+use quamputer::gui::gui_circuit::{ GuiCircuitData, GuiRoot};
 use quamputer::circuit::Circuit;
+use quamputer::gui::camera_manager::handle_camera;
 
 fn circuit1(computer:&QuantumComputer) -> Result<Circuit,String> {
     let circuit = computer.bell_state()
@@ -36,15 +35,17 @@ fn main() -> Result<(), String> {
         .size(640, 480)
         .title("3 Qbits Bell Circuit")
         .vsync()
+        .msaa_4x()
         .resizable()
         .build();
 
     let computer = QuantumComputer::new(6);
 
-    let mut circuit:GuiCircuit  = circuit1(&computer)?.into();
+    let mut circuit  = GuiRoot::new(circuit1(&computer)?.into());
 
     let mut camera = Camera2D::default();
-    camera.target = Vector2::zero();
+    camera.target.x = 200.0;
+    camera.target.y = 200.0;
     camera.zoom = 1.0;
     init_camera(&mut camera, &rl);
 
@@ -70,6 +71,9 @@ fn main() -> Result<(), String> {
 
     let mut need_layout = true;
 
+
+
+    let mut frame_count:u64 = 0;
     while !rl.window_should_close() {
         if rl.is_window_resized() {
             init_camera(&mut camera, &rl);
@@ -77,12 +81,31 @@ fn main() -> Result<(), String> {
             screen_size.1 = rl.get_screen_height();
         }
 
+        handle_camera(&rl,&mut camera);
+
+
+        {
+            need_layout.then(|| {
+                circuit.layout(&parameter);
+            });
+            need_layout = false;
+        }
+
+
+        match frame_count%120 {
+            0 => circuit.clear_texture(),
+            60 => circuit.draw_texture(&parameter,&mut rl, &thread),
+            _ => {}
+        }
+
+
+        frame_count+=1;
+
         let mut d = rl.begin_drawing(&thread);
+
         d.clear_background(parameter.background_color);
         {
             let mut d = d.begin_mode2D(camera);
-            need_layout.then(|| circuit.layout(&parameter));
-            need_layout = false;
             circuit.draw(&mut d, offset, &parameter);
         }
 

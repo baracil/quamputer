@@ -2,8 +2,7 @@ use crate::condition::StopCondition;
 use crate::gate::{GateWithoutControl};
 use crate::circuit::Circuit;
 use crate::operation::{CircuitElement, Loop, Gate, Measure};
-use raylib::prelude::{Vector2, Color};
-use rs_gui::gui::GuiData;
+use raylib::prelude::{Vector2, Color, RenderTexture2D};
 use std::ops::{Deref, DerefMut};
 use raylib::math::Rectangle;
 use rs_gui::size::Size;
@@ -32,6 +31,7 @@ pub struct GuiGateData {
     pub gate_size:f32,
     pub outline:Rectangle,
     pub text:Option<String>,
+    pub text_size:Size,
     pub text_position:Vector2,
 }
 
@@ -41,6 +41,20 @@ pub struct GuiMeasureData {
     pub outline:Rectangle,
 }
 
+pub struct GuiRoot {
+    pub width:u32,
+    pub height:u32,
+    pub circuit:GuiCircuit,
+    pub texture:Option<RenderTexture2D>
+}
+
+impl GuiRoot {
+
+    pub fn new(circuit:GuiCircuit) -> Self {
+        return GuiRoot{circuit, texture:None, width:0, height:0}
+    }
+
+}
 
 #[derive(Clone)]
 pub struct GuiCircuit {
