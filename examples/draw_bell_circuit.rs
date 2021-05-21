@@ -7,6 +7,7 @@ use quamputer::condition::StopCondition::MaxIteration;
 use quamputer::gui::gui_circuit::{ GuiCircuitData, GuiRoot};
 use quamputer::circuit::Circuit;
 use quamputer::gui::camera_manager::CameraManager;
+use quamputer::gui::gui_drawer::GuiDrawer;
 
 fn circuit1(computer:&QuantumComputer) -> Result<Circuit,String> {
     let circuit = computer.bell_state()
@@ -96,12 +97,12 @@ fn main() -> Result<(), String> {
             need_layout = false;
         }
 
-        //
-        // match frame_count%120 {
-        //     0 => circuit.clear_texture(),
-        //     60 => circuit.draw_texture(&parameter,&mut rl, &thread),
-        //     _ => {}
-        // }
+
+        match frame_count%120 {
+            0 => circuit.clear_texture(),
+            60 => circuit.draw_texture(&parameter,&mut rl, &thread),
+            _ => {}
+        }
 
 
         frame_count+=1;
@@ -111,7 +112,7 @@ fn main() -> Result<(), String> {
         d.clear_background(parameter.background_color);
         {
             let mut d = d.begin_mode2D(camera);
-            circuit.draw(&mut d, offset, &parameter);
+            circuit.draw(&mut GuiDrawer::default(&mut d, &parameter,Vector2::zero()), offset, &parameter);
         }
 
 

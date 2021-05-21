@@ -51,7 +51,7 @@ pub struct GuiRoot {
 impl GuiRoot {
 
     pub fn new(circuit:GuiCircuit) -> Self {
-        return GuiRoot{circuit, texture:None, width:0, height:0}
+        return GuiRoot{circuit, texture:None, width:0,height:0}
     }
 
 }

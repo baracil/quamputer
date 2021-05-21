@@ -1,6 +1,8 @@
 use crate::gui::{Drawable, DrawingPar};
 use raylib::prelude::*;
 use crate::gui::gui_circuit::{GuiCircuit, GuiRoot};
+use rs_gui::gui::GuiData;
+use crate::gui::gui_drawer::GuiDrawer;
 
 
 impl GuiRoot {
@@ -18,19 +20,20 @@ impl GuiRoot {
         self.texture = None;
     }
 
-    pub fn draw_texture(&mut self, parameter: &DrawingPar, mut rdh : &mut RaylibHandle, rt:&RaylibThread) {
+    pub fn draw_texture(&mut self, parameter: &DrawingPar, mut raylib_handle: &mut RaylibHandle, raylib_thread:&RaylibThread) {
         if self.texture.is_some() {
             return;
         }
 
-        let loading_result =  rdh.load_render_texture(rt,self.width,self.height);
+        let loading_result =  raylib_handle.load_render_texture(raylib_thread, self.width, self.height);
         if loading_result.is_err() {
             self.texture = None;
         } else {
             let mut texture = loading_result.unwrap();
             {
-                let mut tm = rdh.begin_texture_mode(rt, &mut texture);
-                self.circuit.draw(&mut tm, Vector2::new(0.0,parameter.register_spacing), &parameter, true);
+                let mut raylib_draw = raylib_handle.begin_texture_mode(raylib_thread, &mut texture);
+                let mut gui_drawer = GuiDrawer::for_texture(&mut raylib_draw,parameter);
+                self.circuit.draw(&mut gui_drawer, &parameter);
             }
             self.texture = Some(texture)
         }
@@ -38,19 +41,21 @@ impl GuiRoot {
     }
 
 
-    pub fn draw(&self, drawer: &mut impl RaylibDraw, pos: Vector2, parameter: &DrawingPar) {
+    pub fn draw<T:RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, pos: Vector2, parameter: &DrawingPar) {
         match &self.texture {
-            None => self.circuit.draw(drawer,pos,parameter, false),
+            None => self.circuit.draw(drawer, parameter),
             Some(t) => {
                 let mut texture_pos = pos.clone();
                 texture_pos.y -= parameter.register_spacing;
-                drawer.draw_texture_ex(t,texture_pos,0.0,1.0,Color::WHITE)
+                drawer.draw_texture_ex(t,texture_pos,0.0,1.0,Color::WHITE.fade(0.0))
             }
         }
     }
 }
 
+
 impl Drawable for GuiCircuit {
+
     fn layout(&mut self, parameter: &DrawingPar) -> f32 {
         let width = self.elements.iter_mut()
             .map(|o| o.layout(parameter))
@@ -59,11 +64,12 @@ impl Drawable for GuiCircuit {
         width
     }
 
-    fn draw(&self, drawer: &mut impl RaylibDraw, pos: Vector2, parameter: &DrawingPar, flipped:bool) {
-        let mut pos = pos.clone();
+    fn draw<T:RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter: &DrawingPar) {
+        drawer.push_offset();
         for element in self.elements.iter() {
-            element.draw(drawer, pos, parameter,flipped);
-            pos.x += element.gui_data().width
+            element.draw(drawer,  parameter);
+            drawer.shift_by(element.gui_data().width);
         };
+        drawer.pop_offset();
     }
 }

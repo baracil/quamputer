@@ -1,6 +1,7 @@
 use crate::gui::{Drawable, DrawingPar, draw_all_registers, HEIGHT_SPACING_RATIO};
 use raylib::prelude::*;
 use crate::gui::gui_circuit::GuiMeasure;
+use crate::gui::gui_drawer::GuiDrawer;
 
 const GOLDEN_RATIO:f32 = 1.618033988749894;
 
@@ -20,17 +21,11 @@ impl Drawable for GuiMeasure {
     }
 
 
-    fn draw(&self, drawer: &mut impl RaylibDraw, pos: Vector2, parameter:&DrawingPar, flipped:bool) {
-        draw_all_registers(drawer,pos,parameter,self.gui_data.width,flipped);
+    fn draw<T:RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter:&DrawingPar) {
+        drawer.draw_all_registers(parameter,self.gui_data.width);
 
-        let mut outline = self.gui_data.outline.clone();
-        outline.x += pos.x;
-        outline.y += pos.y;
-
-        parameter.flip_rectangle(&mut outline,flipped);
-
-        drawer.draw_rectangle_rec(outline,Color::BLACK);
-        drawer.draw_rectangle_lines_ex(outline, parameter.register_thickness as i32, parameter.foreground_color);
+        drawer.draw_rectangle_rec(&self.gui_data.outline,Color::BLACK);
+        drawer.draw_rectangle_lines_ex(&self.gui_data.outline, parameter.register_thickness as i32, parameter.foreground_color);
 
 
     }

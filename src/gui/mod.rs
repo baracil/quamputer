@@ -4,11 +4,13 @@ mod loop_drawer;
 mod measure_drawer;
 pub mod gui_circuit;
 pub mod camera_manager;
+pub mod gui_drawer;
 
 
 use raylib::prelude::*;
 use rs_gui::font::FontInfo;
 use crate::gui::gui_circuit::GuiCircuitElement;
+use crate::gui::gui_drawer::GuiDrawer;
 
 const HEIGHT_SPACING_RATIO:f32 = 0.6;
 
@@ -46,27 +48,27 @@ impl DrawingPar {
         return (self.nb_qbits as f32 + 1.0)*self.register_spacing;
     }
 
-    pub fn flip_rectangle(&self, rect: &mut Rectangle, flipped:bool) {
-        if flipped {
-            rect.y = self.full_circuit_height()-(rect.y+rect.height);
-        }
-    }
-
-    pub fn flip_vector(&self, vect:&mut Vector2, flipped:bool) {
-        if flipped {
-            vect.y = self.full_circuit_height()-vect.y;
-        }
-     }
-
-    pub fn flip_y(&self, y:f32, flipped:bool) -> f32 {
-        if flipped {self.full_circuit_height() - y} else {y}
-    }
+    // pub fn flip_rectangle(&self, rect: &mut Rectangle, flipped:bool) {
+    //     if flipped {
+    //         rect.y = self.full_circuit_height()-(rect.y+rect.height);
+    //     }
+    // }
+    //
+    // pub fn flip_vector(&self, vect:&mut Vector2, flipped:bool) {
+    //     if flipped {
+    //         vect.y = self.full_circuit_height()-vect.y;
+    //     }
+    //  }
+    //
+    // pub fn flip_y(&self, y:f32, flipped:bool) -> f32 {
+    //     if flipped {self.full_circuit_height() - y} else {y}
+    // }
 }
 
 
 pub trait Drawable {
     fn layout(&mut self,parameter:&DrawingPar) -> f32;
-    fn draw(&self, drawer: &mut impl RaylibDraw, pos: Vector2, parameter:&DrawingPar, flipped:bool) ;
+    fn draw<T:RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter:&DrawingPar) ;
 }
 
 impl Drawable for GuiCircuitElement {
@@ -79,11 +81,11 @@ impl Drawable for GuiCircuitElement {
         }
     }
 
-    fn draw(&self, drawer: &mut impl RaylibDraw, pos: Vector2, parameter:&DrawingPar, flipped:bool) {
+    fn draw<T:RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter:&DrawingPar) {
         match self {
-            GuiCircuitElement::GuiLoop(p) => p.draw(drawer, pos, parameter,flipped),
-            GuiCircuitElement::GuiGate(p) => p.draw(drawer, pos, parameter,flipped),
-            GuiCircuitElement::GuiMeasure(p) => p.draw(drawer, pos, parameter,flipped),
+            GuiCircuitElement::GuiLoop(p) => p.draw(drawer, parameter),
+            GuiCircuitElement::GuiGate(p) => p.draw(drawer, parameter),
+            GuiCircuitElement::GuiMeasure(p) => p.draw(drawer, parameter),
         }
     }
 
@@ -101,7 +103,7 @@ pub(crate) fn draw_all_registers(drawer: &mut impl RaylibDraw, pos: Vector2, par
         drawer.draw_line_ex(pos_start, pos_end, parameter.register_thickness, parameter.foreground_color);
 
 
-        parameter.flip_vector(&mut pos_start,flipped);
-        parameter.flip_vector(&mut pos_end,flipped);
+        // parameter.flip_vector(&mut pos_start,flipped);
+        // parameter.flip_vector(&mut pos_end,flipped);
     }
 }
