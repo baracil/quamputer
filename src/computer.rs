@@ -1,9 +1,6 @@
 use crate::builder::{QuantumCircuitBuilder};
 use crate::state::QuantumState;
-use crate::circuit::{Executable};
-use crate::operation::{CircuitElement, Gate};
 use crate::gate::StandardGate::{Hadamard, CNot};
-use crate::gate::{GateWithoutControl, StandardGate};
 
 pub struct QuantumComputer {
     nb_qbits: u8,
