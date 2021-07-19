@@ -4,7 +4,7 @@ use std::ops::Sub;
 use num_complex::Complex64;
 use num_traits::One;
 
-use crate::gate::Gate::{Hadamard, Not, Swap, X, Y, Z};
+use crate::gate::StandardGate::{Hadamard, Not, Swap, X, Y, Z};
 use crate::gate::State::{Measured, NotMeasured};
 use crate::gate_op::hadamard::apply_controlled_hadamard;
 use crate::gate_op::pauli::{apply_controlled_not, apply_controlled_pauli_x, apply_controlled_pauli_y, apply_controlled_pauli_z};
@@ -59,7 +59,7 @@ impl GateWithoutControl {
 /// Gate without any control qbits.
 ///
 #[derive(Copy, Clone)]
-pub enum Gate {
+pub enum StandardGate {
     Not(u8),
     X(u8),
     Y(u8),
@@ -72,7 +72,7 @@ pub enum Gate {
     Fredkin(u8, u8, [u8; 1]),
 }
 
-impl Into<crate::operation::Gate> for Gate {
+impl Into<crate::operation::Gate> for StandardGate {
     fn into(self) -> crate::operation::Gate {
         match self {
             Not(t) => crate::operation::Gate::new(GateWithoutControl::Not(t), vec![]),
@@ -81,22 +81,22 @@ impl Into<crate::operation::Gate> for Gate {
             Z(t) => crate::operation::Gate::new( GateWithoutControl::Z(t), vec![] ),
             Swap(t1, t2) => crate::operation::Gate::new( GateWithoutControl::Swap(t1, t2), vec![] ),
             Hadamard(t) => crate::operation::Gate::new( GateWithoutControl::Hadamard(t), vec![] ),
-            Gate::CNot(t, c) => crate::operation::Gate::new( GateWithoutControl::Not(t), Vec::from(c) ),
-            Gate::Toffoli(t, c) => crate::operation::Gate::new( GateWithoutControl::Not(t), Vec::from(c) ),
-            Gate::CSwap(t1, t2, c) => crate::operation::Gate::new( GateWithoutControl::Swap(t1, t2), Vec::from(c) ),
-            Gate::Fredkin(t1, t2, c) => crate::operation::Gate::new( GateWithoutControl::Swap(t1, t2), Vec::from(c) ),
+            StandardGate::CNot(t, c) => crate::operation::Gate::new(GateWithoutControl::Not(t), Vec::from(c) ),
+            StandardGate::Toffoli(t, c) => crate::operation::Gate::new(GateWithoutControl::Not(t), Vec::from(c) ),
+            StandardGate::CSwap(t1, t2, c) => crate::operation::Gate::new(GateWithoutControl::Swap(t1, t2), Vec::from(c) ),
+            StandardGate::Fredkin(t1, t2, c) => crate::operation::Gate::new(GateWithoutControl::Swap(t1, t2), Vec::from(c) ),
         }
     }
 }
 
-impl Into<CircuitElement> for Gate {
+impl Into<CircuitElement> for StandardGate {
     fn into(self) -> CircuitElement {
         return CircuitElement::Gate(self.into());
     }
 }
 
-impl From<&Gate> for crate::operation::Gate {
-    fn from(gate: &Gate) -> Self {
+impl From<&StandardGate> for crate::operation::Gate {
+    fn from(gate: &StandardGate) -> Self {
         match gate {
             Not(t) => crate::operation::Gate { gate: GateWithoutControl::Not(*t), control_bits: vec![] },
             X(t) => crate::operation::Gate { gate: GateWithoutControl::X(*t), control_bits: vec![] },
@@ -104,10 +104,10 @@ impl From<&Gate> for crate::operation::Gate {
             Z(t) => crate::operation::Gate { gate: GateWithoutControl::Z(*t), control_bits: vec![] },
             Swap(t1, t2) => crate::operation::Gate { gate: GateWithoutControl::Swap(*t1, *t2), control_bits: vec![] },
             Hadamard(t) => crate::operation::Gate { gate: GateWithoutControl::Hadamard(*t), control_bits: vec![] },
-            Gate::CNot(t, c) => crate::operation::Gate { gate: GateWithoutControl::Not(*t), control_bits: Vec::from(*c) },
-            Gate::Toffoli(t, c) => crate::operation::Gate { gate: GateWithoutControl::Not(*t), control_bits: Vec::from(*c) },
-            Gate::CSwap(t1, t2, c) => crate::operation::Gate { gate: GateWithoutControl::Swap(*t1, *t2), control_bits: Vec::from(*c) },
-            Gate::Fredkin(t1, t2, c) => crate::operation::Gate { gate: GateWithoutControl::Swap(*t1, *t2), control_bits: Vec::from(*c) },
+            StandardGate::CNot(t, c) => crate::operation::Gate { gate: GateWithoutControl::Not(*t), control_bits: Vec::from(*c) },
+            StandardGate::Toffoli(t, c) => crate::operation::Gate { gate: GateWithoutControl::Not(*t), control_bits: Vec::from(*c) },
+            StandardGate::CSwap(t1, t2, c) => crate::operation::Gate { gate: GateWithoutControl::Swap(*t1, *t2), control_bits: Vec::from(*c) },
+            StandardGate::Fredkin(t1, t2, c) => crate::operation::Gate { gate: GateWithoutControl::Swap(*t1, *t2), control_bits: Vec::from(*c) },
         }
     }
 }
@@ -117,7 +117,7 @@ impl From<&Gate> for crate::operation::Gate {
 /// For instance the Toffoli gate is obtained with
 ///
 /// ```
-/// use quamputer::gate::Gate::Not;
+/// use quamputer::gate::StandardGate::Not;
 /// let toffoli = Not(2).with_two_controls(0,1);
 /// ```
 #[derive(Clone)]
@@ -148,14 +148,14 @@ pub(crate) fn check_for_no_duplicate(bits: Vec<u8>) -> Result<(), String> {
     Ok(())
 }
 
-impl Gate {
+impl StandardGate {
     /// Create a ControlledGate from this gate
     /// that uses only one control qbit
     ///
     /// # Examples
     ///
     /// ```
-    /// use quamputer::gate::Gate::Not;
+    /// use quamputer::gate::StandardGate::Not;
     /// let not = Not(2); // create a Not Gate on qbit(2)
     /// let cnot = not.with_one_control(0); // create a CNot gate. Control is qbit(0) and target qbit(2)
     /// let toffoli = not.with_two_controls(0,1); // create a Toffoli
@@ -173,7 +173,7 @@ impl Gate {
     /// # Examples
     ///
     /// ```
-    /// use quamputer::gate::Gate::Not;
+    /// use quamputer::gate::StandardGate::Not;
     /// let not = Not(2); // create a Not Gate on qbit(2)
     /// let toffoli = not.with_two_controls(0,1); // create a Toffoli gate
     /// ```

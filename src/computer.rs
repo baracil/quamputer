@@ -1,8 +1,9 @@
 use crate::builder::{QuantumCircuitBuilder};
 use crate::state::QuantumState;
 use crate::circuit::{Executable};
-use crate::operation::CircuitElement;
-use crate::gate::Gate::{Hadamard, CNot};
+use crate::operation::{CircuitElement, Gate};
+use crate::gate::StandardGate::{Hadamard, CNot};
+use crate::gate::{GateWithoutControl, StandardGate};
 
 pub struct QuantumComputer {
     nb_qbits: u8,
@@ -19,9 +20,9 @@ impl QuantumComputer {
     /// to set all the qbits in Bell state
     pub fn bell_state(&self) -> QuantumCircuitBuilder {
         let mut builder = self.new_circuit_builder();
-        builder.apply(Hadamard(0));
+        builder.add_operation(Hadamard(0));
         for i in 1..self.nb_qbits {
-            builder.apply(CNot(i, [i - 1]));
+            builder.add_operation(CNot(i, [i - 1]));
         }
         builder
     }

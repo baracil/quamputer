@@ -22,15 +22,15 @@ impl QuantumCircuitBuilder {
         circuit.check_validity(self.nb_qbits).map(|()| circuit)
     }
 
-    pub fn apply_sub_circuit(&mut self, circuit:impl Into<Circuit>, loop_condition: StopCondition) -> &mut QuantumCircuitBuilder {
-        self.apply(Loop{circuit:circuit.into(), stop_condition: loop_condition })
+    pub fn add_loop(&mut self, circuit:impl Into<Circuit>, loop_condition: StopCondition) -> &mut QuantumCircuitBuilder {
+        self.add_operation(Loop{circuit:circuit.into(), stop_condition: loop_condition })
     }
 
-    pub fn measure(&mut self, id:&str, target:u8) -> &mut QuantumCircuitBuilder {
-        self.apply(Measure{id:id.to_string(),target})
+    pub fn add_measure(&mut self, id:&str, target:u8) -> &mut QuantumCircuitBuilder {
+        self.add_operation(Measure{id:id.to_string(),target})
     }
 
-    pub fn apply(&mut self, operation: impl Into<CircuitElement>) -> &mut QuantumCircuitBuilder {
+    pub fn add_operation(&mut self, operation: impl Into<CircuitElement>) -> &mut QuantumCircuitBuilder {
         self.operations.push(operation.into());
         self
     }

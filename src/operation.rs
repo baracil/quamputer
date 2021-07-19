@@ -1,5 +1,5 @@
 use crate::gate::{ExecutionContext, ControlledGate, check_for_no_duplicate, GateWithoutControl};
-use crate::gate::Gate::{Swap, Not};
+use crate::gate::StandardGate::{Swap, Not};
 use crate::condition::{StopCondition};
 use serde::{Serialize,Deserialize};
 use crate::circuit::Circuit;

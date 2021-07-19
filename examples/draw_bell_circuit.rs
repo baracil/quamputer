@@ -1,6 +1,6 @@
 use raylib::prelude::*;
 use quamputer::computer::QuantumComputer;
-use quamputer::gate::Gate::{Fredkin, Toffoli, Hadamard, CNot};
+use quamputer::gate::StandardGate::{Fredkin, Toffoli, Hadamard, CNot};
 use quamputer::gui::{ DrawingPar};
 use rsgui::font::FontInfo;
 use quamputer::condition::StopCondition::MaxIteration;
@@ -11,23 +11,23 @@ use quamputer::gui::gui_drawer::GuiDrawer;
 
 fn circuit1(computer:&QuantumComputer) -> Result<Circuit,String> {
     let circuit = computer.bell_state()
-        .apply(Toffoli(2, [1, 0]))
-        .apply(Fredkin(0, 1, [2]))
-        .measure("q0", 2)
+        .add_operation(Toffoli(2, [1, 0]))
+        .add_operation(Fredkin(0, 1, [2]))
+        .add_measure("q0", 2)
         .build()?;
 
 
      computer.new_circuit_builder()
-         .apply(Toffoli(2,[1,0]))
-        .apply_sub_circuit(circuit, MaxIteration(10))
+         .add_operation(Toffoli(2, [1,0]))
+        .add_loop(circuit, MaxIteration(10))
         .build()
 }
 
 fn circuit2(computer:&QuantumComputer) -> Result<Circuit,String> {
     computer.new_circuit_builder()
-        .apply(Hadamard(0))
-        .apply(CNot(1,[0]))
-        .measure("q0",0)
+        .add_operation(Hadamard(0))
+        .add_operation(CNot(1, [0]))
+        .add_measure("q0", 0)
         .build()
 }
 
