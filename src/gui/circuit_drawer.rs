@@ -17,6 +17,16 @@ impl GuiRoot {
         self.height = height.max(0.0).round() as u32;
     }
 
+    pub fn draw<T:RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, pos: Vector2, parameter: &DrawingPar) {
+        match &self.texture {
+            None => self.circuit.draw(drawer, parameter),
+            Some(t) => {
+                let mut texture_pos = pos.clone();
+                texture_pos.y -= parameter.register_spacing;
+                drawer.draw_texture_ex(t,texture_pos,0.0,(SCALE as f32).inv(),Color::VIOLET)
+            }
+        }
+    }
 
     pub fn clear_texture(&mut self) {
         self.texture = None;
@@ -43,16 +53,6 @@ impl GuiRoot {
     }
 
 
-    pub fn draw<T:RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, pos: Vector2, parameter: &DrawingPar) {
-        match &self.texture {
-            None => self.circuit.draw(drawer, parameter),
-            Some(t) => {
-                let mut texture_pos = pos.clone();
-                texture_pos.y -= parameter.register_spacing;
-                drawer.draw_texture_ex(t,texture_pos,0.0,(SCALE as f32).inv(),Color::VIOLET)
-            }
-        }
-    }
 }
 
 
