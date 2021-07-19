@@ -9,7 +9,7 @@ fn main() -> Result<(),String> {
 
     let circuit = {
         computer.new_circuit_builder()
-            .add_loop(computer.bell_state().add_measure("q0", 0), MaxZeroSampling("q0".to_string(), 10))
+            .add_loop(computer.bell_state().add_measure("q0", 0), MaxZeroSampling{id:"q0".to_string(), nb:10})
             .build()?
     };
 

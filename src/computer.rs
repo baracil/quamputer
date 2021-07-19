@@ -34,17 +34,12 @@ impl QuantumComputer {
         QuantumCircuitBuilder::new(self.nb_qbits)
     }
 
-    /// Compile an executable that can be launch
-    /// with a initial state
-    pub fn compile<'a>(&self, circuit: &'a CircuitElement) -> Executable<'a> {
-        Executable(circuit)
-    }
-
-
+    /// Create a initial quantum state with all amplitudes to zero
     pub fn zero_state(&self) -> QuantumState {
         QuantumState::zero(self.nb_qbits)
     }
 
+    /// Create a initial quantum state with the same amplitudes for all qbits
     pub fn same_amplitude(&self, qbit_idx: &[usize]) -> QuantumState {
         QuantumState::same_amplitude(self.nb_qbits, qbit_idx)
     }

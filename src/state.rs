@@ -25,7 +25,6 @@ impl DerefMut for QuantumState {
     }
 }
 
-
 impl Debug for QuantumState {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let wave_function = self.amplitudes.iter()
