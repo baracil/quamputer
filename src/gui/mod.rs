@@ -67,6 +67,7 @@ impl DrawingPar {
 
 
 pub trait Drawable {
+    /// Layout its content and return the width it will use
     fn layout(&mut self,parameter:&DrawingPar) -> f32;
     fn draw<T:RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter:&DrawingPar) ;
 }
@@ -91,7 +92,9 @@ impl Drawable for GuiCircuitElement {
 
 }
 
-pub(crate) fn draw_all_registers(drawer: &mut impl RaylibDraw, pos: Vector2, parameter:&DrawingPar, width:f32, flipped:bool) {
+
+/// Draw all registers at the given position.
+pub(crate) fn draw_all_registers(drawer: &mut impl RaylibDraw, pos: Vector2, parameter:&DrawingPar, width:f32) {
     let mut pos_start = pos.clone();
     let mut pos_end = pos.clone();
     pos_end.x = pos_start.x+width;
@@ -101,9 +104,5 @@ pub(crate) fn draw_all_registers(drawer: &mut impl RaylibDraw, pos: Vector2, par
         pos_end.y = pos.y + (i as f32) * parameter.register_spacing;
 
         drawer.draw_line_ex(pos_start, pos_end, parameter.register_thickness, parameter.foreground_color);
-
-
-        // parameter.flip_vector(&mut pos_start,flipped);
-        // parameter.flip_vector(&mut pos_end,flipped);
     }
 }
