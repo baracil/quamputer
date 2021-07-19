@@ -4,6 +4,7 @@ use raylib::consts::KeyboardKey;
 use raylib::math::Vector2;
 use crate::gui::DrawingPar;
 use rsgui::mouse::MouseState;
+use std::sync::atomic::compiler_fence;
 
 
 #[derive(Default)]
@@ -60,11 +61,28 @@ fn drag_ended(d:&RaylibHandle) -> bool {
 fn handle_mouse_wheel(rl:&RaylibHandle, camera:&mut Camera2D) {
     let wheel = rl.get_mouse_wheel_move();
 
-    if wheel.abs()> 0.0 {
-        camera.zoom *= 1.2_f32.powf(wheel as f32);
-        camera.zoom = camera.zoom.clamp(0.1,2.0)
-
+    if wheel.abs()<=0.0 {
+        return
     }
+
+    let old_zoom = camera.zoom;
+    let zoom = (old_zoom * 1.2_f32.powf(wheel as f32)).clamp(0.1,2.0);
+
+    let zoom_factor = zoom/old_zoom;
+    let mouse_position = rl.get_screen_to_world2D(rl.get_mouse_position(),*camera);
+
+
+    // var factor = GetZoomFactor(mouseState);
+    // var mouseInWorld = GetScreenToWorld2D(mouseState.MousePosition, _editorData.Camera);
+    // _editorData.CameraZoom *= factor;
+    // _editorData.CameraTarget = (_editorData.CameraTarget - mouseInWorld) / factor + mouseInWorld;
+
+
+
+    camera.target.x = (camera.target.x - mouse_position.x)/zoom_factor + mouse_position.x;
+    camera.target.y = (camera.target.y - mouse_position.y)/zoom_factor + mouse_position.y;
+    camera.zoom = zoom;
+
 }
 
 
