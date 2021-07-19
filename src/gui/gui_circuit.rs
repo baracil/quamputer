@@ -217,7 +217,7 @@ impl From<&Gate> for GuiCircuitElement {
 }
 impl From<&Measure> for GuiCircuitElement {
     fn from(m: &Measure) -> Self {
-        GuiMeasure{ gui_data:Default::default(),id:m.id.clone(), target:m.target}.into()
+        GuiMeasure{ gui_data:Default::default(),id:m.id.clone(), target:m.qbit_target }.into()
     }
 }
 
@@ -254,7 +254,7 @@ impl From<&GuiGate> for CircuitElement {
 }
 impl From<&GuiMeasure> for CircuitElement {
     fn from(m: &GuiMeasure) -> Self {
-        Measure{target:m.target, id:m.id.clone()}.into()
+        Measure{ qbit_target:m.target, id:m.id.clone()}.into()
     }
 }
 

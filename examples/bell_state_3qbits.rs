@@ -1,6 +1,6 @@
 use quamputer::computer::QuantumComputer;
 use quamputer::gate::StandardGate::{Hadamard, CNot};
-use quamputer::condition::StopCondition::{MaxZeroSampling};
+use quamputer::condition::StopCondition::{MaxZeroSampling, Or};
 use quamputer::operation::CircuitElement::Gate;
 
 

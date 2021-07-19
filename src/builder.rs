@@ -26,8 +26,8 @@ impl QuantumCircuitBuilder {
         self.add_operation(Loop{circuit:circuit.into(), stop_condition: loop_condition })
     }
 
-    pub fn add_measure(&mut self, id:&str, target:u8) -> &mut QuantumCircuitBuilder {
-        self.add_operation(Measure{id:id.to_string(),target})
+    pub fn add_measure(&mut self, id:&str, qbit_target:u8) -> &mut QuantumCircuitBuilder {
+        self.add_operation(Measure{id:id.to_string(), qbit_target })
     }
 
     pub fn add_operation(&mut self, operation: impl Into<CircuitElement>) -> &mut QuantumCircuitBuilder {
