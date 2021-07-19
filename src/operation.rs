@@ -63,7 +63,14 @@ pub struct Gate {
     pub control_bits:Vec<u8>,
 }
 
-
+impl Gate {
+    pub fn new(gate:GateWithoutControl, control_bits:Vec<u8>) -> Self {
+        Gate{
+            gate,
+            control_bits
+        }
+    }
+}
 
 impl QuantumOperation for Measure {
     fn max_qbit_idx(&self) -> u8 {

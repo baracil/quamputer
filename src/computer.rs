@@ -15,6 +15,8 @@ impl QuantumComputer {
     }
 
 
+    /// Create a circuit builder initial with operation
+    /// to set all the qbits in Bell state
     pub fn bell_state(&self) -> QuantumCircuitBuilder {
         let mut builder = self.new_circuit_builder();
         builder.apply(Hadamard(0));

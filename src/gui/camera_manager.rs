@@ -3,7 +3,7 @@ use raylib::camera::Camera2D;
 use raylib::consts::KeyboardKey;
 use raylib::math::Vector2;
 use crate::gui::DrawingPar;
-use rs_gui::mouse::MouseState;
+use rsgui::mouse::MouseState;
 
 
 #[derive(Default)]

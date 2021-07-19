@@ -4,6 +4,7 @@ use raylib::math::{Vector2};
 use crate::gui::gui_circuit::GuiLoop;
 use crate::gui::gui_drawer::GuiDrawer;
 use std::panic::panic_any;
+use raylib::color::Color;
 
 impl Drawable for GuiLoop {
 
@@ -14,7 +15,7 @@ impl Drawable for GuiLoop {
         self.gui_data.outline.y = -parameter.register_spacing;
         self.gui_data.outline.height = parameter.full_circuit_height();
         self.gui_data.outline.width = circuit_width;
-        self.gui_data.outline_background = parameter.foreground_color.fade(0.5);
+        self.gui_data.outline_background = Color::new(128,128,128,255);
 
         self.gui_data.width
     }

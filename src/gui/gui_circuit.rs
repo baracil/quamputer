@@ -5,33 +5,46 @@ use crate::operation::{CircuitElement, Loop, Gate, Measure};
 use raylib::prelude::{Vector2, Color, RenderTexture2D};
 use std::ops::{Deref, DerefMut};
 use raylib::math::Rectangle;
-use rs_gui::size::Size;
+use rsgui::size::Size;
 
+///Common data to all gui element
 #[derive(Clone, Default)]
 pub struct CommonGuiData {
+    ///the total width the element takes
     pub width:f32,
+    ///the center of the element
     pub center:Vector2,
 }
 
+///Graphical data for a circuit
 #[derive(Clone, Default)]
 pub struct GuiCircuitData {
     pub common:CommonGuiData,
 }
 
+///Graphical data for a loop element
 #[derive(Clone, Default)]
 pub struct GuiLoopData {
+    ///the common data (width and position)
     pub common:CommonGuiData,
+    ///the outline used to delimit the loop
     pub outline:Rectangle,
+    ///the background color of the loop
     pub outline_background:Color,
 }
 
+///Graphical data for a gate element
 #[derive(Clone,Default)]
 pub struct GuiGateData {
+    ///the common data (width and position)
     pub common:CommonGuiData,
     pub gate_size:f32,
     pub outline:Rectangle,
+    ///optional displayed text
     pub text:Option<String>,
+    ///the size of the text
     pub text_size:Size,
+    ///the position of the text to display
     pub text_position:Vector2,
 }
 
@@ -80,7 +93,9 @@ pub struct GuiGate {
 #[derive(Clone)]
 pub struct GuiMeasure {
     pub gui_data:GuiMeasureData,
+    ///A uniq identifier of the measurement
     pub id:String,
+    ///the target qbit for the measurement
     pub target:u8,
 }
 

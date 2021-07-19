@@ -1,18 +1,20 @@
-use raylib::{RaylibHandle, RaylibThread};
+use raylib::{RaylibHandle, RaylibThread, set_trace_log};
 use raylib::drawing::RaylibDraw;
 use crate::gui::DrawingPar;
 use raylib::prelude::{Color, Rectangle, Vector2, RenderTexture2D};
-use rs_gui::font::FontInfo;
+use rsgui::font::FontInfo;
 use std::panic::panic_any;
-use rs_gui::size::Size;
+use rsgui::size::Size;
 use std::path::Prefix::DeviceNS;
 use std::collections::LinkedList;
 use std::net::Shutdown::Read;
+
 
 pub struct GuiDrawer<'a, T: RaylibDraw> {
     raylib_draw: &'a mut T,
     full_height: f32,
     flipped: bool,
+    scale:u32,
     point1: Vector2,
     point2: Vector2,
     rectangle: Rectangle,
@@ -37,15 +39,15 @@ impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
 
 impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
     pub fn shift_by(&mut self, width: f32) {
-        self.offset.x += width;
+        self.offset.x += self.transform_length(&width);
     }
 
     fn transform_thickness(&self, length: &i32) -> i32 {
-        return *length;
+        return *length * (self.scale as i32);
     }
 
     fn transform_length(&self, length: &f32) -> f32 {
-        return *length;
+        return *length * (self.scale as f32);
     }
 
     fn transform_vector(&self, reference: &Vector2) -> Vector2 {
@@ -54,36 +56,35 @@ impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
         result
     }
 
+    fn transform_rectangle(&self, reference: &Rectangle) -> Rectangle {
+        let mut result = reference.clone();
+        self.transform_rectangle_in_place(&mut result);
+        result
+    }
+
+
     fn transform_vector_in_place(&self, target: &mut Vector2) {
-        let mut x = target.x + self.offset.x;
-        let mut y = target.y + self.offset.y;
+        let mut x = target.x*(self.scale as f32) + self.offset.x;
+        let mut y = target.y*(self.scale as f32) + self.offset.y;
         if self.flipped {
-            y = self.full_height - y;
+            y = self.full_height*(self.scale as f32) - y;
         }
         target.x = x;
         target.y = y;
     }
 
-    fn transform_rectangle(&self, reference: &Rectangle) -> Rectangle {
-        let mut result = reference.clone();
-        result.x += self.offset.x;
-        result.y += self.offset.y;
-
-        if self.flipped {
-            result.y = self.full_height - result.y - reference.height;
-        }
-        result
-    }
-
-
     fn transform_rectangle_in_place(&self, reference: &mut Rectangle) {
-        let x = reference.x + self.offset.x;
-        let mut y = reference.y + self.offset.y;
+        let mut x = reference.x*(self.scale as f32) + self.offset.x;
+        let mut y = reference.y*(self.scale as f32) + self.offset.y;
+        let mut width = reference.width*(self.scale as f32);
+        let mut height = reference.height*(self.scale as f32);
         if self.flipped {
-            y = self.full_height - y - reference.height;
+            y = self.full_height*(self.scale as f32) - y - height;
         }
         reference.x = x;
         reference.y = y;
+        reference.width = width;
+        reference.height = height;
     }
 
 
@@ -91,7 +92,8 @@ impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
         let mut rec = Rectangle::new(pos.x, pos.y, size.width(), size.height());
         self.transform_rectangle_in_place(&mut rec);
         let pos = Vector2::new(rec.x, rec.y);
-        font.draw_text(self.raylib_draw, text, &pos, 0.0, color);
+        self.raylib_draw.draw_text_ex(&font.font.as_ref(),text,pos,font.size*(self.scale as f32),0.0,color);
+        // font.draw_text(self.raylib_draw, text, &pos, 0.0, color);
     }
 
     pub(crate) fn draw_circle_sector_lines(&mut self, center: &Vector2, radius: f32, start_angle: i32, end_angle: i32, segments: i32, color: Color) {
@@ -121,6 +123,7 @@ impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
 
     pub(crate) fn draw_all_registers(&mut self, parameter: &DrawingPar, width: f32) {
         let width = self.transform_length(&width);
+        let thickness = self.transform_length(&parameter.register_thickness);
         let mut pos_start = Vector2::zero();
         let mut pos_end = Vector2::zero();
 
@@ -134,7 +137,7 @@ impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
             self.transform_vector_in_place(&mut pos_start);
             self.transform_vector_in_place(&mut pos_end);
 
-            self.raylib_draw.draw_line_ex(pos_start, pos_end, parameter.register_thickness, parameter.foreground_color);
+            self.raylib_draw.draw_line_ex(pos_start, pos_end, thickness, parameter.foreground_color);
         }
     }
 
@@ -152,15 +155,15 @@ impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
 
 impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
     pub fn default(raylib_draw: &'a mut T, parameter: &DrawingPar, position: Vector2) -> GuiDrawer<'a, T> {
-        return GuiDrawer::new(raylib_draw, parameter.full_circuit_height(), position, false);
+        return GuiDrawer::new(raylib_draw, parameter.full_circuit_height(), position, false,1);
     }
 
-    pub fn for_texture(raylib_draw: &'a mut T, parameter: &DrawingPar) -> GuiDrawer<'a, T> {
-        let position = Vector2::new(0.0, parameter.register_spacing);
-        return GuiDrawer::new(raylib_draw, parameter.full_circuit_height(), position, true);
+    pub fn for_texture(raylib_draw: &'a mut T, parameter: &DrawingPar, scale:u32) -> GuiDrawer<'a, T> {
+        let position = Vector2::new(0.0, parameter.register_spacing*(scale as f32));
+        return GuiDrawer::new(raylib_draw, parameter.full_circuit_height(), position, true,scale);
     }
 
-    fn new(raylib_draw: &'a mut T, full_height: f32, position: Vector2, flipped: bool) -> Self {
-        Self { raylib_draw, full_height, flipped, point1: Default::default(), offset: position, point2: Default::default(), rectangle: Default::default(), offset_queue: LinkedList::new() }
+    fn new(raylib_draw: &'a mut T, full_height: f32, position: Vector2, flipped: bool, scale:u32) -> Self {
+        Self { raylib_draw, full_height, scale,flipped, point1: Default::default(), offset: position, point2: Default::default(), rectangle: Default::default(), offset_queue: LinkedList::new() }
     }
 }

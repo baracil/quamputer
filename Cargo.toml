@@ -17,7 +17,7 @@ rand= "0.8.3"
 serde={version = "1.0.126", features=["derive"]}
 serde_json = "1.0.64"
 raylib = {version="3.5.0", optional=true}
-rs-gui = {path="../rs-gui", optional=true}
+rsgui = {path="../rsgui", optional=true}
 
 [features]
-gui=["rs-gui", "raylib"]
+gui=["rsgui", "raylib"]

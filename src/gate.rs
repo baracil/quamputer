@@ -24,6 +24,14 @@ pub enum GateWithoutControl {
     Z(u8),
     Swap(u8, u8),
     Hadamard(u8),
+    // Todo
+    // Phase(f64,u8),
+    // S(u8),
+    // T(u8),
+    // Rx(f64,u8)
+    // Ry(f64,u8)
+    // Rzç ˙˙˙˙˙˙                                                                                         (f64,u8)
+
 }
 
 impl GateWithoutControl {
@@ -67,16 +75,16 @@ pub enum Gate {
 impl Into<crate::operation::Gate> for Gate {
     fn into(self) -> crate::operation::Gate {
         match self {
-            Not(t) => crate::operation::Gate { gate: GateWithoutControl::Not(t), control_bits: vec![] },
-            X(t) => crate::operation::Gate { gate: GateWithoutControl::X(t), control_bits: vec![] },
-            Y(t) => crate::operation::Gate { gate: GateWithoutControl::Y(t), control_bits: vec![] },
-            Z(t) => crate::operation::Gate { gate: GateWithoutControl::Z(t), control_bits: vec![] },
-            Swap(t1, t2) => crate::operation::Gate { gate: GateWithoutControl::Swap(t1, t2), control_bits: vec![] },
-            Hadamard(t) => crate::operation::Gate { gate: GateWithoutControl::Hadamard(t), control_bits: vec![] },
-            Gate::CNot(t, c) => crate::operation::Gate { gate: GateWithoutControl::Not(t), control_bits: Vec::from(c) },
-            Gate::Toffoli(t, c) => crate::operation::Gate { gate: GateWithoutControl::Not(t), control_bits: Vec::from(c) },
-            Gate::CSwap(t1, t2, c) => crate::operation::Gate { gate: GateWithoutControl::Swap(t1, t2), control_bits: Vec::from(c) },
-            Gate::Fredkin(t1, t2, c) => crate::operation::Gate { gate: GateWithoutControl::Swap(t1, t2), control_bits: Vec::from(c) },
+            Not(t) => crate::operation::Gate::new(GateWithoutControl::Not(t), vec![]),
+            X(t) => crate::operation::Gate::new(GateWithoutControl::X(t), vec![]),
+            Y(t) => crate::operation::Gate::new( GateWithoutControl::Y(t), vec![] ),
+            Z(t) => crate::operation::Gate::new( GateWithoutControl::Z(t), vec![] ),
+            Swap(t1, t2) => crate::operation::Gate::new( GateWithoutControl::Swap(t1, t2), vec![] ),
+            Hadamard(t) => crate::operation::Gate::new( GateWithoutControl::Hadamard(t), vec![] ),
+            Gate::CNot(t, c) => crate::operation::Gate::new( GateWithoutControl::Not(t), Vec::from(c) ),
+            Gate::Toffoli(t, c) => crate::operation::Gate::new( GateWithoutControl::Not(t), Vec::from(c) ),
+            Gate::CSwap(t1, t2, c) => crate::operation::Gate::new( GateWithoutControl::Swap(t1, t2), Vec::from(c) ),
+            Gate::Fredkin(t1, t2, c) => crate::operation::Gate::new( GateWithoutControl::Swap(t1, t2), Vec::from(c) ),
         }
     }
 }

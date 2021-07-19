@@ -4,7 +4,7 @@ use raylib::math::Vector2;
 use crate::gate::GateWithoutControl;
 use crate::gui::gui_circuit::{GuiGate, GuiGateData};
 use std::panic::panic_any;
-use rs_gui::size::Size;
+use rsgui::size::Size;
 use crate::gui::gui_drawer::GuiDrawer;
 
 impl Drawable for GuiGate {

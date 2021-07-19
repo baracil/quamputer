@@ -1,9 +1,11 @@
 use crate::gui::{Drawable, DrawingPar};
 use raylib::prelude::*;
 use crate::gui::gui_circuit::{GuiCircuit, GuiRoot};
-use rs_gui::gui::GuiData;
+use rsgui::gui::GuiData;
 use crate::gui::gui_drawer::GuiDrawer;
+use num_traits::Inv;
 
+const SCALE:u32 = 1;
 
 impl GuiRoot {
 
@@ -25,14 +27,14 @@ impl GuiRoot {
             return;
         }
 
-        let loading_result =  raylib_handle.load_render_texture(raylib_thread, self.width, self.height);
+        let loading_result =  raylib_handle.load_render_texture(raylib_thread, self.width*SCALE, self.height*SCALE);
         if loading_result.is_err() {
             self.texture = None;
         } else {
             let mut texture = loading_result.unwrap();
             {
                 let mut raylib_draw = raylib_handle.begin_texture_mode(raylib_thread, &mut texture);
-                let mut gui_drawer = GuiDrawer::for_texture(&mut raylib_draw,parameter);
+                let mut gui_drawer = GuiDrawer::for_texture(&mut raylib_draw,parameter,SCALE);
                 self.circuit.draw(&mut gui_drawer, &parameter);
             }
             self.texture = Some(texture)
@@ -47,7 +49,7 @@ impl GuiRoot {
             Some(t) => {
                 let mut texture_pos = pos.clone();
                 texture_pos.y -= parameter.register_spacing;
-                drawer.draw_texture_ex(t,texture_pos,0.0,1.0,Color::WHITE.fade(0.0))
+                drawer.draw_texture_ex(t,texture_pos,0.0,(SCALE as f32).inv(),Color::VIOLET)
             }
         }
     }

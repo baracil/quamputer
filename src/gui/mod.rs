@@ -8,7 +8,7 @@ pub mod gui_drawer;
 
 
 use raylib::prelude::*;
-use rs_gui::font::FontInfo;
+use rsgui::font::FontInfo;
 use crate::gui::gui_circuit::GuiCircuitElement;
 use crate::gui::gui_drawer::GuiDrawer;
 

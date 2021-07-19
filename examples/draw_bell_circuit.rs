@@ -2,7 +2,7 @@ use raylib::prelude::*;
 use quamputer::computer::QuantumComputer;
 use quamputer::gate::Gate::{Fredkin, Toffoli, Hadamard, CNot};
 use quamputer::gui::{ DrawingPar};
-use rs_gui::font::FontInfo;
+use rsgui::font::FontInfo;
 use quamputer::condition::StopCondition::MaxIteration;
 use quamputer::gui::gui_circuit::{ GuiCircuitData, GuiRoot};
 use quamputer::circuit::Circuit;
@@ -18,6 +18,7 @@ fn circuit1(computer:&QuantumComputer) -> Result<Circuit,String> {
 
 
      computer.new_circuit_builder()
+         .apply(Toffoli(2,[1,0]))
         .apply_sub_circuit(circuit, MaxIteration(10))
         .build()
 }
@@ -92,17 +93,16 @@ fn main() -> Result<(), String> {
         {
             need_layout.then(|| {
                 circuit.layout(&parameter);
-                circuit.draw_texture(&parameter,&mut rl, &thread)
             });
             need_layout = false;
         }
 
 
-        match frame_count%120 {
-            0 => circuit.clear_texture(),
-            60 => circuit.draw_texture(&parameter,&mut rl, &thread),
-            _ => {}
-        }
+        // match frame_count%120 {
+        //     0 => circuit.clear_texture(),
+        //     60 => circuit.draw_texture(&parameter,&mut rl, &thread),
+        //     _ => {}
+        // }
 
 
         frame_count+=1;
