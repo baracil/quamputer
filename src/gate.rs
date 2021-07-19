@@ -233,9 +233,14 @@ pub struct MeasureCount {
     pub nb_one: u32,
 }
 
+/// Contains information about the execution
+/// of the quantum circuit
 pub struct ExecutionContext {
+    /// Current quantum state
     current_state: QuantumState,
+    /// Indicates if the quantum state has just been measured
     state: State,
+    /// Measurement results by measurement's id
     count: HashMap<String, MeasureCount>,
 }
 

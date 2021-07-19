@@ -26,6 +26,13 @@ impl QuantumCircuitBuilder {
         self.add_operation(Loop{circuit:circuit.into(), stop_condition: loop_condition })
     }
 
+    /// Add a measurement operation that will measure a given qbits.
+    /// After measurement, the quantum state is in the measured state (there is no superposition)
+    /// # Arguments
+    /// - id : an id that can be used for further reference in [`StopCondition`]
+    ///
+    ///
+    /// [`StopCondition`]: condition/StopCondition
     pub fn add_measure(&mut self, id:&str, qbit_target:u8) -> &mut QuantumCircuitBuilder {
         self.add_operation(Measure{id:id.to_string(), qbit_target })
     }

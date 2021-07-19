@@ -2,6 +2,7 @@ use crate::gate::ExecutionContext;
 use serde::{Serialize,Deserialize};
 
 
+/// Variants used to define the stop condition in a loop.
 #[derive(Clone, Serialize, Deserialize)]
 pub enum StopCondition {
     /// Condition that stops the loop after the first iteration
@@ -19,6 +20,12 @@ pub enum StopCondition {
 
 impl StopCondition {
 
+    /// Check if the current context match this condition
+    ///
+    /// # Arguments
+    ///
+    /// - nb_iterations : the current number of iterations of the loop
+    /// - context : the execution context of the quantum program
     pub fn is_end_of_loop(&self, nb_iterations: u32, context: &ExecutionContext) -> bool {
         match self {
             StopCondition::Once() => nb_iterations>=1,
