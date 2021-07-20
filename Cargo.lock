@@ -122,6 +122,7 @@ dependencies = [
 name = "quamputer"
 version = "0.1.0"
 dependencies = [
+ "generational-arena",
  "num-complex",
  "num-traits",
  "rand",
@@ -129,6 +130,7 @@ dependencies = [
  "rsgui",
  "serde",
  "serde_json",
+ "vec-tree",
 ]
 
 [[package]]

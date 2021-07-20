@@ -2,66 +2,71 @@ use crate::gui::{Drawable, DrawingPar, draw_all_registers, HEIGHT_SPACING_RATIO}
 use raylib::drawing::RaylibDraw;
 use raylib::math::Vector2;
 use crate::gate::GateWithoutControl;
-use crate::gui::gui_circuit::{GuiGate, GuiGateData};
+use crate::gui::gui_circuit::{GuiGate, GuiGateData, GuiCircuitElement};
 use std::panic::panic_any;
 use rsgui::size::Size;
 use crate::gui::gui_drawer::GuiDrawer;
+use vec_tree::VecTree;
 
 impl Drawable for GuiGate {
-    fn layout(&mut self, parameter: &DrawingPar) -> f32 {
+    fn layout(&self, parameter: &DrawingPar, tree: &VecTree<GuiCircuitElement>) -> f32 {
         let gate_size = self.gate.width(parameter);
         let gate_y_center = self.gate.y_middle(parameter);
         let text = self.gate.text();
 
-        self.gui_data.text = text;
-        match &self.gui_data.text {
+        let mut data = GuiGateData::default();
+        data.text = text;
+
+        match &data.text {
             None => {
-                self.gui_data.outline.width = 0.0;
-                self.gui_data.outline.height = 0.0;
-                self.gui_data.text_size = Size::new(0.0, 0.0);
-                self.gui_data.text_position = Vector2::default();
+               data.outline.width = 0.0;
+               data.outline.height = 0.0;
+               data.text_size = Size::new(0.0, 0.0);
+               data.text_position = Vector2::default();
             }
             Some(t) => {
                 let size = parameter.font.measure_text(t, 0.0);
-                self.gui_data.outline.x = parameter.margin;
-                self.gui_data.outline.y = gate_y_center - gate_size * 0.5;
-                self.gui_data.outline.width = gate_size;
-                self.gui_data.outline.height = gate_size;
-                self.gui_data.text_size = size;
-                self.gui_data.text_position.x = self.gui_data.outline.x + (self.gui_data.outline.width - size.width()) * 0.5;
-                self.gui_data.text_position.y = self.gui_data.outline.y + (self.gui_data.outline.height - size.height()) * 0.5;
+                data.outline.x = parameter.margin;
+                data.outline.y = gate_y_center - gate_size * 0.5;
+                data.outline.width = gate_size;
+                data.outline.height = gate_size;
+                data.text_size = size;
+                data.text_position.x = data.outline.x + (data.outline.width - size.width()) * 0.5;
+                data.text_position.y = data.outline.y + (data.outline.height - size.height()) * 0.5;
             }
         }
 
         let width = 2.0 * parameter.margin + gate_size;
-        self.gui_data.width = width;
-        self.gui_data.center.x = parameter.margin + gate_size * 0.5;
-        self.gui_data.center.y = gate_y_center;
-        self.gui_data.gate_size = gate_size;
+        data.width = width;
+        data.center.x = parameter.margin + gate_size * 0.5;
+        data.center.y = gate_y_center;
+        data.gate_size = gate_size;
+
+        self.gui_data.replace(data);
         width
     }
 
-    fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter: &DrawingPar) {
-        let width = self.gui_data.width;
+    fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter: &DrawingPar, tree: &VecTree<GuiCircuitElement>) {
+        let width = self.gui_data.borrow().width;
 
         drawer.draw_all_registers(parameter, width);
 
         self.draw_control_qbits(drawer, parameter, &self.control_bits);
 
 
-        self.gate.draw(drawer, parameter, &self.gui_data);
+        self.gate.draw(drawer, parameter, &self.gui_data.borrow());
     }
 }
 
 impl GuiGate {
     fn draw_control_qbits<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter: &DrawingPar, control_bits: &[u8]) {
-        let mut cpos_end = self.gui_data.center.clone();
+        let mut cpos_end = self.gui_data.borrow().center.clone();
         let radius = parameter.register_spacing * 0.06;
 
         for control_bit in control_bits {
             cpos_end.y = parameter.qbit_y_offset(*control_bit);
 
-            drawer.draw_line_ex(&self.gui_data.center, &cpos_end, parameter.register_thickness, parameter.foreground_color);
+            drawer.draw_line_ex(&self.gui_data.borrow().center, &cpos_end, parameter.register_thickness, parameter.foreground_color);
             drawer.draw_circle_v(&cpos_end, radius, parameter.foreground_color);
         }
     }

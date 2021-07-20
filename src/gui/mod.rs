@@ -11,6 +11,7 @@ use raylib::prelude::*;
 use rsgui::font::FontInfo;
 use crate::gui::gui_circuit::GuiCircuitElement;
 use crate::gui::gui_drawer::GuiDrawer;
+use vec_tree::VecTree;
 
 const HEIGHT_SPACING_RATIO:f32 = 0.6;
 
@@ -68,25 +69,25 @@ impl DrawingPar {
 
 pub trait Drawable {
     /// Layout its content and return the width it will use
-    fn layout(&mut self,parameter:&DrawingPar) -> f32;
-    fn draw<T:RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter:&DrawingPar) ;
+    fn layout(&self, parameter:&DrawingPar, tree: &VecTree<GuiCircuitElement>) -> f32;
+    fn draw<T:RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter:&DrawingPar, tree: &VecTree<GuiCircuitElement>) ;
 }
 
 impl Drawable for GuiCircuitElement {
 
-    fn layout(&mut self, parameter: &DrawingPar) -> f32 {
+    fn layout(&self, parameter: &DrawingPar, tree: &VecTree<GuiCircuitElement>) -> f32 {
         match self {
-            GuiCircuitElement::GuiLoop(p) => p.layout(parameter),
-            GuiCircuitElement::GuiGate(p) => p.layout(parameter),
-            GuiCircuitElement::GuiMeasure(p) => p.layout(parameter)
+            GuiCircuitElement::GuiLoop(p) => p.layout(parameter,tree),
+            GuiCircuitElement::GuiGate(p) => p.layout(parameter,tree),
+            GuiCircuitElement::GuiMeasure(p) => p.layout(parameter,tree)
         }
     }
 
-    fn draw<T:RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter:&DrawingPar) {
+    fn draw<T:RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter:&DrawingPar, tree: &VecTree<GuiCircuitElement>) {
         match self {
-            GuiCircuitElement::GuiLoop(p) => p.draw(drawer, parameter),
-            GuiCircuitElement::GuiGate(p) => p.draw(drawer, parameter),
-            GuiCircuitElement::GuiMeasure(p) => p.draw(drawer, parameter),
+            GuiCircuitElement::GuiLoop(p) => p.draw(drawer, parameter,tree),
+            GuiCircuitElement::GuiGate(p) => p.draw(drawer, parameter,tree),
+            GuiCircuitElement::GuiMeasure(p) => p.draw(drawer, parameter,tree),
         }
     }
 

@@ -6,6 +6,10 @@ use raylib::prelude::{Vector2, Color, RenderTexture2D};
 use std::ops::{Deref, DerefMut};
 use raylib::math::Rectangle;
 use rsgui::size::Size;
+use generational_arena::Index;
+use vec_tree::VecTree;
+use crate::N;
+use std::cell::{Cell, RefCell};
 
 ///Common data to all gui element
 #[derive(Clone, Default)]
@@ -31,6 +35,7 @@ pub struct GuiLoopData {
     pub outline:Rectangle,
     ///the background color of the loop
     pub outline_background:Color,
+    pub margin:f32,
 }
 
 ///Graphical data for a gate element
@@ -57,42 +62,70 @@ pub struct GuiMeasureData {
 pub struct GuiRoot {
     pub width:u32,
     pub height:u32,
-    pub circuit:GuiCircuit,
-    pub texture:Option<RenderTexture2D>
+    pub tree:VecTree<GuiCircuitElement>,
 }
 
 impl GuiRoot {
 
-    pub fn new(circuit:GuiCircuit) -> Self {
-        return GuiRoot{circuit, texture:None, width:0,height:0}
+    pub fn new(circuit:&Circuit) -> Self {
+        let gui_loop:GuiCircuitElement = circuit.into();
+        let mut tree = VecTree::new();
+
+        let root_index = tree.insert_root(gui_loop);
+        tree.get_mut(root_index).unwrap().set_index(root_index);
+
+        let mut root = GuiRoot{tree, width:0,height:0};
+
+        for element in &circuit.elements {
+            root.add(element,root_index);
+        };
+
+        root
+    }
+
+    fn add(&mut self,element:&CircuitElement,parent:Index) {
+        let gui_element = element.into();
+        let index = self.tree.insert(gui_element,parent);
+        self.tree.get_mut(index).unwrap().set_index(index);
+        match element {
+            CircuitElement::Loop(l) => {
+                for x in &l.circuit.elements {
+                    self.add(x,index)
+                }}
+            CircuitElement::Gate(g) => {}
+            CircuitElement::Measure(m) => {}
+        };
     }
 
 }
 
 #[derive(Clone)]
 pub struct GuiCircuit {
-    pub gui_data:GuiCircuitData,
+    pub gui_data:RefCell<GuiCircuitData>,
     pub nb_qbits:u8,
-    pub elements:Vec<GuiCircuitElement>,
 }
 
 #[derive(Clone)]
 pub struct GuiLoop {
-    pub gui_data:GuiLoopData,
+    pub index:Option<Index>,
+    pub gui_data:RefCell<GuiLoopData>,
     pub circuit:GuiCircuit,
     pub stop_condition:StopCondition,
+    pub raw_circuit:bool,
 }
 
 #[derive(Clone)]
 pub struct GuiGate {
-    pub gui_data:GuiGateData,
+    pub index:Option<Index>,
+    pub gui_data:RefCell<GuiGateData>,
     pub gate:GateWithoutControl,
     pub control_bits:Vec<u8>,
 }
 
 #[derive(Clone)]
 pub struct GuiMeasure {
-    pub gui_data:GuiMeasureData,
+    pub index:Option<Index>,
+    pub gui_data:RefCell<GuiMeasureData>,
     ///A uniq identifier of the measurement
     pub id:String,
     ///the target qbit for the measurement
@@ -108,11 +141,19 @@ pub enum GuiCircuitElement {
 }
 
 impl GuiCircuitElement {
-    pub(crate) fn gui_data(&self) -> &CommonGuiData {
+    pub(crate) fn width(&self) -> f32 {
         match self {
-            GuiCircuitElement::GuiLoop(p) => &p.gui_data.common,
-            GuiCircuitElement::GuiGate(p) => &p.gui_data.common,
-            GuiCircuitElement::GuiMeasure(p) => &p.gui_data.common,
+            GuiCircuitElement::GuiLoop(p) => p.gui_data.borrow().common.width,
+            GuiCircuitElement::GuiGate(p) => p.gui_data.borrow().common.width,
+            GuiCircuitElement::GuiMeasure(p) => p.gui_data.borrow().common.width,
+        }
+    }
+
+    pub(crate) fn set_index(&mut self, index:Index) {
+        match self {
+            GuiCircuitElement::GuiLoop(p) => p.index = Some(index),
+            GuiCircuitElement::GuiGate(p) => p.index = Some(index),
+            GuiCircuitElement::GuiMeasure(p) => p.index = Some(index),
         }
     }
 }
@@ -166,35 +207,18 @@ impl DerefMut for GuiMeasureData {
     }
 }
 
-impl From<GuiLoop> for GuiCircuitElement {
-    fn from(l: GuiLoop) -> Self {
-        GuiCircuitElement::GuiLoop(l)
-    }
-}
-impl From<GuiGate> for GuiCircuitElement {
-    fn from(g: GuiGate) -> Self {
-        GuiCircuitElement::GuiGate(g)
-    }
-}
-impl From<GuiMeasure> for GuiCircuitElement {
-    fn from(m: GuiMeasure) -> Self {
-        GuiCircuitElement::GuiMeasure(m)
-    }
-}
-
-
-impl From<&Circuit> for GuiCircuit {
-    fn from(circuit: &Circuit) -> Self {
-        let elements = circuit.elements.iter().map(|i| {i.into()}).collect();
-        GuiCircuit{ gui_data:Default::default(),nb_qbits:circuit.nb_qbits, elements }
-    }
-}
 impl From<Circuit> for GuiCircuit {
-    fn from(circuit: Circuit) -> Self {
-        let elements = circuit.elements.iter().map(|i| {i.into()}).collect();
-        GuiCircuit{ gui_data:Default::default(),nb_qbits:circuit.nb_qbits, elements }
+    fn from(c: Circuit) -> Self {
+        GuiCircuit{gui_data:RefCell::new(GuiCircuitData::default()),nb_qbits:c.nb_qbits}
     }
 }
+impl From<&Circuit> for GuiCircuit {
+    fn from(c: &Circuit) -> Self {
+        GuiCircuit{gui_data:RefCell::new(GuiCircuitData::default()),nb_qbits:c.nb_qbits}
+    }
+}
+
+
 impl From<&CircuitElement> for GuiCircuitElement {
     fn from(element: &CircuitElement) -> Self {
         match element {
@@ -204,59 +228,113 @@ impl From<&CircuitElement> for GuiCircuitElement {
         }
     }
 }
+
+
 impl From<&Loop> for GuiCircuitElement {
     fn from(l: &Loop) -> Self {
-        let gui_circuit = (&l.circuit).into();
-        GuiLoop{ gui_data:Default::default(),circuit:gui_circuit, stop_condition:l.stop_condition.clone()}.into()
+        let gui_circuit = l.circuit.clone().into();
+        let gui_loop = GuiLoop{index:None,raw_circuit:false,gui_data:RefCell::new(GuiLoopData::default()),circuit:gui_circuit,stop_condition:l.stop_condition.clone()};
+        return GuiCircuitElement::GuiLoop(gui_loop)
     }
 }
+
+impl From<Circuit> for GuiCircuitElement {
+    fn from(c: Circuit) -> Self {
+        let mut gui_loop = GuiLoop{index:None,raw_circuit:true,gui_data:RefCell::new(GuiLoopData::default()),circuit:c.into(),stop_condition:StopCondition::Once()};
+        return GuiCircuitElement::GuiLoop(gui_loop)
+    }
+}
+
+impl From<&Circuit> for GuiCircuitElement {
+    fn from(c: &Circuit) -> Self {
+        let mut gui_loop = GuiLoop{index:None,raw_circuit:true,gui_data:RefCell::new(GuiLoopData::default()),circuit:c.into(),stop_condition:StopCondition::Once()};
+        return GuiCircuitElement::GuiLoop(gui_loop)
+    }
+}
+
 impl From<&Gate> for GuiCircuitElement {
     fn from(g: &Gate) -> Self {
-        GuiGate{ gui_data:Default::default(),gate:g.gate,control_bits:g.control_bits.clone()}.into()
+        let gui_gate = GuiGate{index:None,gui_data:RefCell::new(GuiGateData::default()),control_bits:g.control_bits.clone(),gate:g.gate};
+        GuiCircuitElement::GuiGate(gui_gate)
     }
 }
+
 impl From<&Measure> for GuiCircuitElement {
     fn from(m: &Measure) -> Self {
-        GuiMeasure{ gui_data:Default::default(),id:m.id.clone(), target:m.qbit_target }.into()
+        let gui_measure = GuiMeasure{index:None,gui_data:RefCell::new(GuiMeasureData::default()),target:m.qbit_target,id:m.id.clone()};
+        GuiCircuitElement::GuiMeasure(gui_measure)
     }
 }
 
 
 
-impl From<GuiCircuit> for Circuit {
-    fn from(gc: GuiCircuit) -> Self {
-        todo!()
-    }
-}
-impl From<&GuiCircuit> for Circuit {
-    fn from(gc: &GuiCircuit) -> Self {
-        todo!()
-    }
-}
-impl From<&GuiCircuitElement> for CircuitElement {
-    fn from(element: &GuiCircuitElement) -> Self {
-        match element {
-            GuiCircuitElement::GuiLoop(l) => l.into(),
-            GuiCircuitElement::GuiGate(g) => g.into(),
-            GuiCircuitElement::GuiMeasure(m) => m.into(),
-        }
-    }
-}
-impl From<&GuiLoop> for CircuitElement {
-    fn from(l: &GuiLoop) -> Self {
-        Loop{circuit:(&l.circuit).into(),stop_condition:l.stop_condition.clone()}.into()
-    }
-}
-impl From<&GuiGate> for CircuitElement {
-    fn from(g: &GuiGate) -> Self {
-        Gate{gate:g.gate.clone(),control_bits:g.control_bits.clone()}.into()
-    }
-}
-impl From<&GuiMeasure> for CircuitElement {
-    fn from(m: &GuiMeasure) -> Self {
-        Measure{ qbit_target:m.target, id:m.id.clone()}.into()
-    }
-}
-
+//
+//
+// impl From<&Circuit> for GuiCircuit {
+//     fn from(circuit: &Circuit) -> Self {
+//         let elements = circuit.elements.iter().map(|i| {i.into()}).collect();
+//         GuiCircuit{ gui_data:Default::default(),nb_qbits:circuit.nb_qbits, elements }
+//     }
+// }
+// impl From<Circuit> for GuiCircuit {
+//     fn from(circuit: Circuit) -> Self {
+//         let elements = circuit.elements.iter().map(|i| {i.into()}).collect();
+//         GuiCircuit{ gui_data:Default::default(),nb_qbits:circuit.nb_qbits, elements }
+//     }
+// }
+// impl From<&Loop> for GuiCircuitElement {
+//     fn from(l: &Loop) -> Self {
+//         let gui_circuit = (&l.circuit).into();
+//         GuiLoop{ gui_data:Default::default(),circuit:gui_circuit, stop_condition:l.stop_condition.clone()}.into()
+//     }
+// }
+// impl From<&Gate> for GuiCircuitElement {
+//     fn from(g: &Gate) -> Self {
+//         GuiGate{ gui_data:Default::default(),gate:g.gate,control_bits:g.control_bits.clone()}.into()
+//     }
+// }
+// impl From<&Measure> for GuiCircuitElement {
+//     fn from(m: &Measure) -> Self {
+//         GuiMeasure{ gui_data:Default::default(),id:m.id.clone(), target:m.qbit_target }.into()
+//     }
+// }
+//
+//
+//
+// impl From<GuiCircuit> for Circuit {
+//     fn from(gc: GuiCircuit) -> Self {
+//         todo!()
+//     }
+// }
+// impl From<&GuiCircuit> for Circuit {
+//     fn from(gc: &GuiCircuit) -> Self {
+//         todo!()
+//     }
+// }
+// impl From<&GuiCircuitElement> for CircuitElement {
+//     fn from(element: &GuiCircuitElement) -> Self {
+//         match element {
+//             GuiCircuitElement::GuiLoop(l) => l.into(),
+//             GuiCircuitElement::GuiGate(g) => g.into(),
+//             GuiCircuitElement::GuiMeasure(m) => m.into(),
+//         }
+//     }
+// }
+// impl From<&GuiLoop> for CircuitElement {
+//     fn from(l: &GuiLoop) -> Self {
+//         Loop{circuit:(&l.circuit).into(),stop_condition:l.stop_condition.clone()}.into()
+//     }
+// }
+// impl From<&GuiGate> for CircuitElement {
+//     fn from(g: &GuiGate) -> Self {
+//         Gate{gate:g.gate.clone(),control_bits:g.control_bits.clone()}.into()
+//     }
+// }
+// impl From<&GuiMeasure> for CircuitElement {
+//     fn from(m: &GuiMeasure) -> Self {
+//         Measure{ qbit_target:m.target, id:m.id.clone()}.into()
+//     }
+// }
+//
 
 

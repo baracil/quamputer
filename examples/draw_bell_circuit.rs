@@ -43,7 +43,7 @@ fn main() -> Result<(), String> {
 
     let computer = QuantumComputer::new(6);
 
-    let mut circuit  = GuiRoot::new(circuit1(&computer)?.into());
+    let mut circuit  = GuiRoot::new(&circuit1(&computer)?);
 
     let mut camera_manager = CameraManager::default();
 
@@ -112,7 +112,7 @@ fn main() -> Result<(), String> {
         d.clear_background(parameter.background_color);
         {
             let mut d = d.begin_mode2D(camera);
-            circuit.draw(&mut GuiDrawer::default(&mut d, &parameter,Vector2::zero()), offset, &parameter);
+            circuit.draw(&mut GuiDrawer::default(&mut d, &parameter,Vector2::zero()), &parameter);
         }
 
 

@@ -66,7 +66,7 @@ fn handle_mouse_wheel(rl:&RaylibHandle, camera:&mut Camera2D) {
     }
 
     let old_zoom = camera.zoom;
-    let zoom = (old_zoom * 1.2_f32.powf(wheel as f32)).clamp(0.1,2.0);
+    let zoom = (old_zoom * 1.2_f32.powf(wheel as f32)).clamp(0.1,4.0);
 
     let zoom_factor = zoom/old_zoom;
     let mouse_position = rl.get_screen_to_world2D(rl.get_mouse_position(),*camera);
