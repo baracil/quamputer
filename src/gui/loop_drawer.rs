@@ -1,9 +1,7 @@
-use crate::gui::{Drawable, DrawingPar, draw_all_registers};
+use crate::gui::{Drawable, DrawingPar};
 use raylib::drawing::RaylibDraw;
-use raylib::math::{Vector2};
-use crate::gui::gui_circuit::{GuiLoop, GuiCircuitElement, GuiCircuit, GuiLoopData};
+use crate::gui::gui_circuit::{GuiLoop, GuiCircuitElement, GuiLoopData};
 use crate::gui::gui_drawer::GuiDrawer;
-use std::panic::panic_any;
 use raylib::color::Color;
 use vec_tree::VecTree;
 

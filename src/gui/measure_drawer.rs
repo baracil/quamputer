@@ -1,4 +1,4 @@
-use crate::gui::{Drawable, DrawingPar, draw_all_registers, HEIGHT_SPACING_RATIO};
+use crate::gui::{Drawable, DrawingPar, HEIGHT_SPACING_RATIO};
 use raylib::prelude::*;
 use crate::gui::gui_circuit::{GuiMeasure, GuiCircuitElement, GuiMeasureData};
 use crate::gui::gui_drawer::GuiDrawer;
@@ -7,7 +7,8 @@ use vec_tree::VecTree;
 const GOLDEN_RATIO:f32 = 1.618033988749894;
 
 impl Drawable for GuiMeasure {
-    fn layout(&self, parameter: &DrawingPar, tree: &VecTree<GuiCircuitElement>) -> f32 {
+
+    fn layout(&self, parameter: &DrawingPar, _tree: &VecTree<GuiCircuitElement>) -> f32 {
         let gate_height = parameter.register_spacing * HEIGHT_SPACING_RATIO ;
         let gate_width = gate_height*GOLDEN_RATIO;
 
@@ -27,7 +28,7 @@ impl Drawable for GuiMeasure {
     }
 
 
-    fn draw<T:RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter:&DrawingPar, tree: &VecTree<GuiCircuitElement>) {
+    fn draw<T:RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter:&DrawingPar, _tree: &VecTree<GuiCircuitElement>) {
         drawer.draw_all_registers(parameter,self.gui_data.borrow().width);
 
         drawer.draw_rectangle_rec(&self.gui_data.borrow().outline,Color::BLACK);

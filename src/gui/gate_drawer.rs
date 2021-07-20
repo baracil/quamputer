@@ -1,15 +1,14 @@
-use crate::gui::{Drawable, DrawingPar, draw_all_registers, HEIGHT_SPACING_RATIO};
+use crate::gui::{Drawable, DrawingPar, HEIGHT_SPACING_RATIO};
 use raylib::drawing::RaylibDraw;
 use raylib::math::Vector2;
 use crate::gate::GateWithoutControl;
 use crate::gui::gui_circuit::{GuiGate, GuiGateData, GuiCircuitElement};
-use std::panic::panic_any;
 use rsgui::size::Size;
 use crate::gui::gui_drawer::GuiDrawer;
 use vec_tree::VecTree;
 
 impl Drawable for GuiGate {
-    fn layout(&self, parameter: &DrawingPar, tree: &VecTree<GuiCircuitElement>) -> f32 {
+    fn layout(&self, parameter: &DrawingPar, _tree: &VecTree<GuiCircuitElement>) -> f32 {
         let gate_size = self.gate.width(parameter);
         let gate_y_center = self.gate.y_middle(parameter);
         let text = self.gate.text();
@@ -46,7 +45,7 @@ impl Drawable for GuiGate {
         width
     }
 
-    fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter: &DrawingPar, tree: &VecTree<GuiCircuitElement>) {
+    fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter: &DrawingPar, _tree: &VecTree<GuiCircuitElement>) {
         let width = self.gui_data.borrow().width;
 
         drawer.draw_all_registers(parameter, width);
@@ -123,8 +122,6 @@ impl GateWithoutControl {
 
 
 fn draw_gate_with_text<T: RaylibDraw>(drawer: &mut GuiDrawer<T>, parameter: &DrawingPar, gui_data: &GuiGateData) {
-    let mut gate = gui_data.outline.clone();
-
     drawer.draw_rectangle_rec(&gui_data.outline, parameter.background_color);
     drawer.draw_rectangle_lines_ex(&gui_data.outline, parameter.register_thickness as i32, parameter.foreground_color);
 

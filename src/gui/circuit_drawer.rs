@@ -1,12 +1,7 @@
 use crate::gui::{Drawable, DrawingPar};
 use raylib::prelude::*;
-use crate::gui::gui_circuit::{GuiCircuit, GuiRoot, GuiCircuitElement};
-use rsgui::gui::GuiData;
+use crate::gui::gui_circuit::{GuiRoot, GuiCircuitElement};
 use crate::gui::gui_drawer::GuiDrawer;
-use num_traits::Inv;
-use vec_tree::VecTree;
-
-const SCALE: u32 = 1;
 
 impl GuiRoot {
     pub fn layout(&mut self, parameter: &DrawingPar) {
@@ -18,7 +13,7 @@ impl GuiRoot {
             return;
         }
         let root_index = root_index.unwrap();
-        let mut root = self.tree.get(root_index).unwrap();
+        let root = self.tree.get(root_index).unwrap();
 
         let width = root.layout(parameter, &self.tree);
         let height = parameter.full_circuit_height();

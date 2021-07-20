@@ -2,14 +2,13 @@ use crate::condition::StopCondition;
 use crate::gate::{GateWithoutControl};
 use crate::circuit::Circuit;
 use crate::operation::{CircuitElement, Loop, Gate, Measure};
-use raylib::prelude::{Vector2, Color, RenderTexture2D};
+use raylib::prelude::{Vector2, Color};
 use std::ops::{Deref, DerefMut};
 use raylib::math::Rectangle;
 use rsgui::size::Size;
 use generational_arena::Index;
 use vec_tree::VecTree;
-use crate::N;
-use std::cell::{Cell, RefCell};
+use std::cell::{ RefCell};
 
 ///Common data to all gui element
 #[derive(Clone, Default)]
@@ -92,8 +91,8 @@ impl GuiRoot {
                 for x in &l.circuit.elements {
                     self.add(x,index)
                 }}
-            CircuitElement::Gate(g) => {}
-            CircuitElement::Measure(m) => {}
+            CircuitElement::Gate(_) => {}
+            CircuitElement::Measure(_) => {}
         };
     }
 
@@ -240,14 +239,14 @@ impl From<&Loop> for GuiCircuitElement {
 
 impl From<Circuit> for GuiCircuitElement {
     fn from(c: Circuit) -> Self {
-        let mut gui_loop = GuiLoop{index:None,raw_circuit:true,gui_data:RefCell::new(GuiLoopData::default()),circuit:c.into(),stop_condition:StopCondition::Once()};
+        let gui_loop = GuiLoop{index:None,raw_circuit:true,gui_data:RefCell::new(GuiLoopData::default()),circuit:c.into(),stop_condition:StopCondition::Once()};
         return GuiCircuitElement::GuiLoop(gui_loop)
     }
 }
 
 impl From<&Circuit> for GuiCircuitElement {
     fn from(c: &Circuit) -> Self {
-        let mut gui_loop = GuiLoop{index:None,raw_circuit:true,gui_data:RefCell::new(GuiLoopData::default()),circuit:c.into(),stop_condition:StopCondition::Once()};
+        let gui_loop = GuiLoop{index:None,raw_circuit:true,gui_data:RefCell::new(GuiLoopData::default()),circuit:c.into(),stop_condition:StopCondition::Once()};
         return GuiCircuitElement::GuiLoop(gui_loop)
     }
 }

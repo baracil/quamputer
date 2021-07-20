@@ -93,17 +93,3 @@ impl Drawable for GuiCircuitElement {
 
 }
 
-
-/// Draw all registers at the given position.
-pub(crate) fn draw_all_registers(drawer: &mut impl RaylibDraw, pos: Vector2, parameter:&DrawingPar, width:f32) {
-    let mut pos_start = pos.clone();
-    let mut pos_end = pos.clone();
-    pos_end.x = pos_start.x+width;
-
-    for i in 0..parameter.nb_qbits {
-        pos_start.y = pos.y + (i as f32) * parameter.register_spacing;
-        pos_end.y = pos.y + (i as f32) * parameter.register_spacing;
-
-        drawer.draw_line_ex(pos_start, pos_end, parameter.register_thickness, parameter.foreground_color);
-    }
-}

@@ -1,10 +1,6 @@
 use raylib::RaylibHandle;
 use raylib::camera::Camera2D;
-use raylib::consts::KeyboardKey;
 use raylib::math::Vector2;
-use crate::gui::DrawingPar;
-use rsgui::mouse::MouseState;
-use std::sync::atomic::compiler_fence;
 
 
 #[derive(Default)]
@@ -70,14 +66,6 @@ fn handle_mouse_wheel(rl:&RaylibHandle, camera:&mut Camera2D) {
 
     let zoom_factor = zoom/old_zoom;
     let mouse_position = rl.get_screen_to_world2D(rl.get_mouse_position(),*camera);
-
-
-    // var factor = GetZoomFactor(mouseState);
-    // var mouseInWorld = GetScreenToWorld2D(mouseState.MousePosition, _editorData.Camera);
-    // _editorData.CameraZoom *= factor;
-    // _editorData.CameraTarget = (_editorData.CameraTarget - mouseInWorld) / factor + mouseInWorld;
-
-
 
     camera.target.x = (camera.target.x - mouse_position.x)/zoom_factor + mouse_position.x;
     camera.target.y = (camera.target.y - mouse_position.y)/zoom_factor + mouse_position.y;

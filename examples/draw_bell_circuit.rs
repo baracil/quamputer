@@ -4,7 +4,7 @@ use quamputer::gate::StandardGate::{Fredkin, Toffoli, Hadamard, CNot};
 use quamputer::gui::{ DrawingPar};
 use rsgui::font::FontInfo;
 use quamputer::condition::StopCondition::MaxIteration;
-use quamputer::gui::gui_circuit::{ GuiCircuitData, GuiRoot};
+use quamputer::gui::gui_circuit::{ GuiRoot};
 use quamputer::circuit::Circuit;
 use quamputer::gui::camera_manager::CameraManager;
 use quamputer::gui::gui_drawer::GuiDrawer;
@@ -23,7 +23,7 @@ fn circuit1(computer:&QuantumComputer) -> Result<Circuit,String> {
         .build()
 }
 
-fn circuit2(computer:&QuantumComputer) -> Result<Circuit,String> {
+fn _circuit2(computer:&QuantumComputer) -> Result<Circuit,String> {
     computer.new_circuit_builder()
         .add_operation(Hadamard(0))
         .add_operation(CNot(1, [0]))
@@ -70,15 +70,12 @@ fn main() -> Result<(), String> {
         margin: 20.0,
     };
 
-    let offset = Vector2::zero();
-
     let mut screen_size = (rl.get_screen_width(), rl.get_screen_height());
 
     let mut need_layout = true;
 
 
 
-    let mut frame_count:u64 = 0;
     while !rl.window_should_close() {
 
         if rl.is_window_resized() {
@@ -97,15 +94,6 @@ fn main() -> Result<(), String> {
             need_layout = false;
         }
 
-
-        // match frame_count%120 {
-        //     0 => circuit.clear_texture(),
-        //     60 => circuit.draw_texture(&parameter,&mut rl, &thread),
-        //     _ => {}
-        // }
-
-
-        frame_count+=1;
 
         let mut d = rl.begin_drawing(&thread);
 
