@@ -1,5 +1,5 @@
+use crate::execution::ExecutionContext;
 use crate::state::QuantumState;
-use crate::gate::ExecutionContext;
 
 pub fn apply_controlled_swap(control_qbits: &[u8], target1: u8, target2: u8, context: &mut ExecutionContext) {
     let control_mask = context.control_mask(control_qbits);
@@ -27,15 +27,12 @@ pub fn apply_controlled_swap(control_qbits: &[u8], target1: u8, target2: u8, con
 
 #[cfg(test)]
 mod tests_not {
-    
-
-    use num_complex::{Complex64};
+    use num_complex::Complex64;
     use num_traits::identities::One;
     use num_traits::Zero;
 
     use crate::state::QuantumState;
-    use crate::gate::ExecutionContext;
-    
+
     use super::*;
 
     #[test]

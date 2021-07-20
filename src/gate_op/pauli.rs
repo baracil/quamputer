@@ -1,7 +1,9 @@
-use crate::state::QuantumState;
-use num_complex::Complex64;
 use std::ops::Mul;
-use crate::gate::ExecutionContext;
+
+use num_complex::Complex64;
+
+use crate::state::QuantumState;
+use crate::execution::ExecutionContext;
 
 pub fn apply_controlled_pauli_z(control_qbits: &[u8], target: u8, context: &mut ExecutionContext) {
     let control_mask = context.control_mask(control_qbits);
@@ -77,10 +79,12 @@ pub fn apply_controlled_pauli_x(control_qbits: &[u8], target: u8, context: &mut 
 
 #[cfg(test)]
 mod tests_pauli {
-    use super::*;
-    use std::ops::{Neg};
-    use num_traits::Zero;
+    use std::ops::Neg;
+
     use num_traits::One;
+    use num_traits::Zero;
+
+    use super::*;
 
     #[test]
     fn pauli_y_test_on_0() {
@@ -153,15 +157,13 @@ mod tests_pauli {
 
 #[cfg(test)]
 mod tests_not {
-    
-
     use num_complex::{Complex, Complex64};
     use num_traits::identities::One;
     use num_traits::Zero;
 
+    use crate::gate_op::pauli::apply_controlled_pauli_x;
     use crate::state::QuantumState;
-    use crate::gate::ExecutionContext;
-    use crate::gate_op::pauli::{apply_controlled_pauli_x};
+    use crate::execution::ExecutionContext;
 
     #[test]
     fn not_test_on_zero() {
@@ -217,15 +219,13 @@ mod tests_not {
 
 #[cfg(test)]
 mod tests_toffoli {
-    
-
     use num_complex::{Complex, Complex64};
     use num_traits::identities::One;
     use num_traits::Zero;
 
-    use crate::state::QuantumState;
-    use crate::gate::ExecutionContext;
     use crate::gate_op::pauli::apply_controlled_pauli_x;
+    use crate::state::QuantumState;
+    use crate::execution::ExecutionContext;
 
     #[test]
     fn toffoli_test_on_zero() {

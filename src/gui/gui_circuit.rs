@@ -1,7 +1,6 @@
 use crate::condition::StopCondition;
-use crate::gate::{GateWithoutControl};
 use crate::circuit::Circuit;
-use crate::operation::{CircuitElement, Loop, Gate, Measure};
+use crate::operation::{CircuitElement, Loop, Measure};
 use raylib::prelude::{Vector2, Color};
 use std::ops::{Deref, DerefMut};
 use raylib::math::Rectangle;
@@ -9,6 +8,8 @@ use rsgui::size::Size;
 use generational_arena::Index;
 use vec_tree::VecTree;
 use std::cell::{ RefCell};
+use crate::gate_without_control::GateWithoutControl;
+use crate::gate::Gate;
 
 ///Common data to all gui element
 #[derive(Clone, Default)]

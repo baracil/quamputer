@@ -1,7 +1,7 @@
-use crate::gate::ExecutionContext;
 use crate::operation::{QuantumOperation, CircuitElement};
 use crate::state::QuantumState;
 use serde::{Serialize,Deserialize};
+use crate::execution::ExecutionContext;
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Circuit {

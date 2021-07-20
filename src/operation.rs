@@ -1,8 +1,9 @@
-use crate::gate::{ExecutionContext, ControlledGate, check_for_no_duplicate, GateWithoutControl};
-use crate::gate::StandardGate::{Swap, Not};
+use crate::gate_without_control::GateWithoutControl::{Swap, Not};
 use crate::condition::{StopCondition};
 use serde::{Serialize,Deserialize};
 use crate::circuit::Circuit;
+use crate::execution::ExecutionContext;
+use crate::gate::{Gate};
 
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -29,16 +30,16 @@ impl From<Measure> for CircuitElement {
 }
 
 
-pub fn cnot(target:u8, control:u8) -> ControlledGate {
+pub fn cnot(target:u8, control:u8) -> Gate {
     Not(target).with_one_control(control)
 }
-pub fn toffoli(target:u8, control1:u8, control2:u8) -> ControlledGate {
+pub fn toffoli(target:u8, control1:u8, control2:u8) -> Gate {
     Not(target).with_two_controls(control1, control2)
 }
-pub fn cswap(target1:u8, target2:u8, control:u8) -> ControlledGate {
+pub fn cswap(target1:u8, target2:u8, control:u8) -> Gate {
     Swap(target1,target2).with_one_control(control)
 }
-pub fn fredkin(target1:u8, target2:u8, control:u8) -> ControlledGate {
+pub fn fredkin(target1:u8, target2:u8, control:u8) -> Gate {
     Swap(target1,target2).with_one_control(control)
 }
 
@@ -53,22 +54,6 @@ pub struct Measure {
 pub struct Loop {
     pub circuit:Circuit,
     pub stop_condition: StopCondition,
-}
-
-
-#[derive(Clone, Serialize, Deserialize)]
-pub struct Gate {
-    pub gate:GateWithoutControl,
-    pub control_bits:Vec<u8>,
-}
-
-impl Gate {
-    pub fn new(gate:GateWithoutControl, control_bits:Vec<u8>) -> Self {
-        Gate{
-            gate,
-            control_bits
-        }
-    }
 }
 
 impl QuantumOperation for Measure {
@@ -160,6 +145,19 @@ impl QuantumOperation for Gate {
     }
 }
 
+pub(crate) fn check_for_no_duplicate(bits: Vec<u8>) -> Result<(), String> {
+    if bits.len() <= 1 {
+        return Ok(());
+    }
+    for i in 0..bits.len() - 1 {
+        for j in i + 1..bits.len() {
+            if bits[i] == bits[j] {
+                return Err(format!("Duplicate qbit : {} ", bits[i]));
+            }
+        }
+    }
+    Ok(())
+}
 
 impl QuantumOperation for CircuitElement {
 

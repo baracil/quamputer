@@ -1,11 +1,11 @@
 use crate::gui::{Drawable, DrawingPar, HEIGHT_SPACING_RATIO};
 use raylib::drawing::RaylibDraw;
 use raylib::math::Vector2;
-use crate::gate::GateWithoutControl;
 use crate::gui::gui_circuit::{GuiGate, GuiGateData, GuiCircuitElement};
 use rsgui::size::Size;
 use crate::gui::gui_drawer::GuiDrawer;
 use vec_tree::VecTree;
+use crate::gate_without_control::GateWithoutControl;
 
 impl Drawable for GuiGate {
     fn layout(&self, parameter: &DrawingPar, _tree: &VecTree<GuiCircuitElement>) -> f32 {

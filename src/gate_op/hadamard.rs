@@ -1,8 +1,6 @@
 use crate::state::QuantumState;
 use std::f64::consts::FRAC_1_SQRT_2;
-
-
-use crate::gate::ExecutionContext;
+use crate::execution::ExecutionContext;
 
 
 pub fn apply_controlled_hadamard(control_qbits: &[u8], target: u8, context: &mut ExecutionContext) {

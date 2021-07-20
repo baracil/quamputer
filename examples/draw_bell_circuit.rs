@@ -1,6 +1,5 @@
 use raylib::prelude::*;
 use quamputer::computer::QuantumComputer;
-use quamputer::gate::StandardGate::{Fredkin, Toffoli, Hadamard, CNot};
 use quamputer::gui::{ DrawingPar};
 use rsgui::font::FontInfo;
 use quamputer::condition::StopCondition::MaxIteration;
@@ -8,6 +7,7 @@ use quamputer::gui::gui_circuit::{ GuiRoot};
 use quamputer::circuit::Circuit;
 use quamputer::gui::camera_manager::CameraManager;
 use quamputer::gui::gui_drawer::GuiDrawer;
+use quamputer::standard_gate::StandardGate::{Toffoli, Fredkin, Hadamard, CNot};
 
 fn circuit1(computer:&QuantumComputer) -> Result<Circuit,String> {
     let circuit = computer.bell_state()
