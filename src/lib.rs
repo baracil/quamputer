@@ -9,7 +9,7 @@ pub mod operation;
 pub mod condition;
 
 
-#[cfg(feature = "gui")]
+//#[cfg(feature = "gui")]
 pub mod gui;
 
 // with 16 qbits, one state holds 1MBytes of data

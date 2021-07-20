@@ -17,7 +17,6 @@ impl From<Loop> for CircuitElement {
         CircuitElement::Loop(p)
     }
 }
-
 impl From<Gate> for CircuitElement {
     fn from(p: Gate) -> Self {
         CircuitElement::Gate(p)
