@@ -207,6 +207,7 @@ dependencies = [
 [[package]]
 name = "rsgui"
 version = "0.1.0"
+source = "git+https://github.com/baracil/rs-gui.git#ab7db1fce27302e38abae0e1ad57a1c59b1ac3eb"
 dependencies = [
  "bitflags",
  "generational-arena",
