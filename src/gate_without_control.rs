@@ -13,8 +13,8 @@ pub enum GateWithoutControl {
     X(u8),
     Y(u8),
     Z(u8),
-    Swap(u8, u8),
     Hadamard(u8),
+    Swap(u8, u8),
     // Todo
     // Phase(f64,u8),
     // S(u8),

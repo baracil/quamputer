@@ -56,7 +56,7 @@ fn main() -> Result<(), String> {
 
     let font_info = {
         let font_size = 48;
-        let font = rl.load_font_ex(&thread, "/home/Bastien Aracil/fonts/OpenSans-Regular.ttf", font_size, FontLoadEx::Default(200));
+        let font = rl.load_font_ex(&thread, "resources/fonts/OpenSans-Regular.ttf", font_size, FontLoadEx::Default(200));
         FontInfo::new(font?, font_size)
     };
 
