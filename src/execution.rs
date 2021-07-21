@@ -1,10 +1,17 @@
-use crate::state::QuantumState;
 use std::collections::HashMap;
-use num_complex::Complex64;
-use crate::measure::{MeasureCount, State};
-use num_traits::One;
-use crate::measure::State::{Measured, NotMeasured};
 use std::ops::Sub;
+
+use num_complex::Complex64;
+use num_traits::One;
+
+use crate::execution::State::{Measured, NotMeasured};
+use crate::measure::MeasureCount;
+use crate::state::QuantumState;
+
+pub enum State {
+    Measured(usize),
+    NotMeasured,
+}
 
 /// Contains information about the execution
 /// of the quantum circuit
@@ -18,7 +25,6 @@ pub struct ExecutionContext {
 }
 
 impl ExecutionContext {
-
     pub(crate) fn increase_zero(&mut self, id: &String) {
         self.increase_count(id, |c| c.nb_zero += 1)
     }

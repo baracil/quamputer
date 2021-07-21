@@ -1,11 +1,11 @@
+use serde::{Deserialize, Serialize};
 
-
+use crate::execution::ExecutionContext;
+use crate::gate::Gate;
 use crate::gate_op::hadamard::apply_controlled_hadamard;
 use crate::gate_op::pauli::{apply_controlled_not, apply_controlled_pauli_x, apply_controlled_pauli_y, apply_controlled_pauli_z};
 use crate::gate_op::swap::apply_controlled_swap;
-use serde::{Serialize, Deserialize};
-use crate::execution::ExecutionContext;
-use crate::gate::Gate;
+use crate::operation::CircuitElement;
 
 #[derive(Copy, Clone, Serialize, Deserialize)]
 pub enum GateWithoutControl {
@@ -24,8 +24,20 @@ pub enum GateWithoutControl {
     // Rz(f64,u8)
 }
 
+impl Into<Gate> for GateWithoutControl {
+    fn into(self) -> Gate {
+        Gate::new(self, vec![])
+    }
+}
+
+impl Into<CircuitElement> for GateWithoutControl {
+    fn into(self) -> CircuitElement {
+        CircuitElement::Gate(self.into())
+    }
+}
+
 impl GateWithoutControl {
-    /// Create a ControlledGate from this gate
+    /// Create a [`Gate`] from this gate
     /// that uses only one control qbit
     ///
     /// # Examples
@@ -35,8 +47,9 @@ impl GateWithoutControl {
     /// let not = Not(2); // create a Not Gate on qbit(2)
     /// let cnot = not.with_one_control(0); // create a CNot gate. Control is qbit(0) and target qbit(2)
     /// ```
+    ///
     pub fn with_one_control(self, control: u8) -> Gate {
-        Gate { gate: self, control_bits: vec![control] }
+        Gate::new(self, vec![control])
     }
 
     /// Create a ControlledGate from this gate
@@ -50,14 +63,14 @@ impl GateWithoutControl {
     /// let toffoli = not.with_two_controls(0,1); // create a Toffoli
     /// ```
     pub fn with_two_controls(self, control1: u8, control2: u8) -> Gate {
-        Gate { gate: self, control_bits: vec![control1, control2] }
+        Gate::new(self, vec![control1, control2])
     }
 
 
     /// Create a ControlledGate from this gate
     /// that uses multiple control qbits
     pub fn with_multi_control(self, controls: &[u8]) -> Gate {
-        Gate { gate: self, control_bits: controls.to_vec() }
+        Gate::new(self, controls.to_vec())
     }
 
     pub fn get_involved_qbits(&self, others: &[u8]) -> Vec<u8> {
@@ -90,10 +103,10 @@ impl GateWithoutControl {
 
     pub(crate) fn apply_controlled(&self, control_qbits: &[u8], context: &mut ExecutionContext) {
         match self {
-            GateWithoutControl::Not(target) => apply_controlled_not(control_qbits, *target, context),
-            GateWithoutControl::X(target) => apply_controlled_pauli_x(control_qbits, *target, context),
-            GateWithoutControl::Y(target) => apply_controlled_pauli_y(control_qbits, *target, context),
-            GateWithoutControl::Z(target) => apply_controlled_pauli_z(control_qbits, *target, context),
+            GateWithoutControl::Not(target) => apply_controlled_not(*target, control_qbits, context),
+            GateWithoutControl::X(target) => apply_controlled_pauli_x(*target, control_qbits, context),
+            GateWithoutControl::Y(target) => apply_controlled_pauli_y(*target, control_qbits, context),
+            GateWithoutControl::Z(target) => apply_controlled_pauli_z(*target, control_qbits, context),
             GateWithoutControl::Hadamard(target) => apply_controlled_hadamard(control_qbits, *target, context),
             GateWithoutControl::Swap(target1, target2) => apply_controlled_swap(control_qbits, *target1, *target2, context),
         }

@@ -1,16 +1,17 @@
+use std::collections::LinkedList;
+
 use raylib::drawing::RaylibDraw;
-use crate::gui::DrawingPar;
 use raylib::prelude::{Color, Rectangle, Vector2};
 use rsgui::font::FontInfo;
 use rsgui::size::Size;
-use std::collections::LinkedList;
 
+use crate::gui::DrawingPar;
 
 pub struct GuiDrawer<'a, T: RaylibDraw> {
     raylib_draw: &'a mut T,
     full_height: f32,
     flipped: bool,
-    scale:u32,
+    scale: u32,
     offset: Vector2,
     offset_queue: LinkedList<Vector2>,
 }
@@ -26,9 +27,7 @@ impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
             Some(o) => self.offset = o
         }
     }
-}
 
-impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
     pub fn shift_by(&mut self, width: f32) {
         self.offset.x += self.transform_length(&width);
     }
@@ -55,22 +54,22 @@ impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
 
 
     fn transform_vector_in_place(&self, target: &mut Vector2) {
-        let x = target.x*(self.scale as f32) + self.offset.x;
-        let mut y = target.y*(self.scale as f32) + self.offset.y;
+        let x = target.x * (self.scale as f32) + self.offset.x;
+        let mut y = target.y * (self.scale as f32) + self.offset.y;
         if self.flipped {
-            y = self.full_height*(self.scale as f32) - y;
+            y = self.full_height * (self.scale as f32) - y;
         }
         target.x = x;
         target.y = y;
     }
 
     fn transform_rectangle_in_place(&self, reference: &mut Rectangle) {
-        let x = reference.x*(self.scale as f32) + self.offset.x;
-        let mut y = reference.y*(self.scale as f32) + self.offset.y;
-        let width = reference.width*(self.scale as f32);
-        let height = reference.height*(self.scale as f32);
+        let x = reference.x * (self.scale as f32) + self.offset.x;
+        let mut y = reference.y * (self.scale as f32) + self.offset.y;
+        let width = reference.width * (self.scale as f32);
+        let height = reference.height * (self.scale as f32);
         if self.flipped {
-            y = self.full_height*(self.scale as f32) - y - height;
+            y = self.full_height * (self.scale as f32) - y - height;
         }
         reference.x = x;
         reference.y = y;
@@ -83,7 +82,7 @@ impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
         let mut rec = Rectangle::new(pos.x, pos.y, size.width(), size.height());
         self.transform_rectangle_in_place(&mut rec);
         let pos = Vector2::new(rec.x, rec.y);
-        self.raylib_draw.draw_text_ex(&font.font.as_ref(),text,pos,font.size*(self.scale as f32),0.0,color);
+        self.raylib_draw.draw_text_ex(&font.font.as_ref(), text, pos, font.size * (self.scale as f32), 0.0, color);
     }
 
     pub(crate) fn draw_circle_sector_lines(&mut self, center: &Vector2, radius: f32, start_angle: i32, end_angle: i32, segments: i32, color: Color) {
@@ -136,14 +135,12 @@ impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
         let rectangle = self.transform_rectangle(rectangle);
         self.raylib_draw.draw_rectangle_rec(rectangle, color)
     }
-}
 
-impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
     pub fn default(raylib_draw: &'a mut T, parameter: &DrawingPar, position: Vector2) -> GuiDrawer<'a, T> {
-        return GuiDrawer::new(raylib_draw, parameter.full_circuit_height(), position, false,1);
+        return GuiDrawer::new(raylib_draw, parameter.full_circuit_height(), position, false, 1);
     }
 
-    fn new(raylib_draw: &'a mut T, full_height: f32, position: Vector2, flipped: bool, scale:u32) -> Self {
-        Self { raylib_draw, full_height, scale,flipped, offset: position, offset_queue: LinkedList::new() }
+    fn new(raylib_draw: &'a mut T, full_height: f32, position: Vector2, flipped: bool, scale: u32) -> Self {
+        Self { raylib_draw, full_height, scale, flipped, offset: position, offset_queue: LinkedList::new() }
     }
 }

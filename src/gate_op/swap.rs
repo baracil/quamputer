@@ -78,5 +78,4 @@ mod tests_not {
         assert!(context._norm_of_diff(2, Complex64::zero()) < 1e-6);
         assert!(context._norm_of_diff(3, Complex64::one()) < 1e-6);
     }
-
 }

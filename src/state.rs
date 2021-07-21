@@ -1,9 +1,10 @@
-use num_complex::{Complex64};
-use crate::{power_of_two};
-use std::ops::{Deref, DerefMut, Add};
-
-use num_traits::Zero;
 use std::fmt::{Debug, Formatter, Result};
+use std::ops::{Add, Deref, DerefMut};
+
+use num_complex::Complex64;
+use num_traits::Zero;
+
+use crate::power_of_two;
 
 /// Quantum state
 ///
@@ -29,7 +30,7 @@ impl Debug for QuantumState {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let wave_function = self.amplitudes.iter()
             .enumerate()
-            .map(|(i, a)| { format!(" ({0:.6},{1:.6})x|{2:0>3$b}>", a.re, a.im, i,self.nb_qbits as usize) })
+            .map(|(i, a)| { format!(" ({0:.6},{1:.6})x|{2:0>3$b}>", a.re, a.im, i, self.nb_qbits as usize) })
             .reduce(|s1, s2| s1.add(&s2))
             .unwrap_or("".to_string());
 
@@ -45,12 +46,11 @@ impl QuantumState {
 }
 
 impl QuantumState {
-
-    pub (crate) fn mask(&self, qbit_idx: u8) -> usize {
+    pub(crate) fn mask(&self, qbit_idx: u8) -> usize {
         return power_of_two(self.nb_qbits - 1 - qbit_idx);
     }
 
-    pub (crate) fn control_mask(&self, control_qbits: &[u8]) -> usize {
+    pub(crate) fn control_mask(&self, control_qbits: &[u8]) -> usize {
         control_qbits.iter()
             .map(|i| self.mask(*i))
             .reduce(|m1, m2| m1 + m2)
@@ -60,8 +60,7 @@ impl QuantumState {
 
 
 impl QuantumState {
-
-    pub (crate) fn same_amplitude(nb_qbits: u8, qbit_idx: &[usize]) -> QuantumState {
+    pub(crate) fn same_amplitude(nb_qbits: u8, qbit_idx: &[usize]) -> QuantumState {
         let nb_amplitudes = power_of_two(nb_qbits);
         let mut amplitudes = Vec::with_capacity(nb_amplitudes);
         amplitudes.resize_with(nb_amplitudes, || Complex64::zero());
@@ -76,18 +75,18 @@ impl QuantumState {
     }
 
 
-    pub (crate) fn zero(nb_quits: u8) -> Self {
+    pub(crate) fn zero(nb_quits: u8) -> Self {
         QuantumState::same_amplitude(nb_quits, &[0])
     }
 
-    pub (crate) fn nil(nb_quits: u8) -> Self {
+    pub(crate) fn nil(nb_quits: u8) -> Self {
         let nb_amplitudes = power_of_two(nb_quits);
         let mut amplitudes = Vec::with_capacity(nb_amplitudes);
         amplitudes.resize_with(nb_amplitudes, || Complex64::zero());
         Self { nb_qbits: nb_quits, amplitudes }
     }
 
-    pub (crate) fn from(other: &QuantumState) -> Self {
+    pub(crate) fn from(other: &QuantumState) -> Self {
         Self { nb_qbits: other.nb_qbits, amplitudes: other.amplitudes.clone() }
     }
 }

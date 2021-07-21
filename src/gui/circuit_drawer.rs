@@ -1,6 +1,7 @@
-use crate::gui::{Drawable, DrawingPar};
 use raylib::prelude::*;
-use crate::gui::gui_circuit::{GuiRoot, GuiCircuitElement};
+
+use crate::gui::{Drawable, DrawingPar};
+use crate::gui::gui_circuit::{GuiCircuitElement, GuiRoot};
 use crate::gui::gui_drawer::GuiDrawer;
 
 impl GuiRoot {
@@ -32,7 +33,6 @@ impl GuiRoot {
     fn get_root(&self) -> Option<&GuiCircuitElement> {
         self.tree.get_root_index().and_then(|i| { self.tree.get(i) })
     }
-
 }
 
 

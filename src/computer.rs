@@ -1,6 +1,6 @@
-use crate::builder::{QuantumCircuitBuilder};
-use crate::state::QuantumState;
+use crate::builder::QuantumCircuitBuilder;
 use crate::standard_gate::StandardGate::{CNot, Hadamard};
+use crate::state::QuantumState;
 
 pub struct QuantumComputer {
     nb_qbits: u8,
@@ -13,7 +13,7 @@ impl QuantumComputer {
     }
 
 
-    /// Create a circuit builder initial with operation
+    /// Create a circuit builder initialized with operations
     /// to set all the qbits in Bell state
     pub fn bell_state(&self) -> QuantumCircuitBuilder {
         let mut builder = self.new_circuit_builder();
@@ -40,6 +40,8 @@ impl QuantumComputer {
     pub fn same_amplitude(&self, qbit_idx: &[usize]) -> QuantumState {
         QuantumState::same_amplitude(self.nb_qbits, qbit_idx)
     }
+
+    /// Return the number of qbits this computer has
     pub fn nb_qbits(&self) -> u8 {
         self.nb_qbits
     }

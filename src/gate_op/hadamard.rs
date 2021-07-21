@@ -1,7 +1,7 @@
-use crate::state::QuantumState;
 use std::f64::consts::FRAC_1_SQRT_2;
-use crate::execution::ExecutionContext;
 
+use crate::execution::ExecutionContext;
+use crate::state::QuantumState;
 
 pub fn apply_controlled_hadamard(control_qbits: &[u8], target: u8, context: &mut ExecutionContext) {
     let control_mask = context.control_mask(control_qbits);

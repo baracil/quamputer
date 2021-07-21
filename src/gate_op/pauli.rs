@@ -2,12 +2,12 @@ use std::ops::Mul;
 
 use num_complex::Complex64;
 
-use crate::state::QuantumState;
 use crate::execution::ExecutionContext;
+use crate::state::QuantumState;
 
-pub fn apply_controlled_pauli_z(control_qbits: &[u8], target: u8, context: &mut ExecutionContext) {
+pub fn apply_controlled_pauli_z(target_qbit: u8, control_qbits: &[u8], context: &mut ExecutionContext) {
     let control_mask = context.control_mask(control_qbits);
-    let target_mask = context.mask(target);
+    let target_mask = context.mask(target_qbit);
 
     let mut result = QuantumState::nil(context.nb_qbits());
 
@@ -16,11 +16,11 @@ pub fn apply_controlled_pauli_z(control_qbits: &[u8], target: u8, context: &mut 
         let amplitude = context.current_amplitude_at(i);
 
         let control_set = (i & control_mask) == control_mask;
-        let bit_set = (i& target_mask) != 0;
+        let bit_set = (i & target_mask) != 0;
 
         let amplitude = match (control_set, bit_set) {
-            (true,true) => -amplitude,
-            (_,_) => amplitude
+            (true, true) => -amplitude,
+            (_, _) => amplitude
         };
 
         result[i] = amplitude.clone();
@@ -29,9 +29,9 @@ pub fn apply_controlled_pauli_z(control_qbits: &[u8], target: u8, context: &mut 
     context.set_current_state(result);
 }
 
-pub fn apply_controlled_pauli_y(control_qbits: &[u8], target: u8, context: &mut ExecutionContext) {
+pub fn apply_controlled_pauli_y(target_qbit: u8, control_qbits: &[u8], context: &mut ExecutionContext) {
     let control_mask = context.control_mask(control_qbits);
-    let mask = context.mask(target);
+    let mask = context.mask(target_qbit);
 
     let mut result = QuantumState::nil(context.nb_qbits());
 
@@ -46,10 +46,10 @@ pub fn apply_controlled_pauli_y(control_qbits: &[u8], target: u8, context: &mut 
         let bit_set = (src & mask) != 0;
 
 
-        let (amplitude,dst) = match (control_set, bit_set) {
-            (true,true) => (minus_i.mul(amplitude), src^mask),
-            (true,false) => (i.mul(amplitude), src^mask),
-            (false,_) => (amplitude,src)
+        let (amplitude, dst) = match (control_set, bit_set) {
+            (true, true) => (minus_i.mul(amplitude), src ^ mask),
+            (true, false) => (i.mul(amplitude), src ^ mask),
+            (false, _) => (amplitude, src)
         };
 
         result[dst] = amplitude;
@@ -58,13 +58,13 @@ pub fn apply_controlled_pauli_y(control_qbits: &[u8], target: u8, context: &mut 
     context.set_current_state(result)
 }
 
-pub fn apply_controlled_not(control_qbits: &[u8], target: u8, context: &mut ExecutionContext) {
-    apply_controlled_pauli_x(control_qbits,target,context)
+pub fn apply_controlled_not(target_qbit: u8, control_qbits: &[u8], context: &mut ExecutionContext) {
+    apply_controlled_pauli_x(target_qbit, control_qbits, context)
 }
 
-pub fn apply_controlled_pauli_x(control_qbits: &[u8], target: u8, context: &mut ExecutionContext) {
+pub fn apply_controlled_pauli_x(target_qbit: u8, control_qbits: &[u8], context: &mut ExecutionContext) {
     let control_mask = context.control_mask(control_qbits);
-    let target_mask = context.mask(target);
+    let target_mask = context.mask(target_qbit);
 
     let mut result = QuantumState::nil(context.nb_qbits());
 
@@ -89,7 +89,7 @@ mod tests_pauli {
     #[test]
     fn pauli_y_test_on_0() {
         let mut context = ExecutionContext::initialize(&QuantumState::same_amplitude(1, &[0]));
-        apply_controlled_pauli_y(&[], 0, &mut context);
+        apply_controlled_pauli_y(0, &[], &mut context);
 
         assert!(context._norm_of_diff(0, Complex64::zero()) < 1e-6);
         assert!(context._norm_of_diff(1, Complex64::i()) < 1e-6);
@@ -98,7 +98,7 @@ mod tests_pauli {
     #[test]
     fn pauli_y_test_on_1() {
         let mut context = ExecutionContext::initialize(&QuantumState::same_amplitude(1, &[1]));
-        apply_controlled_pauli_y(&[], 0, &mut context);
+        apply_controlled_pauli_y(0, &[], &mut context);
 
         assert!(context._norm_of_diff(0, Complex64::new(0.0, -1.0)) < 1e-6);
         assert!(context._norm_of_diff(1, Complex64::zero()) < 1e-6);
@@ -113,7 +113,7 @@ mod tests_pauli {
         state[1] = c2;
 
         let mut context = ExecutionContext::initialize(&state);
-        apply_controlled_pauli_y(&[], 0, &mut context);
+        apply_controlled_pauli_y(0, &[], &mut context);
 
         assert!(context._norm_of_diff(0, c2.mul(Complex64::i().neg())) < 1e-6);
         assert!(context._norm_of_diff(1, c1.mul(Complex64::i())) < 1e-6);
@@ -122,7 +122,7 @@ mod tests_pauli {
     #[test]
     fn pauli_z_test_on_0() {
         let mut context = ExecutionContext::initialize(&QuantumState::same_amplitude(1, &[0]));
-        apply_controlled_pauli_z(&[], 0, &mut context);
+        apply_controlled_pauli_z(0, &[], &mut context);
 
         assert!(context._norm_of_diff(0, Complex64::one()) < 1e-6);
         assert!(context._norm_of_diff(1, Complex64::zero()) < 1e-6);
@@ -131,11 +131,10 @@ mod tests_pauli {
     #[test]
     fn pauli_z_test_on_1() {
         let mut context = ExecutionContext::initialize(&QuantumState::same_amplitude(1, &[1]));
-        apply_controlled_pauli_z(&[], 0, &mut context);
+        apply_controlled_pauli_z(0, &[], &mut context);
 
         assert!(context._norm_of_diff(0, Complex64::zero()) < 1e-6);
         assert!(context._norm_of_diff(1, Complex64::new(-1.0, 0.0)) < 1e-6);
-
     }
 
     #[test]
@@ -147,12 +146,11 @@ mod tests_pauli {
         state[1] = c2;
 
         let mut context = ExecutionContext::initialize(&state);
-        apply_controlled_pauli_z(&[], 0, &mut context);
+        apply_controlled_pauli_z(0, &[], &mut context);
 
         assert!(context._norm_of_diff(0, c1) < 1e-6);
         assert!(context._norm_of_diff(1, c2.neg()) < 1e-6);
     }
-
 }
 
 #[cfg(test)]
@@ -161,14 +159,14 @@ mod tests_not {
     use num_traits::identities::One;
     use num_traits::Zero;
 
+    use crate::execution::ExecutionContext;
     use crate::gate_op::pauli::apply_controlled_pauli_x;
     use crate::state::QuantumState;
-    use crate::execution::ExecutionContext;
 
     #[test]
     fn not_test_on_zero() {
         let mut context = ExecutionContext::initialize(&QuantumState::zero(3));
-        apply_controlled_pauli_x(&[], 2, &mut context);
+        apply_controlled_pauli_x(2, &[], &mut context);
 
         assert!(context._norm_of_diff(0, Complex64::zero()) < 1e-6);
         assert!(context._norm_of_diff(1, Complex64::one()) < 1e-6);
@@ -183,8 +181,8 @@ mod tests_not {
     #[test]
     fn not_test_on_one() {
         let mut context = ExecutionContext::initialize(&QuantumState::zero(3));
-        apply_controlled_pauli_x(&[], 2, &mut context);
-        apply_controlled_pauli_x(&[], 1, &mut context);
+        apply_controlled_pauli_x(2, &[], &mut context);
+        apply_controlled_pauli_x(1, &[], &mut context);
 
         assert!(context._norm_of_diff(0, Complex64::zero()) < 1e-6);
         assert!(context._norm_of_diff(1, Complex64::zero()) < 1e-6);
@@ -204,7 +202,7 @@ mod tests_not {
         state[6] = Complex::one();
 
         let mut context = ExecutionContext::initialize(&state);
-        apply_controlled_pauli_x(&[], 1, &mut context);
+        apply_controlled_pauli_x(1, &[], &mut context);
 
         assert!(context._norm_of_diff(0, Complex64::zero()) < 1e-6);
         assert!(context._norm_of_diff(1, Complex64::zero()) < 1e-6);
@@ -223,15 +221,15 @@ mod tests_toffoli {
     use num_traits::identities::One;
     use num_traits::Zero;
 
+    use crate::execution::ExecutionContext;
     use crate::gate_op::pauli::apply_controlled_pauli_x;
     use crate::state::QuantumState;
-    use crate::execution::ExecutionContext;
 
     #[test]
     fn toffoli_test_on_zero() {
         let state = QuantumState::zero(3);
         let mut context = ExecutionContext::initialize(&state);
-        apply_controlled_pauli_x(&[0, 1], 2, &mut context);
+        apply_controlled_pauli_x(2, &[0, 1], &mut context);
 
         assert!(context._norm_of_diff(0, Complex64::one()) < 1e-6);
         assert!(context._norm_of_diff(1, Complex64::zero()) < 1e-6);
@@ -252,7 +250,7 @@ mod tests_toffoli {
         state[7] = Complex::new(3.0, 0.0);
 
         let mut context = ExecutionContext::initialize(&state);
-        apply_controlled_pauli_x(&[0, 1], 2, &mut context);
+        apply_controlled_pauli_x(2, &[0, 1], &mut context);
         assert!(context._norm_of_diff(0, Complex64::zero()) < 1e-6);
         assert!(context._norm_of_diff(1, Complex64::zero()) < 1e-6);
         assert!(context._norm_of_diff(2, Complex64::one()) < 1e-6);

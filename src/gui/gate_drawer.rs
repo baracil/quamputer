@@ -1,11 +1,12 @@
-use crate::gui::{Drawable, DrawingPar, HEIGHT_SPACING_RATIO};
 use raylib::drawing::RaylibDraw;
 use raylib::math::Vector2;
-use crate::gui::gui_circuit::{GuiGate, GuiGateData, GuiCircuitElement};
 use rsgui::size::Size;
-use crate::gui::gui_drawer::GuiDrawer;
 use vec_tree::VecTree;
+
 use crate::gate_without_control::GateWithoutControl;
+use crate::gui::{Drawable, DrawingPar, HEIGHT_SPACING_RATIO};
+use crate::gui::gui_circuit::{GuiCircuitElement, GuiGate, GuiGateData};
+use crate::gui::gui_drawer::GuiDrawer;
 
 impl Drawable for GuiGate {
     fn layout(&self, parameter: &DrawingPar, _tree: &VecTree<GuiCircuitElement>) -> f32 {
@@ -18,10 +19,10 @@ impl Drawable for GuiGate {
 
         match &data.text {
             None => {
-               data.outline.width = 0.0;
-               data.outline.height = 0.0;
-               data.text_size = Size::new(0.0, 0.0);
-               data.text_position = Vector2::default();
+                data.outline.width = 0.0;
+                data.outline.height = 0.0;
+                data.text_size = Size::new(0.0, 0.0);
+                data.text_position = Vector2::default();
             }
             Some(t) => {
                 let size = parameter.font.measure_text(t, 0.0);
@@ -150,7 +151,7 @@ fn draw_swap_gate<T: RaylibDraw>(drawer: &mut GuiDrawer<T>, parameter: &DrawingP
     let target_y_pos2 = parameter.qbit_y_offset(*target2);
     let size = gui_data.gate_size * 0.5;
 
-    let pos1 = Vector2::new( parameter.margin + size, target_y_pos1);
+    let pos1 = Vector2::new(parameter.margin + size, target_y_pos1);
     let pos2 = Vector2::new(parameter.margin + size, target_y_pos2);
 
     drawer.draw_line_ex(&pos1, &pos2, parameter.register_thickness, parameter.foreground_color);
