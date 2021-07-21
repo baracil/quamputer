@@ -9,17 +9,12 @@ impl GuiRoot {
         let root_index = self.tree.get_root_index();
 
         if root_index.is_none() {
-            self.width = 0;
-            self.height = 0;
             return;
         }
         let root_index = root_index.unwrap();
         let root = self.tree.get(root_index).unwrap();
 
-        let width = root.layout(parameter, &self.tree);
-        let height = parameter.full_circuit_height();
-        self.width = width.max(0.0).round() as u32;
-        self.height = height.max(0.0).round() as u32;
+        root.layout(parameter, &self.tree);
     }
 
     pub fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter: &DrawingPar) {

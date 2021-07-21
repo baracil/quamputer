@@ -64,8 +64,7 @@ pub struct GuiMeasureData {
 }
 
 pub struct GuiRoot {
-    pub width: u32,
-    pub height: u32,
+
     pub tree: VecTree<GuiCircuitElement>,
 }
 
@@ -76,7 +75,7 @@ impl GuiRoot {
 
         let root_index = tree.insert_root(gui_loop);
 
-        let mut root = GuiRoot { tree, width: 0, height: 0 };
+        let mut root = GuiRoot { tree };
         root.set_node_index(root_index);
 
         for element in &circuit.elements {
