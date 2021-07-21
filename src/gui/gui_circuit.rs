@@ -170,7 +170,6 @@ impl GuiCircuitElement {
 
 impl Deref for GuiCircuitData {
     type Target = CommonGuiData;
-
     fn deref(&self) -> &Self::Target {
         &self.common
     }
@@ -184,7 +183,6 @@ impl DerefMut for GuiCircuitData {
 
 impl Deref for GuiGateData {
     type Target = CommonGuiData;
-
     fn deref(&self) -> &Self::Target {
         &self.common
     }
@@ -198,7 +196,6 @@ impl DerefMut for GuiGateData {
 
 impl Deref for GuiLoopData {
     type Target = CommonGuiData;
-
     fn deref(&self) -> &Self::Target {
         &self.common
     }
@@ -212,7 +209,6 @@ impl DerefMut for GuiLoopData {
 
 impl Deref for GuiMeasureData {
     type Target = CommonGuiData;
-
     fn deref(&self) -> &Self::Target {
         &self.common
     }
@@ -247,15 +243,6 @@ impl From<&CircuitElement> for GuiCircuitElement {
     }
 }
 
-
-impl From<&Loop> for GuiCircuitElement {
-    fn from(l: &Loop) -> Self {
-        let gui_circuit = l.circuit.clone().into();
-        let gui_loop = GuiLoop { index: None, raw_circuit: false, gui_data: RefCell::new(GuiLoopData::default()), circuit: gui_circuit, stop_condition: l.stop_condition.clone() };
-        return GuiCircuitElement::GuiLoop(gui_loop);
-    }
-}
-
 impl From<Circuit> for GuiCircuitElement {
     fn from(c: Circuit) -> Self {
         let gui_loop = GuiLoop { index: None, raw_circuit: true, gui_data: RefCell::new(GuiLoopData::default()), circuit: c.into(), stop_condition: StopCondition::Once() };
@@ -266,6 +253,17 @@ impl From<Circuit> for GuiCircuitElement {
 impl From<&Circuit> for GuiCircuitElement {
     fn from(c: &Circuit) -> Self {
         let gui_loop = GuiLoop { index: None, raw_circuit: true, gui_data: RefCell::new(GuiLoopData::default()), circuit: c.into(), stop_condition: StopCondition::Once() };
+        return GuiCircuitElement::GuiLoop(gui_loop);
+    }
+}
+
+
+
+
+impl From<&Loop> for GuiCircuitElement {
+    fn from(l: &Loop) -> Self {
+        let gui_circuit = l.circuit.clone().into();
+        let gui_loop = GuiLoop { index: None, raw_circuit: false, gui_data: RefCell::new(GuiLoopData::default()), circuit: gui_circuit, stop_condition: l.stop_condition.clone() };
         return GuiCircuitElement::GuiLoop(gui_loop);
     }
 }

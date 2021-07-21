@@ -9,7 +9,7 @@ use crate::gui::DrawingPar;
 
 pub struct GuiDrawer<'a, T: RaylibDraw> {
     raylib_draw: &'a mut T,
-    full_height: f32,
+    full_circuit_height: f32,
     flipped: bool,
     scale: u32,
     offset: Vector2,
@@ -17,6 +17,7 @@ pub struct GuiDrawer<'a, T: RaylibDraw> {
 }
 
 impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
+
     pub(crate) fn push_offset(&mut self) {
         self.offset_queue.push_back(self.offset)
     }
@@ -57,7 +58,7 @@ impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
         let x = target.x * (self.scale as f32) + self.offset.x;
         let mut y = target.y * (self.scale as f32) + self.offset.y;
         if self.flipped {
-            y = self.full_height * (self.scale as f32) - y;
+            y = self.full_circuit_height * (self.scale as f32) - y;
         }
         target.x = x;
         target.y = y;
@@ -69,7 +70,7 @@ impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
         let width = reference.width * (self.scale as f32);
         let height = reference.height * (self.scale as f32);
         if self.flipped {
-            y = self.full_height * (self.scale as f32) - y - height;
+            y = self.full_circuit_height * (self.scale as f32) - y - height;
         }
         reference.x = x;
         reference.y = y;
@@ -141,6 +142,6 @@ impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
     }
 
     fn new(raylib_draw: &'a mut T, full_height: f32, position: Vector2, flipped: bool, scale: u32) -> Self {
-        Self { raylib_draw, full_height, scale, flipped, offset: position, offset_queue: LinkedList::new() }
+        Self { raylib_draw, full_circuit_height: full_height, scale, flipped, offset: position, offset_queue: LinkedList::new() }
     }
 }

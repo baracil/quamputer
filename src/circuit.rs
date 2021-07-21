@@ -6,12 +6,15 @@ use crate::state::QuantumState;
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Circuit {
+    /// the number of qbits in this circuit
     pub nb_qbits: u8,
+    /// the elements composing this circuit
     pub elements: Vec<CircuitElement>,
 }
 
 
 impl Circuit {
+
     pub fn execute(&self, initial_state: &QuantumState) -> ExecutionContext {
         let mut context = ExecutionContext::initialize(&initial_state);
         self.apply(&mut context);

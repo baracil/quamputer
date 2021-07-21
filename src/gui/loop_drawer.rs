@@ -7,6 +7,7 @@ use crate::gui::gui_circuit::{GuiCircuitElement, GuiLoop, GuiLoopData};
 use crate::gui::gui_drawer::GuiDrawer;
 
 impl Drawable for GuiLoop {
+
     fn layout(&self, parameter: &DrawingPar, tree: &VecTree<GuiCircuitElement>) -> f32 {
         let children = self.index.map(|i| { tree.children(i) });
 
