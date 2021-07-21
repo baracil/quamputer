@@ -12,18 +12,18 @@ pub fn apply_controlled_pauli_z(target_qbit: u8, control_qbits: &[u8], context: 
     let mut result = QuantumState::nil(context.nb_qbits());
 
     let len = context.nb_amplitudes();
-    for i in 0..len {
-        let amplitude = context.current_amplitude_at(i);
+    for src in 0..len {
+        let amplitude = context.current_amplitude_at(src);
 
-        let control_set = (i & control_mask) == control_mask;
-        let bit_set = (i & target_mask) != 0;
+        let control_set = (src & control_mask) == control_mask;
+        let bit_set = (src & target_mask) != 0;
 
         let amplitude = match (control_set, bit_set) {
             (true, true) => -amplitude,
             (_, _) => amplitude
         };
 
-        result[i] = amplitude.clone();
+        result[src] = amplitude.clone();
     }
 
     context.set_current_state(result);
@@ -31,7 +31,7 @@ pub fn apply_controlled_pauli_z(target_qbit: u8, control_qbits: &[u8], context: 
 
 pub fn apply_controlled_pauli_y(target_qbit: u8, control_qbits: &[u8], context: &mut ExecutionContext) {
     let control_mask = context.control_mask(control_qbits);
-    let mask = context.mask(target_qbit);
+    let target_mask = context.mask(target_qbit);
 
     let mut result = QuantumState::nil(context.nb_qbits());
 
@@ -43,12 +43,12 @@ pub fn apply_controlled_pauli_y(target_qbit: u8, control_qbits: &[u8], context: 
         let amplitude = context.current_amplitude_at(src);
 
         let control_set = (src & control_mask) == control_mask;
-        let bit_set = (src & mask) != 0;
+        let bit_set = (src & target_mask) != 0;
 
 
         let (amplitude, dst) = match (control_set, bit_set) {
-            (true, true) => (minus_i.mul(amplitude), src ^ mask),
-            (true, false) => (i.mul(amplitude), src ^ mask),
+            (true, true) => (minus_i.mul(amplitude), src ^ target_mask),
+            (true, false) => (i.mul(amplitude), src ^ target_mask),
             (false, _) => (amplitude, src)
         };
 
