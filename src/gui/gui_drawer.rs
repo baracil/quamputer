@@ -9,8 +9,6 @@ use crate::gui::DrawingPar;
 
 pub struct GuiDrawer<'a, T: RaylibDraw> {
     raylib_draw: &'a mut T,
-    full_circuit_height: f32,
-    flipped: bool,
     scale: u32,
     offset: Vector2,
     offset_queue: LinkedList<Vector2>,
@@ -57,9 +55,6 @@ impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
     fn transform_vector_in_place(&self, target: &mut Vector2) {
         let x = target.x * (self.scale as f32) + self.offset.x;
         let mut y = target.y * (self.scale as f32) + self.offset.y;
-        if self.flipped {
-            y = self.full_circuit_height * (self.scale as f32) - y;
-        }
         target.x = x;
         target.y = y;
     }
@@ -69,9 +64,6 @@ impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
         let mut y = reference.y * (self.scale as f32) + self.offset.y;
         let width = reference.width * (self.scale as f32);
         let height = reference.height * (self.scale as f32);
-        if self.flipped {
-            y = self.full_circuit_height * (self.scale as f32) - y - height;
-        }
         reference.x = x;
         reference.y = y;
         reference.width = width;
@@ -106,13 +98,13 @@ impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
         self.raylib_draw.draw_line_ex(start, end, thickness, color);
     }
 
-    pub(crate) fn draw_all_registers(&mut self, parameter: &DrawingPar, width: f32) {
+    pub(crate) fn draw_all_registers(&mut self, nb_qbits:u8, parameter: &DrawingPar, width: f32) {
         let width = self.transform_length(&width);
         let thickness = self.transform_length(&parameter.register_thickness);
         let mut pos_start = Vector2::zero();
         let mut pos_end = Vector2::zero();
 
-        for i in 0..parameter.nb_qbits {
+        for i in 0..nb_qbits {
             pos_start.x = 0.0;
             pos_start.y = (i as f32) * parameter.register_spacing;
 
@@ -137,11 +129,11 @@ impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
         self.raylib_draw.draw_rectangle_rec(rectangle, color)
     }
 
-    pub fn default(raylib_draw: &'a mut T, parameter: &DrawingPar, position: Vector2) -> GuiDrawer<'a, T> {
-        return GuiDrawer::new(raylib_draw, parameter.full_circuit_height(), position, false, 1);
+    pub fn default(raylib_draw: &'a mut T, position: Vector2) -> GuiDrawer<'a, T> {
+        return GuiDrawer::new(raylib_draw,  position, 1);
     }
 
-    fn new(raylib_draw: &'a mut T, full_height: f32, position: Vector2, flipped: bool, scale: u32) -> Self {
-        Self { raylib_draw, full_circuit_height: full_height, scale, flipped, offset: position, offset_queue: LinkedList::new() }
+    fn new(raylib_draw: &'a mut T, position: Vector2, scale: u32) -> Self {
+        Self { raylib_draw,scale, offset: position, offset_queue: LinkedList::new() }
     }
 }

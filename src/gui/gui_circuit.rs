@@ -14,6 +14,7 @@ use crate::gate::Gate;
 use crate::gate_without_control::GateWithoutControl;
 use crate::measure::Measure;
 use crate::operation::CircuitElement;
+use crate::gui::DrawingPar;
 
 ///Common data to all gui element
 #[derive(Clone, Default)]
@@ -64,18 +65,20 @@ pub struct GuiMeasureData {
 }
 
 pub struct GuiRoot {
-
+    pub nb_qbits:u8,
+    pub position:Vector2,
+    pub parameter:DrawingPar,
     pub tree: VecTree<GuiCircuitElement>,
 }
 
 impl GuiRoot {
-    pub fn new(circuit: &Circuit) -> Self {
+    pub fn new(circuit: &Circuit, reference:&DrawingPar) -> Self {
         let gui_loop: GuiCircuitElement = circuit.into();
         let mut tree = VecTree::new();
 
         let root_index = tree.insert_root(gui_loop);
 
-        let mut root = GuiRoot { tree };
+        let mut root = GuiRoot { position:Vector2::default(), nb_qbits:circuit.nb_qbits, tree , parameter:reference.clone()};
         root.set_node_index(root_index);
 
         for element in &circuit.elements {

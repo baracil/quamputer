@@ -8,7 +8,7 @@ use crate::gui::gui_drawer::GuiDrawer;
 
 impl Drawable for GuiLoop {
 
-    fn layout(&self, parameter: &DrawingPar, tree: &VecTree<GuiCircuitElement>) -> f32 {
+    fn layout(&self, nb_qbits:u8, parameter: &DrawingPar, tree: &VecTree<GuiCircuitElement>) -> f32 {
         let children = self.index.map(|i| { tree.children(i) });
 
         let circuit_width: f32 = match children {
@@ -16,7 +16,7 @@ impl Drawable for GuiLoop {
                 iter.map(|i| tree.get(i))
                     .filter(|m| m.is_some())
                     .map(|o| o.unwrap())
-                    .map(|l| l.layout(parameter, tree))
+                    .map(|l| l.layout(nb_qbits, parameter, tree))
                     .sum()
             }
             None => 0.0
@@ -31,7 +31,7 @@ impl Drawable for GuiLoop {
         data.width = width;
         data.outline.x = margin;
         data.outline.y = -parameter.register_spacing;
-        data.outline.height = parameter.full_circuit_height();
+        data.outline.height = parameter.full_circuit_height(nb_qbits);
         data.outline.width = circuit_width;
         data.outline_background = Color::new(128, 128, 128, 255);
 
@@ -40,7 +40,7 @@ impl Drawable for GuiLoop {
         width
     }
 
-    fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter: &DrawingPar, tree: &VecTree<GuiCircuitElement>) {
+    fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, nb_qbits:u8, parameter: &DrawingPar, tree: &VecTree<GuiCircuitElement>) {
         let rect = self.gui_data.borrow().outline.clone();
         let raw_circuit = self.raw_circuit;
 
@@ -49,7 +49,7 @@ impl Drawable for GuiLoop {
             drawer.draw_rectangle_lines_ex(&rect, parameter.register_thickness as i32, parameter.foreground_color);
         }
 
-        drawer.draw_all_registers(parameter, self.gui_data.borrow().width);
+        drawer.draw_all_registers(nb_qbits,parameter, self.gui_data.borrow().width);
 
 
         let children = self.index.map(|i| tree.children(i));
@@ -67,7 +67,7 @@ impl Drawable for GuiLoop {
             let element = tree.get(idx);
             match element {
                 Some(e) => {
-                    e.draw(drawer, parameter, tree);
+                    e.draw(drawer, nb_qbits, parameter, tree);
                     drawer.shift_by(e.width());
                 }
                 None => {}

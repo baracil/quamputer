@@ -9,7 +9,7 @@ use crate::gui::gui_circuit::{GuiCircuitElement, GuiGate, GuiGateData};
 use crate::gui::gui_drawer::GuiDrawer;
 
 impl Drawable for GuiGate {
-    fn layout(&self, parameter: &DrawingPar, _tree: &VecTree<GuiCircuitElement>) -> f32 {
+    fn layout(&self, nb_qbits:u8 , parameter: &DrawingPar, _tree: &VecTree<GuiCircuitElement>) -> f32 {
         let gate_size = self.gate.width(parameter);
         let gate_y_center = self.gate.y_middle(parameter);
         let text = self.gate.text();
@@ -46,10 +46,10 @@ impl Drawable for GuiGate {
         width
     }
 
-    fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter: &DrawingPar, _tree: &VecTree<GuiCircuitElement>) {
+    fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, nb_qbits:u8, parameter: &DrawingPar, _tree: &VecTree<GuiCircuitElement>) {
         let width = self.gui_data.borrow().width;
 
-        drawer.draw_all_registers(parameter, width);
+        drawer.draw_all_registers(nb_qbits, parameter, width);
 
         self.draw_control_qbits(drawer, parameter, &self.control_bits);
 

@@ -16,10 +16,9 @@ pub mod gui_drawer;
 
 const HEIGHT_SPACING_RATIO: f32 = 0.6;
 
-
+#[derive(Clone)]
 pub struct DrawingPar {
     pub font: FontInfo,
-    pub nb_qbits: u8,
     pub register_spacing: f32,
     pub register_thickness: f32,
     pub margin: f32,
@@ -32,7 +31,6 @@ impl DrawingPar {
     pub fn scale(&self, factor: f32) -> Self {
         DrawingPar {
             font: FontInfo { font: self.font.font.clone(), size: self.font.size * factor },
-            nb_qbits: self.nb_qbits,
             register_spacing: self.register_spacing * factor,
             register_thickness: self.register_thickness * factor,
             margin: self.margin * factor,
@@ -45,8 +43,8 @@ impl DrawingPar {
         (qbit_idx as f32) * self.register_spacing
     }
 
-    pub fn full_circuit_height(&self) -> f32 {
-        return (self.nb_qbits as f32 + 1.0) * self.register_spacing;
+    pub fn full_circuit_height(&self, nb_qbits:u8) -> f32 {
+        return (nb_qbits as f32 + 1.0) * self.register_spacing;
     }
 
     // pub fn flip_rectangle(&self, rect: &mut Rectangle, flipped:bool) {
@@ -69,24 +67,24 @@ impl DrawingPar {
 
 pub trait Drawable {
     /// Layout its content and return the width it will use
-    fn layout(&self, parameter: &DrawingPar, tree: &VecTree<GuiCircuitElement>) -> f32;
-    fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter: &DrawingPar, tree: &VecTree<GuiCircuitElement>);
+    fn layout(&self, nb_qbits:u8, parameter: &DrawingPar, tree: &VecTree<GuiCircuitElement>) -> f32;
+    fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, nb_qbits:u8, parameter: &DrawingPar, tree: &VecTree<GuiCircuitElement>);
 }
 
 impl Drawable for GuiCircuitElement {
-    fn layout(&self, parameter: &DrawingPar, tree: &VecTree<GuiCircuitElement>) -> f32 {
+    fn layout(&self, nb_qbits:u8, parameter: &DrawingPar, tree: &VecTree<GuiCircuitElement>) -> f32 {
         match self {
-            GuiCircuitElement::GuiLoop(p) => p.layout(parameter, tree),
-            GuiCircuitElement::GuiGate(p) => p.layout(parameter, tree),
-            GuiCircuitElement::GuiMeasure(p) => p.layout(parameter, tree)
+            GuiCircuitElement::GuiLoop(p) => p.layout(nb_qbits, parameter, tree),
+            GuiCircuitElement::GuiGate(p) => p.layout(nb_qbits, parameter, tree),
+            GuiCircuitElement::GuiMeasure(p) => p.layout(nb_qbits, parameter, tree)
         }
     }
 
-    fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter: &DrawingPar, tree: &VecTree<GuiCircuitElement>) {
+    fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, nb_qbits:u8, parameter: &DrawingPar, tree: &VecTree<GuiCircuitElement>) {
         match self {
-            GuiCircuitElement::GuiLoop(p) => p.draw(drawer, parameter, tree),
-            GuiCircuitElement::GuiGate(p) => p.draw(drawer, parameter, tree),
-            GuiCircuitElement::GuiMeasure(p) => p.draw(drawer, parameter, tree),
+            GuiCircuitElement::GuiLoop(p) => p.draw(drawer, nb_qbits,parameter, tree),
+            GuiCircuitElement::GuiGate(p) => p.draw(drawer,nb_qbits, parameter, tree),
+            GuiCircuitElement::GuiMeasure(p) => p.draw(drawer, nb_qbits ,parameter, tree),
         }
     }
 }
