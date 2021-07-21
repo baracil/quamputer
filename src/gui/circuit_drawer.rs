@@ -1,8 +1,9 @@
 use raylib::prelude::*;
 
 use crate::gui::{Drawable, DrawingPar};
-use crate::gui::gui_circuit::{GuiCircuitElement, GuiRoot};
+use crate::gui::gui_circuit::{GuiCircuitElement, GuiRoot, HoverData};
 use crate::gui::gui_drawer::GuiDrawer;
+use crate::gui::mouse_position::MouseInformation;
 
 impl GuiRoot {
     pub fn layout(&mut self) {
@@ -17,12 +18,20 @@ impl GuiRoot {
         root.layout(self.nb_qbits, &self.parameter, &self.tree);
     }
 
-    pub fn draw<T: RaylibDraw>(&self, rl2d: &mut RaylibMode2D<T>) {
-        let mut drawer = GuiDrawer::default(rl2d,self.position);
-        match self.get_root() {
+    pub fn draw<T: RaylibDraw>(&self, rl2d: &mut RaylibMode2D<T>, mouse_information:&MouseInformation) -> Option<HoverData> {
+        let mut drawer = GuiDrawer::default(rl2d, mouse_information, self.position);
+        let hover_data = match self.get_root() {
             Some(r) => r.draw(&mut drawer, self.nb_qbits , &self.parameter, &self.tree),
-            None => {}
-        }
+            None => None
+        };
+
+        // if let Some(h) = &hover_data {
+        //     if let Some(element) = self.tree.get(h.index) {
+        //         element.outline()
+        //     }
+        // }
+
+        return hover_data
     }
 
 

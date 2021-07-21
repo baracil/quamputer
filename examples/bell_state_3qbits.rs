@@ -2,6 +2,7 @@ use quamputer::computer::QuantumComputer;
 use quamputer::condition::StopCondition::{MaxZeroSampling, Or, MaxOneSample};
 
 fn main() -> Result<(), String> {
+
     let computer = QuantumComputer::new(3);
 
     let circuit = {

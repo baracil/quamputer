@@ -3,14 +3,16 @@ use quamputer::computer::QuantumComputer;
 use quamputer::gui::{ DrawingPar};
 use rsgui::font::FontInfo;
 use quamputer::condition::StopCondition::MaxIteration;
-use quamputer::gui::gui_circuit::{ GuiRoot};
+use quamputer::gui::gui_circuit::{GuiRoot, HoverData, GuiCircuitElement};
 use quamputer::circuit::Circuit;
 use quamputer::gui::camera_manager::CameraManager;
 use quamputer::gui::gui_drawer::GuiDrawer;
 use quamputer::standard_gate::StandardGate::{Toffoli, Fredkin, Hadamard, CNot};
 use std::f32::consts::PI;
+use quamputer::gui::mouse_position::MouseInformation;
 
 fn circuit1(computer:&QuantumComputer) -> Result<Circuit,String> {
+
     let circuit = computer.bell_state()
         .add_operation(Toffoli(2, [1, 0]))
         .add_operation(Fredkin(0, 1, [2]))
@@ -53,13 +55,13 @@ fn main() -> Result<(), String> {
 
     let reference = DrawingPar {
         font: font_info,
+        hover_color: Color::VIOLET,
         register_spacing: 100.0,
         register_thickness: 2.,
         background_color: Color::BLACK,
         foreground_color: Color::WHITE,
         margin: 20.0,
     };
-
 
 
     let computer = QuantumComputer::new(6);
@@ -90,6 +92,9 @@ fn main() -> Result<(), String> {
             screen_size.1 = rl.get_screen_height();
         }
 
+        let mouse_info = MouseInformation::new(&rl,&camera);
+
+
         camera_manager.handle_camera(&rl,&mut camera);
 
 
@@ -102,13 +107,23 @@ fn main() -> Result<(), String> {
 
         let mut d = rl.begin_drawing(&thread);
 
-        let time = d.get_time() as f32;
 
         d.clear_background(reference.background_color);
         {
             let mut d = d.begin_mode2D(camera);
+            let hover = circuit.draw(&mut d, &mouse_info);
 
-            circuit.draw(&mut d);
+            if let Some(h) = &hover {
+
+                if let HoverData::Gate(idx,_,Some(c)) = h {
+                    if d.is_key_pressed(crate::consts::KeyboardKey::KEY_DELETE) {
+                        if let Some(GuiCircuitElement::GuiGate(g)) = circuit.get_element_mut(*idx) {
+                            g.control_bits.remove(*c);
+                        }
+                    }
+                }
+
+            }
         }
 
 

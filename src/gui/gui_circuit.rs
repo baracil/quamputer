@@ -15,6 +15,44 @@ use crate::gate_without_control::GateWithoutControl;
 use crate::measure::Measure;
 use crate::operation::CircuitElement;
 use crate::gui::DrawingPar;
+use std::fmt::{Display, Formatter};
+use crate::execution::State::Measured;
+
+/// Information about hoover gate/control point
+pub enum HoverData {
+    Loop(Index),
+    Measure(Index),
+    Gate(Index,Option<u8>,Option<usize>),
+}
+
+impl Display for HoverData {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            HoverData::Loop(index) => write!(f,"Loop {:?}",index),
+            HoverData::Measure(index) => write!(f,"Measure {:?}",index),
+            HoverData::Gate(index,target, control) => write!(f,"Gate {:?} t:{:?} c:{:?}",index,target, control),
+        }
+    }
+}
+
+impl HoverData {
+    pub fn for_measure(index:Index) -> Self {
+        HoverData::Measure(index)
+    }
+
+    pub fn for_loop(index:Index) -> Self {
+        HoverData::Loop(index)
+    }
+
+    pub fn for_gate_on_target_qbit(index:Index, target:u8) -> Self {
+        HoverData::Gate(index, Some(target),None)
+    }
+
+    pub fn for_gate_on_control_qbit(index:Index, control:usize) -> Self{
+        HoverData::Gate(index, None,Some(control))
+    }
+}
+
 
 ///Common data to all gui element
 #[derive(Clone, Default)]
@@ -69,6 +107,17 @@ pub struct GuiRoot {
     pub position:Vector2,
     pub parameter:DrawingPar,
     pub tree: VecTree<GuiCircuitElement>,
+}
+
+
+impl GuiRoot {
+    pub fn get_element(&self, element_index: Index) -> Option<&GuiCircuitElement> {
+        self.tree.get(element_index)
+    }
+
+    pub fn get_element_mut(&mut self, element_index: Index) -> Option<&mut GuiCircuitElement> {
+        self.tree.get_mut(element_index)
+    }
 }
 
 impl GuiRoot {
@@ -152,7 +201,18 @@ pub enum GuiCircuitElement {
     GuiMeasure(GuiMeasure),
 }
 
+impl Display for GuiCircuitElement {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            GuiCircuitElement::GuiLoop(_) => f.write_str("GuiLoop"),
+            GuiCircuitElement::GuiGate(p) => f.write_str("GuiGate "),
+            GuiCircuitElement::GuiMeasure(_) => f.write_str("GuiMeasure"),
+        }
+    }
+}
+
 impl GuiCircuitElement {
+
     pub(crate) fn width(&self) -> f32 {
         match self {
             GuiCircuitElement::GuiLoop(p) => p.gui_data.borrow().common.width,

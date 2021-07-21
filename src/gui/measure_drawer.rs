@@ -2,7 +2,7 @@ use raylib::prelude::*;
 use vec_tree::VecTree;
 
 use crate::gui::{Drawable, DrawingPar, HEIGHT_SPACING_RATIO};
-use crate::gui::gui_circuit::{GuiCircuitElement, GuiMeasure, GuiMeasureData};
+use crate::gui::gui_circuit::{GuiCircuitElement, GuiMeasure, GuiMeasureData, HoverData};
 use crate::gui::gui_drawer::GuiDrawer;
 
 const GOLDEN_RATIO: f32 = 1.618033988749894;
@@ -28,10 +28,24 @@ impl Drawable for GuiMeasure {
     }
 
 
-    fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, nb_qbits:u8, parameter: &DrawingPar, _tree: &VecTree<GuiCircuitElement>) {
+    fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, nb_qbits:u8, parameter: &DrawingPar, _tree: &VecTree<GuiCircuitElement>) -> Option<HoverData> {
+        let transformed_outline = drawer.transform_rectangle(&self.gui_data.borrow().outline);
+        let mouse_pos = drawer.get_world_mouse_position();
+
         drawer.draw_all_registers(nb_qbits, parameter, self.gui_data.borrow().width);
 
         drawer.draw_rectangle_rec(&self.gui_data.borrow().outline, Color::BLACK);
         drawer.draw_rectangle_lines_ex(&self.gui_data.borrow().outline, parameter.register_thickness as i32, parameter.foreground_color);
+
+        let hover = transformed_outline.check_collision_point_rec(mouse_pos);
+
+        if hover {
+            drawer.draw_rectangle_lines_ex(&self.gui_data.borrow().outline, parameter.register_thickness as i32,parameter.hover_color);
+        }
+
+        if hover {
+            return self.index.map(|index| { HoverData::for_measure(index)});
+        }
+        None
     }
 }

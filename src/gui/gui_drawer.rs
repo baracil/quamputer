@@ -6,15 +6,24 @@ use rsgui::font::FontInfo;
 use rsgui::size::Size;
 
 use crate::gui::DrawingPar;
+use crate::gui::mouse_position::MouseInformation;
 
 pub struct GuiDrawer<'a, T: RaylibDraw> {
     raylib_draw: &'a mut T,
+    mouse_info:MouseInformation,
     scale: u32,
     offset: Vector2,
     offset_queue: LinkedList<Vector2>,
 }
 
 impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
+
+    pub(crate) fn is_mouse_in_disk(&self, center: &Vector2, radius: f32) -> bool {
+        let mut mouse_position = self.get_local_world_mouse_position();
+        let mouse_distance = (mouse_position.x - center.x).hypot(mouse_position.y - center.y);
+        mouse_distance <= radius
+    }
+
 
     pub(crate) fn push_offset(&mut self) {
         self.offset_queue.push_back(self.offset)
@@ -39,13 +48,19 @@ impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
         return *length * (self.scale as f32);
     }
 
-    fn transform_vector(&self, reference: &Vector2) -> Vector2 {
+    pub fn transform_vector(&self, reference: &Vector2) -> Vector2 {
         let mut result = reference.clone();
         self.transform_vector_in_place(&mut result);
         result
     }
 
-    fn transform_rectangle(&self, reference: &Rectangle) -> Rectangle {
+    pub fn inv_transform_vector(&self, reference: &Vector2) -> Vector2 {
+        let mut result = reference.clone();
+        self.inv_transform_vector_in_place(&mut result);
+        result
+    }
+
+    pub fn transform_rectangle(&self, reference: &Rectangle) -> Rectangle {
         let mut result = reference.clone();
         self.transform_rectangle_in_place(&mut result);
         result
@@ -59,7 +74,14 @@ impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
         target.y = y;
     }
 
-    fn transform_rectangle_in_place(&self, reference: &mut Rectangle) {
+    pub fn inv_transform_vector_in_place(&self, target: &mut Vector2) {
+        let x = (target.x - self.offset.x) / (self.scale as f32);
+        let mut y = (target.y - self.offset.y)/ (self.scale as f32);
+        target.x = x;
+        target.y = y;
+    }
+
+    pub fn transform_rectangle_in_place(&self, reference: &mut Rectangle) {
         let x = reference.x * (self.scale as f32) + self.offset.x;
         let mut y = reference.y * (self.scale as f32) + self.offset.y;
         let width = reference.width * (self.scale as f32);
@@ -70,6 +92,18 @@ impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
         reference.height = height;
     }
 
+
+    pub(crate) fn get_screen_mouse_position(&self) -> Vector2 {
+        self.mouse_info.screen
+    }
+
+    pub(crate) fn get_world_mouse_position(&self) -> Vector2 {
+        self.mouse_info.world
+    }
+
+    pub(crate) fn get_local_world_mouse_position(&self) -> Vector2 {
+        self.inv_transform_vector(&self.mouse_info.world)
+    }
 
     pub(crate) fn draw_text(&mut self, font: &FontInfo, text: &String, pos: &Vector2, size: &Size, color: Color) {
         let mut rec = Rectangle::new(pos.x, pos.y, size.width(), size.height());
@@ -129,11 +163,11 @@ impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
         self.raylib_draw.draw_rectangle_rec(rectangle, color)
     }
 
-    pub fn default(raylib_draw: &'a mut T, position: Vector2) -> GuiDrawer<'a, T> {
-        return GuiDrawer::new(raylib_draw,  position, 1);
+    pub fn default(raylib_draw: &'a mut T, mouse_info:&MouseInformation, position: Vector2) -> GuiDrawer<'a, T> {
+        return GuiDrawer::new(raylib_draw,  mouse_info, position, 1);
     }
 
-    fn new(raylib_draw: &'a mut T, position: Vector2, scale: u32) -> Self {
-        Self { raylib_draw,scale, offset: position, offset_queue: LinkedList::new() }
+    fn new(raylib_draw: &'a mut T, mouse_info:&MouseInformation, position: Vector2, scale: u32) -> Self {
+        Self { raylib_draw,scale, offset: position, offset_queue: LinkedList::new(), mouse_info:mouse_info.clone() }
     }
 }
