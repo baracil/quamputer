@@ -18,7 +18,7 @@ fn main() -> Result<(), String> {
     let circuit = computer.new_circuit_builder()
         .add_operation(Hadamard(0))
         .add_operation(CNot(1, [0]))
-        .add_operation(CNot(2, [0]))
+        .add_operation(CNot(2, [1]))
         .build()?;
 
     let initial_state = computer.zero_state();
