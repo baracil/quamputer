@@ -1,55 +1,57 @@
 use std::cell::RefCell;
+use std::fmt::{Display, Formatter};
 use std::ops::{Deref, DerefMut};
 
 use generational_arena::Index;
+use raylib::core::drawing::RaylibDraw;
 use raylib::math::Rectangle;
 use raylib::prelude::{Color, Vector2};
 use rsgui::size::Size;
-use vec_tree::{VecTree, ChildrenIter};
 
 use crate::_loop::Loop;
 use crate::circuit::Circuit;
 use crate::condition::StopCondition;
 use crate::gate::Gate;
 use crate::gate_without_control::GateWithoutControl;
+use crate::gui::{Drawable, Style};
+use crate::gui::gui_drawer::GuiDrawer;
 use crate::measure::Measure;
 use crate::operation::CircuitElement;
-use crate::gui::Style;
-use std::fmt::{Display, Formatter};
-
+use crate::gui::id_generator::IdGenerator;
+use std::process::id;
 
 /// Information about hoover gate/control point
 pub enum HoverData {
-    Loop(Index),
-    Measure(Index),
-    Gate(Index,Option<u8>,Option<usize>),
+    Loop(u32),
+    Measure(u32),
+    Gate(u32, Option<u8>, Option<usize>),
 }
 
 impl Display for HoverData {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            HoverData::Loop(index) => write!(f,"Loop {:?}",index),
-            HoverData::Measure(index) => write!(f,"Measure {:?}",index),
-            HoverData::Gate(index,target, control) => write!(f,"Gate {:?} t:{:?} c:{:?}",index,target, control),
+            HoverData::Loop(index) => write!(f, "Loop {:?}", index),
+            HoverData::Measure(index) => write!(f, "Measure {:?}", index),
+            HoverData::Gate(index, target, control) => write!(f, "Gate {:?} t:{:?} c:{:?}", index, target, control),
         }
     }
 }
 
 impl HoverData {
-    pub fn for_measure(index:Index) -> Self {
-        HoverData::Measure(index)
+    pub fn for_measure(id: u32) -> Self {
+        HoverData::Measure(id)
     }
 
-    pub fn for_loop(index:Index) -> Self {
-        HoverData::Loop(index)
+    pub fn for_loop(id: u32) -> Self {
+        HoverData::Loop(id)
     }
 
-    pub fn for_gate_on_target_qbit(index:Index, target:u8) -> Self {
-        HoverData::Gate(index, Some(target),None)
+    pub fn for_gate_on_target_qbit(id: u32, target: u8) -> Self {
+        HoverData::Gate(id, Some(target), None)
     }
 
-    pub fn for_gate_on_control_qbit(index:Index, control:usize) -> Self{
-        HoverData::Gate(index, None,Some(control))
+    pub fn for_gate_on_control_qbit(id: u32, control: usize) -> Self {
+        HoverData::Gate(id, None, Some(control))
     }
 }
 
@@ -103,42 +105,18 @@ pub struct GuiMeasureData {
 }
 
 pub struct GuiRoot {
-    pub position:Vector2,
+    pub position: Vector2,
+    pub circuit: GuiCircuit,
     pub parameter: DrawableParameter,
 }
 
 pub struct DrawableParameter {
-    pub nb_qbits:u8,
+    pub nb_qbits: u8,
     pub style: Style,
-    pub tree: VecTree<GuiCircuitElement>
-}
-
-impl DrawableParameter {
-    pub(crate) fn get_root(&self) -> Option<&GuiCircuitElement> {
-        self.tree.get_root_index()
-            .and_then(|index| {self.tree.get(index)})
-    }
-
-    pub fn get_element_mut(&mut self, index: Index) -> Option<&mut GuiCircuitElement> {
-        self.tree.get_mut(index)
-    }
-    pub fn get_element(&self, index: Index) -> Option<&GuiCircuitElement> {
-        self.tree.get(index)
-    }
-
-    pub fn insert(&mut self, element: GuiCircuitElement, parent_index: Index) -> Index {
-        self.tree.insert(element, parent_index)
-    }
-
-    pub(crate) fn children(&self, index: Index) -> ChildrenIter<GuiCircuitElement> {
-        self.tree.children(index)
-    }
-
 }
 
 impl Deref for GuiRoot {
     type Target = DrawableParameter;
-
     fn deref(&self) -> &Self::Target {
         &self.parameter
     }
@@ -152,82 +130,54 @@ impl DerefMut for GuiRoot {
 
 impl Deref for DrawableParameter {
     type Target = Style;
-
     fn deref(&self) -> &Self::Target {
         &self.style
     }
 }
 
 impl GuiRoot {
-    pub fn new(circuit: &Circuit, reference:&Style) -> Self {
-        let gui_loop: GuiCircuitElement = circuit.into();
-        let mut tree = VecTree::new();
+    pub fn new(circuit: &Circuit, reference: &Style) -> Self {
+        let mut id_generator= IdGenerator::default();
+        let gui_circuit = GuiCircuit::new(circuit, &mut id_generator);
 
-        let root_index = tree.insert_root(gui_loop);
-
-        let parameter = DrawableParameter{ nb_qbits: circuit.nb_qbits, style:reference.clone(), tree};
-        let mut root = GuiRoot { position:Vector2::default(), parameter};
-        root.set_node_index(root_index);
-
-        for element in &circuit.elements {
-            root.add(element, root_index);
-        };
+        let parameter = DrawableParameter { nb_qbits: circuit.nb_qbits, style: reference.clone() };
+        let mut root = GuiRoot { position: Vector2::default(), parameter, circuit:gui_circuit };
 
         root
     }
 
-    fn set_node_index(&mut self, index: Index) {
-        let node = self.parameter.get_element_mut(index);
-        if node.is_some() {
-            node.unwrap().set_index(index)
-        }
-    }
-
-    fn add(&mut self, element: &CircuitElement, parent_index: Index) {
-        let gui_element = element.into();
-        let index = self.parameter.insert(gui_element, parent_index);
-        self.set_node_index(index);
-        match element {
-            CircuitElement::Loop(l) => {
-                for x in &l.circuit.elements {
-                    self.add(x, index)
-                }
-            }
-            CircuitElement::Gate(_) => {}
-            CircuitElement::Measure(_) => {}
-        };
-    }
 }
 
 #[derive(Clone)]
 pub struct GuiCircuit {
-    pub gui_data: RefCell<GuiCircuitData>,
+    pub id: u32,
+    pub gui_data: GuiCircuitData,
     pub nb_qbits: u8,
+    pub gui_elements: Vec<GuiCircuitElement>,
 }
 
 #[derive(Clone)]
 pub struct GuiLoop {
-    pub index: Option<Index>,
-    pub gui_data: RefCell<GuiLoopData>,
+    pub id: u32,
+    pub gui_data: GuiLoopData,
     pub circuit: GuiCircuit,
     pub stop_condition: StopCondition,
-    pub raw_circuit: bool,
 }
 
 #[derive(Clone)]
 pub struct GuiGate {
-    pub index: Option<Index>,
-    pub gui_data: RefCell<GuiGateData>,
+    pub id: u32,
+    pub gui_data: GuiGateData,
     pub gate: GateWithoutControl,
     pub control_bits: Vec<u8>,
 }
 
 #[derive(Clone)]
 pub struct GuiMeasure {
-    pub index: Option<Index>,
-    pub gui_data: RefCell<GuiMeasureData>,
+    pub id: u32,
+    pub gui_data: GuiMeasureData,
     ///A uniq identifier of the measurement
-    pub id: String,
+    pub measure_id: String,
     ///the target qbit for the measurement
     pub target: u8,
 }
@@ -251,20 +201,11 @@ impl Display for GuiCircuitElement {
 }
 
 impl GuiCircuitElement {
-
     pub(crate) fn width(&self) -> f32 {
         match self {
-            GuiCircuitElement::GuiLoop(p) => p.gui_data.borrow().common.width,
-            GuiCircuitElement::GuiGate(p) => p.gui_data.borrow().common.width,
-            GuiCircuitElement::GuiMeasure(p) => p.gui_data.borrow().common.width,
-        }
-    }
-
-    pub(crate) fn set_index(&mut self, index: Index) {
-        match self {
-            GuiCircuitElement::GuiLoop(p) => p.index = Some(index),
-            GuiCircuitElement::GuiGate(p) => p.index = Some(index),
-            GuiCircuitElement::GuiMeasure(p) => p.index = Some(index),
+            GuiCircuitElement::GuiLoop(p) => p.gui_data.common.width,
+            GuiCircuitElement::GuiGate(p) => p.gui_data.common.width,
+            GuiCircuitElement::GuiMeasure(p) => p.gui_data.common.width,
         }
     }
 }
@@ -321,64 +262,132 @@ impl DerefMut for GuiMeasureData {
     }
 }
 
-impl From<Circuit> for GuiCircuit {
-    fn from(c: Circuit) -> Self {
-        GuiCircuit { gui_data: RefCell::new(GuiCircuitData::default()), nb_qbits: c.nb_qbits }
+impl Drawable for GuiCircuit {
+    fn layout(&mut self, parameter: &DrawableParameter) -> f32 {
+        let width = self.gui_elements.iter_mut().map(|l| { l.layout(parameter) }).sum();
+        self.gui_data.width = width;
+        width
+    }
+
+    fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter: &DrawableParameter) -> Option<HoverData> {
+        drawer.push_offset();
+        let mut hoover_result = None;
+        for element in &self.gui_elements {
+            let child_hoover = element.draw(drawer, parameter);
+            hoover_result = hoover_result.or(child_hoover);
+            drawer.shift_by(element.width());
+        };
+        drawer.pop_offset();
+        hoover_result
     }
 }
 
-impl From<&Circuit> for GuiCircuit {
-    fn from(c: &Circuit) -> Self {
-        GuiCircuit { gui_data: RefCell::new(GuiCircuitData::default()), nb_qbits: c.nb_qbits }
-    }
-}
 
+impl GuiCircuit {
+    pub fn new(circuit: &Circuit, id_generator: &mut IdGenerator) -> Self {
+        let id = id_generator.get_and_increment();
+        let gui_elements = circuit.elements.iter()
+            .map(|element| { to_gui(element,id_generator)}).collect();
 
-impl From<&CircuitElement> for GuiCircuitElement {
-    fn from(element: &CircuitElement) -> Self {
-        match element {
-            CircuitElement::Loop(l) => l.into(),
-            CircuitElement::Gate(g) => g.into(),
-            CircuitElement::Measure(m) => m.into(),
+        GuiCircuit {
+            id,
+            nb_qbits: circuit.nb_qbits,
+            gui_data: GuiCircuitData::default(),
+            gui_elements
         }
     }
 }
 
-impl From<Circuit> for GuiCircuitElement {
-    fn from(c: Circuit) -> Self {
-        let gui_loop = GuiLoop { index: None, raw_circuit: true, gui_data: RefCell::new(GuiLoopData::default()), circuit: c.into(), stop_condition: StopCondition::Once() };
-        return GuiCircuitElement::GuiLoop(gui_loop);
+fn to_gui(element: &CircuitElement, id_generator: &mut IdGenerator) -> GuiCircuitElement {
+    match element {
+        CircuitElement::Loop(l) => GuiLoop::new(l, id_generator),
+        CircuitElement::Gate(g) => GuiGate::new(g, id_generator),
+        CircuitElement::Measure(m) => GuiMeasure::new(m, id_generator)
     }
 }
 
-impl From<&Circuit> for GuiCircuitElement {
-    fn from(c: &Circuit) -> Self {
-        let gui_loop = GuiLoop { index: None, raw_circuit: true, gui_data: RefCell::new(GuiLoopData::default()), circuit: c.into(), stop_condition: StopCondition::Once() };
-        return GuiCircuitElement::GuiLoop(gui_loop);
+impl GuiLoop {
+    pub fn new(loop_element: &Loop, id_generator: &mut IdGenerator) -> GuiCircuitElement {
+        let stop_condition = loop_element.stop_condition.clone();
+        let circuit = GuiCircuit::new(&loop_element.circuit, id_generator);
+        let gui_loop = GuiLoop { id:id_generator.get_and_increment(), stop_condition, circuit, gui_data: GuiLoopData::default() };
+        GuiCircuitElement::GuiLoop(gui_loop)
     }
 }
 
-
-
-
-impl From<&Loop> for GuiCircuitElement {
-    fn from(l: &Loop) -> Self {
-        let gui_circuit = l.circuit.clone().into();
-        let gui_loop = GuiLoop { index: None, raw_circuit: false, gui_data: RefCell::new(GuiLoopData::default()), circuit: gui_circuit, stop_condition: l.stop_condition.clone() };
-        return GuiCircuitElement::GuiLoop(gui_loop);
-    }
-}
-
-impl From<&Gate> for GuiCircuitElement {
-    fn from(g: &Gate) -> Self {
-        let gui_gate = GuiGate { index: None, gui_data: RefCell::new(GuiGateData::default()), control_bits: g.get_control_bits().clone(), gate: g.get_gate() };
+impl GuiGate {
+    pub fn new(gate: &Gate, id_generator: &mut IdGenerator) -> GuiCircuitElement {
+        let gui_gate = GuiGate { id:id_generator.get_and_increment(), control_bits: gate.get_control_bits().clone(), gate: gate.get_gate(), gui_data: GuiGateData::default() };
         GuiCircuitElement::GuiGate(gui_gate)
     }
 }
 
-impl From<&Measure> for GuiCircuitElement {
-    fn from(m: &Measure) -> Self {
-        let gui_measure = GuiMeasure { index: None, gui_data: RefCell::new(GuiMeasureData::default()), target: m.qbit_target, id: m.id.clone() };
+impl GuiMeasure {
+    pub fn new(measure: &Measure, id_generator: &mut IdGenerator) -> GuiCircuitElement {
+        let gui_measure = GuiMeasure { id:id_generator.get_and_increment(), target: measure.qbit_target, measure_id: measure.id.clone(), gui_data: GuiMeasureData::default() };
         GuiCircuitElement::GuiMeasure(gui_measure)
     }
 }
+
+
+// impl From<Circuit> for GuiCircuit {
+//     fn from(c: Circuit) -> Self {
+//         GuiCircuit { id:0,gui_data: RefCell::new(GuiCircuitData::default()), nb_qbits: c.nb_qbits }
+//     }
+// }
+//
+// impl From<&Circuit> for GuiCircuit {
+//     fn from(c: &Circuit) -> Self {
+//         GuiCircuit { id:0,gui_data: RefCell::new(GuiCircuitData::default()), nb_qbits: c.nb_qbits }
+//     }
+// }
+//
+//
+// impl From<&CircuitElement> for GuiCircuitElement {
+//     fn from(element: &CircuitElement) -> Self {
+//         match element {
+//             CircuitElement::Loop(l) => l.into(),
+//             CircuitElement::Gate(g) => g.into(),
+//             CircuitElement::Measure(m) => m.into(),
+//         }
+//     }
+// }
+//
+// impl From<Circuit> for GuiCircuitElement {
+//     fn from(c: Circuit) -> Self {
+//         let gui_loop = GuiLoop { index: None, raw_circuit: true, gui_data: RefCell::new(GuiLoopData::default()), circuit: c.into(), stop_condition: StopCondition::Once() };
+//         return GuiCircuitElement::GuiLoop(gui_loop);
+//     }
+// }
+//
+// impl From<&Circuit> for GuiCircuitElement {
+//     fn from(c: &Circuit) -> Self {
+//         let gui_loop = GuiLoop { index: None, raw_circuit: true, gui_data: RefCell::new(GuiLoopData::default()), circuit: c.into(), stop_condition: StopCondition::Once() };
+//         return GuiCircuitElement::GuiLoop(gui_loop);
+//     }
+// }
+//
+//
+//
+//
+// impl From<&Loop> for GuiCircuitElement {
+//     fn from(l: &Loop) -> Self {
+//         let gui_circuit = l.circuit.clone().into();
+//         let gui_loop = GuiLoop { index: None, raw_circuit: false, gui_data: RefCell::new(GuiLoopData::default()), circuit: gui_circuit, stop_condition: l.stop_condition.clone() };
+//         return GuiCircuitElement::GuiLoop(gui_loop);
+//     }
+// }
+//
+// impl From<&Gate> for GuiCircuitElement {
+//     fn from(g: &Gate) -> Self {
+//         let gui_gate = GuiGate { index: None, gui_data: RefCell::new(GuiGateData::default()), control_bits: g.get_control_bits().clone(), gate: g.get_gate() };
+//         GuiCircuitElement::GuiGate(gui_gate)
+//     }
+// }
+//
+// impl From<&Measure> for GuiCircuitElement {
+//     fn from(m: &Measure) -> Self {
+//         let gui_measure = GuiMeasure { index: None, gui_data: RefCell::new(GuiMeasureData::default()), target: m.qbit_target, id: m.id.clone() };
+//         GuiCircuitElement::GuiMeasure(gui_measure)
+//     }
+// }

@@ -1,6 +1,5 @@
 use raylib::prelude::*;
 use rsgui::font::FontInfo;
-use vec_tree::VecTree;
 
 use crate::gui::gui_circuit::{GuiCircuitElement, HoverData, DrawableParameter};
 use crate::gui::gui_drawer::GuiDrawer;
@@ -16,6 +15,7 @@ pub mod gui_drawer;
 pub mod mouse_information;
 pub mod displacement;
 pub mod drag_information;
+mod id_generator;
 
 
 const HEIGHT_SPACING_RATIO: f32 = 0.6;
@@ -60,12 +60,12 @@ impl Style {
 
 pub trait Drawable {
     /// Layout its content and return the width it will use
-    fn layout(&self, parameter: &DrawableParameter) -> f32;
+    fn layout(&mut self, parameter: &DrawableParameter) -> f32;
     fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter: &DrawableParameter) -> Option<HoverData>;
 }
 
 impl Drawable for GuiCircuitElement {
-    fn layout(&self,parameter: &DrawableParameter) -> f32 {
+    fn layout(&mut self,parameter: &DrawableParameter) -> f32 {
         match self {
             GuiCircuitElement::GuiLoop(p) => p.layout(parameter),
             GuiCircuitElement::GuiGate(p) => p.layout( parameter),

@@ -130,7 +130,6 @@ dependencies = [
  "rsgui",
  "serde",
  "serde_json",
- "vec-tree",
 ]
 
 [[package]]

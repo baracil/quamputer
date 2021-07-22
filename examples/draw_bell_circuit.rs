@@ -116,11 +116,9 @@ fn main() -> Result<(), String> {
 
             if let Some(h) = &hover {
 
-                if let HoverData::Gate(idx,_,Some(c)) = h {
+                if let HoverData::Gate(id, _, Some(c)) = h {
                     if d.is_key_pressed(crate::consts::KeyboardKey::KEY_DELETE) {
-                        if let Some(GuiCircuitElement::GuiGate(g)) = circuit.get_element_mut(*idx) {
-                            g.control_bits.remove(*c);
-                        }
+                        println!("Remove {:?}",id)
                     }
                 }
 

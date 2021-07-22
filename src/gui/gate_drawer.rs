@@ -1,7 +1,6 @@
 use raylib::drawing::RaylibDraw;
 use raylib::math::Vector2;
 use rsgui::size::Size;
-use vec_tree::VecTree;
 
 use crate::gate_without_control::GateWithoutControl;
 use crate::gui::{Drawable, HEIGHT_SPACING_RATIO, Style};
@@ -9,58 +8,54 @@ use crate::gui::gui_circuit::{DrawableParameter, GuiCircuitElement, GuiGate, Gui
 use crate::gui::gui_drawer::GuiDrawer;
 
 impl Drawable for GuiGate {
-    fn layout(&self, parameter: &DrawableParameter) -> f32 {
+    fn layout(&mut self, parameter: &DrawableParameter) -> f32 {
         let gate_size = self.gate.width(parameter);
         let gate_y_center = self.gate.y_middle(parameter);
         let text = self.gate.text();
 
-        let mut data = GuiGateData::default();
-        data.text = text;
-        data.outline.x = parameter.margin;
-        data.outline.y = gate_y_center - gate_size * 0.5;
-        data.outline.width = gate_size;
-        data.outline.height = gate_size;
+        self.gui_data.text = text;
+        self.gui_data.outline.x = parameter.margin;
+        self.gui_data.outline.y = gate_y_center - gate_size * 0.5;
+        self.gui_data.outline.width = gate_size;
+        self.gui_data.outline.height = gate_size;
 
-        match &data.text {
+        match &self.gui_data.text {
             None => {
-                data.text_size = Size::new(0.0, 0.0);
-                data.text_position = Vector2::default();
+               self.gui_data.text_size = Size::new(0.0, 0.0);
+               self.gui_data.text_position = Vector2::default();
             }
             Some(t) => {
                 let size = parameter.font.measure_text(t, 0.0);
-                data.text_size = size;
-                data.text_position.x = data.outline.x + (data.outline.width - size.width()) * 0.5;
-                data.text_position.y = data.outline.y + (data.outline.height - size.height()) * 0.5;
+                self.gui_data.text_size = size;
+                self.gui_data.text_position.x = self.gui_data.outline.x + (self.gui_data.outline.width - size.width()) * 0.5;
+                self.gui_data.text_position.y = self.gui_data.outline.y + (self.gui_data.outline.height - size.height()) * 0.5;
             }
         }
 
         let width = 2.0 * parameter.margin + gate_size;
-        data.width = width;
-        data.center.x = parameter.margin + gate_size * 0.5;
-        data.center.y = gate_y_center;
-        data.gate_size = gate_size;
+        self.gui_data.width = width;
+        self.gui_data.center.x = parameter.margin + gate_size * 0.5;
+        self.gui_data.center.y = gate_y_center;
+        self.gui_data.gate_size = gate_size;
 
-        self.gui_data.replace(data);
         width
     }
 
     fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter: &DrawableParameter) -> Option<HoverData> {
-        let width = self.gui_data.borrow().width;
+        let width = self.gui_data.width;
 
         drawer.draw_all_registers(parameter, width);
 
         let hover_control = self.draw_control_qbits(drawer, parameter, &self.control_bits);
 
 
-        let hover_gate = self.gate.draw(drawer, parameter, &self.gui_data.borrow());
+        let hover_gate = self.gate.draw(drawer, parameter, &self.gui_data);
 
-        let hover_result = if let Some(index) = self.index {
-            match (hover_control, hover_gate) {
-                (_, Some(target_qbit)) => Some(HoverData::for_gate_on_target_qbit(index, target_qbit)),
-                (Some(control_qbit), _) => Some(HoverData::for_gate_on_control_qbit(index, control_qbit)),
-                (None, None) => None
-            }
-        } else { None };
+        let hover_result = match (hover_control, hover_gate) {
+            (_, Some(target_qbit)) => Some(HoverData::for_gate_on_target_qbit(self.id, target_qbit)),
+            (Some(control_qbit), _) => Some(HoverData::for_gate_on_control_qbit(self.id, control_qbit)),
+            (None, None) => None
+        };
 
         hover_result
     }
@@ -68,13 +63,13 @@ impl Drawable for GuiGate {
 
 impl GuiGate {
     fn draw_control_qbits<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter: &Style, control_bits: &[u8]) -> Option<usize> {
-        let mut cpos_end = self.gui_data.borrow().center.clone();
+        let mut cpos_end = self.gui_data.center.clone();
         let radius = parameter.register_spacing * 0.06;
 
 
         for (_i, control_bit) in control_bits.iter().enumerate() {
             cpos_end.y = parameter.qbit_y_offset(*control_bit);
-            drawer.draw_line_ex(&self.gui_data.borrow().center, &cpos_end, parameter.register_thickness, parameter.foreground_color);
+            drawer.draw_line_ex(&self.gui_data.center, &cpos_end, parameter.register_thickness, parameter.foreground_color);
         };
 
         let mut hover_result = None;
@@ -90,7 +85,6 @@ impl GuiGate {
         hover_result
     }
 }
-
 
 impl GateWithoutControl {
     pub fn width(&self, style: &Style) -> f32 {
@@ -139,7 +133,6 @@ impl GateWithoutControl {
         }
     }
 }
-
 
 fn draw_gate_with_text<T: RaylibDraw>(drawer: &mut GuiDrawer<T>, parameter: &Style, gui_data: &GuiGateData) -> bool {
     let mouse_position = drawer.mouse_info.world_pos;
