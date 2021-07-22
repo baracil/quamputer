@@ -84,7 +84,7 @@ impl Drawable for GuiLoop {
 
         if hoover_result.is_none() && !raw_circuit {
             let transformed_outline = drawer.transform_rectangle(&self.gui_data.borrow().outline);
-            let mouse_position = drawer.get_world_mouse_position();
+            let mouse_position = drawer.mouse_info.world_pos;
             let hover = transformed_outline.check_collision_point_rec(mouse_position);
 
             if  hover {

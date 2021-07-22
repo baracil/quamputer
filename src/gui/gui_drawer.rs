@@ -6,11 +6,11 @@ use rsgui::font::FontInfo;
 use rsgui::size::Size;
 
 use crate::gui::DrawingPar;
-use crate::gui::mouse_position::MouseInformation;
+use crate::gui::mouse_information::MouseInformation;
 
 pub struct GuiDrawer<'a, T: RaylibDraw> {
     raylib_draw: &'a mut T,
-    mouse_info:MouseInformation,
+    pub mouse_info:MouseInformation,
     scale: u32,
     offset: Vector2,
     offset_queue: LinkedList<Vector2>,
@@ -19,7 +19,7 @@ pub struct GuiDrawer<'a, T: RaylibDraw> {
 impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
 
     pub(crate) fn is_mouse_in_disk(&self, center: &Vector2, radius: f32) -> bool {
-        let mut mouse_position = self.get_local_world_mouse_position();
+        let mut mouse_position = self.inv_transform_vector(&self.mouse_info.world_pos);
         let mouse_distance = (mouse_position.x - center.x).hypot(mouse_position.y - center.y);
         mouse_distance <= radius
     }
@@ -90,19 +90,6 @@ impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
         reference.y = y;
         reference.width = width;
         reference.height = height;
-    }
-
-
-    pub(crate) fn get_screen_mouse_position(&self) -> Vector2 {
-        self.mouse_info.screen
-    }
-
-    pub(crate) fn get_world_mouse_position(&self) -> Vector2 {
-        self.mouse_info.world
-    }
-
-    pub(crate) fn get_local_world_mouse_position(&self) -> Vector2 {
-        self.inv_transform_vector(&self.mouse_info.world)
     }
 
     pub(crate) fn draw_text(&mut self, font: &FontInfo, text: &String, pos: &Vector2, size: &Size, color: Color) {

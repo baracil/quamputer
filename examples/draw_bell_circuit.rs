@@ -9,7 +9,7 @@ use quamputer::gui::camera_manager::CameraManager;
 use quamputer::gui::gui_drawer::GuiDrawer;
 use quamputer::standard_gate::StandardGate::{Toffoli, Fredkin, Hadamard, CNot};
 use std::f32::consts::PI;
-use quamputer::gui::mouse_position::MouseInformation;
+use quamputer::gui::mouse_information::MouseInformation;
 
 fn circuit1(computer:&QuantumComputer) -> Result<Circuit,String> {
 
@@ -83,6 +83,7 @@ fn main() -> Result<(), String> {
     let mut need_layout = true;
 
 
+    let mut mouse_info = MouseInformation::new();
 
     while !rl.window_should_close() {
 
@@ -92,10 +93,10 @@ fn main() -> Result<(), String> {
             screen_size.1 = rl.get_screen_height();
         }
 
-        let mouse_info = MouseInformation::new(&rl,&camera);
 
+        mouse_info.update(&rl,&camera);
 
-        camera_manager.handle_camera(&rl,&mut camera);
+        camera_manager.handle_camera(&rl,&mut camera,&mouse_info.middle_drag);
 
 
         {

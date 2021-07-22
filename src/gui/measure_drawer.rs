@@ -30,7 +30,7 @@ impl Drawable for GuiMeasure {
 
     fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, nb_qbits:u8, parameter: &DrawingPar, _tree: &VecTree<GuiCircuitElement>) -> Option<HoverData> {
         let transformed_outline = drawer.transform_rectangle(&self.gui_data.borrow().outline);
-        let mouse_pos = drawer.get_world_mouse_position();
+        let mouse_pos = drawer.mouse_info.world_pos;
 
         drawer.draw_all_registers(nb_qbits, parameter, self.gui_data.borrow().width);
 

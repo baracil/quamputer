@@ -12,7 +12,9 @@ mod measure_drawer;
 pub mod gui_circuit;
 pub mod camera_manager;
 pub mod gui_drawer;
-pub mod mouse_position;
+pub mod mouse_information;
+pub mod displacement;
+pub mod drag_information;
 
 
 const HEIGHT_SPACING_RATIO: f32 = 0.6;

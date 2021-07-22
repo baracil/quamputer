@@ -3,7 +3,7 @@ use raylib::prelude::*;
 use crate::gui::{Drawable, DrawingPar};
 use crate::gui::gui_circuit::{GuiCircuitElement, GuiRoot, HoverData};
 use crate::gui::gui_drawer::GuiDrawer;
-use crate::gui::mouse_position::MouseInformation;
+use crate::gui::mouse_information::MouseInformation;
 
 impl GuiRoot {
     pub fn layout(&mut self) {

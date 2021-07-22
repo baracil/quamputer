@@ -146,7 +146,7 @@ impl GateWithoutControl {
 
 
 fn draw_gate_with_text<T: RaylibDraw>(drawer: &mut GuiDrawer<T>, parameter: &DrawingPar, gui_data: &GuiGateData) -> bool {
-    let mouse_position = drawer.get_world_mouse_position();
+    let mouse_position = drawer.mouse_info.world_pos;
     let transformed_outline = drawer.transform_rectangle(&gui_data.outline);
 
     let hover = transformed_outline.check_collision_point_rec(mouse_position);
