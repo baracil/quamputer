@@ -1,6 +1,6 @@
 use raylib::prelude::*;
 use quamputer::computer::QuantumComputer;
-use quamputer::gui::{ DrawingPar};
+use quamputer::gui::{Style};
 use rsgui::font::FontInfo;
 use quamputer::condition::StopCondition::MaxIteration;
 use quamputer::gui::gui_circuit::{GuiRoot, HoverData, GuiCircuitElement};
@@ -53,7 +53,7 @@ fn main() -> Result<(), String> {
         FontInfo::new(font?, font_size)
     };
 
-    let reference = DrawingPar {
+    let reference = Style {
         font: font_info,
         hover_color: Color::VIOLET,
         register_spacing: 100.0,

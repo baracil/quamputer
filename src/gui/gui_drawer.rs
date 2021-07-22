@@ -5,8 +5,9 @@ use raylib::prelude::{Color, Rectangle, Vector2};
 use rsgui::font::FontInfo;
 use rsgui::size::Size;
 
-use crate::gui::DrawingPar;
+use crate::gui::{Style};
 use crate::gui::mouse_information::MouseInformation;
+use crate::gui::gui_circuit::DrawableParameter;
 
 pub struct GuiDrawer<'a, T: RaylibDraw> {
     raylib_draw: &'a mut T,
@@ -119,13 +120,13 @@ impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
         self.raylib_draw.draw_line_ex(start, end, thickness, color);
     }
 
-    pub(crate) fn draw_all_registers(&mut self, nb_qbits:u8, parameter: &DrawingPar, width: f32) {
+    pub(crate) fn draw_all_registers(&mut self, parameter:&DrawableParameter, width: f32) {
         let width = self.transform_length(&width);
         let thickness = self.transform_length(&parameter.register_thickness);
         let mut pos_start = Vector2::zero();
         let mut pos_end = Vector2::zero();
 
-        for i in 0..nb_qbits {
+        for i in 0..parameter.nb_qbits {
             pos_start.x = 0.0;
             pos_start.y = (i as f32) * parameter.register_spacing;
 

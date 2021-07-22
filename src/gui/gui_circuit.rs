@@ -5,7 +5,7 @@ use generational_arena::Index;
 use raylib::math::Rectangle;
 use raylib::prelude::{Color, Vector2};
 use rsgui::size::Size;
-use vec_tree::VecTree;
+use vec_tree::{VecTree, ChildrenIter};
 
 use crate::_loop::Loop;
 use crate::circuit::Circuit;
@@ -14,7 +14,7 @@ use crate::gate::Gate;
 use crate::gate_without_control::GateWithoutControl;
 use crate::measure::Measure;
 use crate::operation::CircuitElement;
-use crate::gui::DrawingPar;
+use crate::gui::Style;
 use std::fmt::{Display, Formatter};
 
 
@@ -103,31 +103,70 @@ pub struct GuiMeasureData {
 }
 
 pub struct GuiRoot {
-    pub nb_qbits:u8,
     pub position:Vector2,
-    pub parameter:DrawingPar,
-    pub tree: VecTree<GuiCircuitElement>,
+    pub parameter: DrawableParameter,
 }
 
+pub struct DrawableParameter {
+    pub nb_qbits:u8,
+    pub style: Style,
+    pub tree: VecTree<GuiCircuitElement>
+}
 
-impl GuiRoot {
-    pub fn get_element(&self, element_index: Index) -> Option<&GuiCircuitElement> {
-        self.tree.get(element_index)
+impl DrawableParameter {
+    pub(crate) fn get_root(&self) -> Option<&GuiCircuitElement> {
+        self.tree.get_root_index()
+            .and_then(|index| {self.tree.get(index)})
     }
 
-    pub fn get_element_mut(&mut self, element_index: Index) -> Option<&mut GuiCircuitElement> {
-        self.tree.get_mut(element_index)
+    pub fn get_element_mut(&mut self, index: Index) -> Option<&mut GuiCircuitElement> {
+        self.tree.get_mut(index)
+    }
+    pub fn get_element(&self, index: Index) -> Option<&GuiCircuitElement> {
+        self.tree.get(index)
+    }
+
+    pub fn insert(&mut self, element: GuiCircuitElement, parent_index: Index) -> Index {
+        self.tree.insert(element, parent_index)
+    }
+
+    pub(crate) fn children(&self, index: Index) -> ChildrenIter<GuiCircuitElement> {
+        self.tree.children(index)
+    }
+
+}
+
+impl Deref for GuiRoot {
+    type Target = DrawableParameter;
+
+    fn deref(&self) -> &Self::Target {
+        &self.parameter
+    }
+}
+
+impl DerefMut for GuiRoot {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.parameter
+    }
+}
+
+impl Deref for DrawableParameter {
+    type Target = Style;
+
+    fn deref(&self) -> &Self::Target {
+        &self.style
     }
 }
 
 impl GuiRoot {
-    pub fn new(circuit: &Circuit, reference:&DrawingPar) -> Self {
+    pub fn new(circuit: &Circuit, reference:&Style) -> Self {
         let gui_loop: GuiCircuitElement = circuit.into();
         let mut tree = VecTree::new();
 
         let root_index = tree.insert_root(gui_loop);
 
-        let mut root = GuiRoot { position:Vector2::default(), nb_qbits:circuit.nb_qbits, tree , parameter:reference.clone()};
+        let parameter = DrawableParameter{ nb_qbits: circuit.nb_qbits, style:reference.clone(), tree};
+        let mut root = GuiRoot { position:Vector2::default(), parameter};
         root.set_node_index(root_index);
 
         for element in &circuit.elements {
@@ -138,7 +177,7 @@ impl GuiRoot {
     }
 
     fn set_node_index(&mut self, index: Index) {
-        let node = self.tree.get_mut(index);
+        let node = self.parameter.get_element_mut(index);
         if node.is_some() {
             node.unwrap().set_index(index)
         }
@@ -146,7 +185,7 @@ impl GuiRoot {
 
     fn add(&mut self, element: &CircuitElement, parent_index: Index) {
         let gui_element = element.into();
-        let index = self.tree.insert(gui_element, parent_index);
+        let index = self.parameter.insert(gui_element, parent_index);
         self.set_node_index(index);
         match element {
             CircuitElement::Loop(l) => {

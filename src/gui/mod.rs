@@ -2,8 +2,9 @@ use raylib::prelude::*;
 use rsgui::font::FontInfo;
 use vec_tree::VecTree;
 
-use crate::gui::gui_circuit::{GuiCircuitElement, HoverData};
+use crate::gui::gui_circuit::{GuiCircuitElement, HoverData, DrawableParameter};
 use crate::gui::gui_drawer::GuiDrawer;
+use std::ops::Deref;
 
 mod circuit_drawer;
 mod gate_drawer;
@@ -20,7 +21,7 @@ pub mod drag_information;
 const HEIGHT_SPACING_RATIO: f32 = 0.6;
 
 #[derive(Clone)]
-pub struct DrawingPar {
+pub struct Style {
     pub font: FontInfo,
     pub register_spacing: f32,
     pub register_thickness: f32,
@@ -31,9 +32,12 @@ pub struct DrawingPar {
 }
 
 
-impl DrawingPar {
+
+
+
+impl Style {
     pub fn scale(&self, factor: f32) -> Self {
-        DrawingPar {
+        Style {
             hover_color: self.hover_color,
             font: FontInfo { font: self.font.font.clone(), size: self.font.size * factor },
             register_spacing: self.register_spacing * factor,
@@ -56,24 +60,24 @@ impl DrawingPar {
 
 pub trait Drawable {
     /// Layout its content and return the width it will use
-    fn layout(&self, nb_qbits:u8, parameter: &DrawingPar, tree: &VecTree<GuiCircuitElement>) -> f32;
-    fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, nb_qbits:u8, parameter: &DrawingPar, tree: &VecTree<GuiCircuitElement>) -> Option<HoverData>;
+    fn layout(&self, parameter: &DrawableParameter) -> f32;
+    fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter: &DrawableParameter) -> Option<HoverData>;
 }
 
 impl Drawable for GuiCircuitElement {
-    fn layout(&self, nb_qbits:u8, parameter: &DrawingPar, tree: &VecTree<GuiCircuitElement>) -> f32 {
+    fn layout(&self,parameter: &DrawableParameter) -> f32 {
         match self {
-            GuiCircuitElement::GuiLoop(p) => p.layout(nb_qbits, parameter, tree),
-            GuiCircuitElement::GuiGate(p) => p.layout(nb_qbits, parameter, tree),
-            GuiCircuitElement::GuiMeasure(p) => p.layout(nb_qbits, parameter, tree)
+            GuiCircuitElement::GuiLoop(p) => p.layout(parameter),
+            GuiCircuitElement::GuiGate(p) => p.layout( parameter),
+            GuiCircuitElement::GuiMeasure(p) => p.layout( parameter)
         }
     }
 
-    fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, nb_qbits:u8, parameter: &DrawingPar, tree: &VecTree<GuiCircuitElement>) -> Option<HoverData>{
+    fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter: &DrawableParameter) -> Option<HoverData>{
         match self {
-            GuiCircuitElement::GuiLoop(p) => p.draw(drawer, nb_qbits,parameter, tree),
-            GuiCircuitElement::GuiGate(p) => p.draw(drawer,nb_qbits, parameter, tree),
-            GuiCircuitElement::GuiMeasure(p) => p.draw(drawer, nb_qbits ,parameter, tree),
+            GuiCircuitElement::GuiLoop(p) => p.draw(drawer, parameter),
+            GuiCircuitElement::GuiGate(p) => p.draw(drawer, parameter),
+            GuiCircuitElement::GuiMeasure(p) => p.draw(drawer, parameter),
         }
     }
 }

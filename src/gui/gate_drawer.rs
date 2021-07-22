@@ -1,19 +1,15 @@
-
-
 use raylib::drawing::RaylibDraw;
 use raylib::math::Vector2;
-
-
 use rsgui::size::Size;
 use vec_tree::VecTree;
 
 use crate::gate_without_control::GateWithoutControl;
-use crate::gui::{Drawable, DrawingPar, HEIGHT_SPACING_RATIO};
-use crate::gui::gui_circuit::{GuiCircuitElement, GuiGate, GuiGateData, HoverData};
+use crate::gui::{Drawable, HEIGHT_SPACING_RATIO, Style};
+use crate::gui::gui_circuit::{DrawableParameter, GuiCircuitElement, GuiGate, GuiGateData, HoverData};
 use crate::gui::gui_drawer::GuiDrawer;
 
 impl Drawable for GuiGate {
-    fn layout(&self, _nb_qbits: u8, parameter: &DrawingPar, _tree: &VecTree<GuiCircuitElement>) -> f32 {
+    fn layout(&self, parameter: &DrawableParameter) -> f32 {
         let gate_size = self.gate.width(parameter);
         let gate_y_center = self.gate.y_middle(parameter);
         let text = self.gate.text();
@@ -48,10 +44,10 @@ impl Drawable for GuiGate {
         width
     }
 
-    fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, nb_qbits: u8, parameter: &DrawingPar, _tree: &VecTree<GuiCircuitElement>) -> Option<HoverData> {
+    fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter: &DrawableParameter) -> Option<HoverData> {
         let width = self.gui_data.borrow().width;
 
-        drawer.draw_all_registers(nb_qbits, parameter, width);
+        drawer.draw_all_registers(parameter, width);
 
         let hover_control = self.draw_control_qbits(drawer, parameter, &self.control_bits);
 
@@ -71,7 +67,7 @@ impl Drawable for GuiGate {
 }
 
 impl GuiGate {
-    fn draw_control_qbits<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter: &DrawingPar, control_bits: &[u8]) -> Option<usize> {
+    fn draw_control_qbits<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter: &Style, control_bits: &[u8]) -> Option<usize> {
         let mut cpos_end = self.gui_data.borrow().center.clone();
         let radius = parameter.register_spacing * 0.06;
 
@@ -97,7 +93,7 @@ impl GuiGate {
 
 
 impl GateWithoutControl {
-    pub fn width(&self, parameter: &DrawingPar) -> f32 {
+    pub fn width(&self, style: &Style) -> f32 {
         let factor: f32 = match self {
             GateWithoutControl::Not(_) => 0.5,
             GateWithoutControl::Swap(_, _) => 0.5,
@@ -106,7 +102,7 @@ impl GateWithoutControl {
             GateWithoutControl::Z(_) => 1.0,
             GateWithoutControl::Hadamard(_) => 1.0
         };
-        return parameter.register_spacing * factor * HEIGHT_SPACING_RATIO;
+        return style.register_spacing * factor * HEIGHT_SPACING_RATIO;
     }
 
     pub fn text(&self) -> Option<String> {
@@ -120,7 +116,7 @@ impl GateWithoutControl {
         }
     }
 
-    pub fn y_middle(&self, parameter: &DrawingPar) -> f32 {
+    pub fn y_middle(&self, parameter: &Style) -> f32 {
         match self {
             GateWithoutControl::Not(t) => parameter.qbit_y_offset(*t),
             GateWithoutControl::X(t) => parameter.qbit_y_offset(*t),
@@ -131,7 +127,7 @@ impl GateWithoutControl {
         }
     }
 
-    fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter: &DrawingPar, gui_data: &GuiGateData) -> Option<u8> {
+    fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter: &Style, gui_data: &GuiGateData) -> Option<u8> {
         match self {
             GateWithoutControl::X(target) => draw_gate_with_text(drawer, parameter, gui_data).then(|| { *target }),
             GateWithoutControl::Y(target) => draw_gate_with_text(drawer, parameter, gui_data).then(|| { *target }),
@@ -145,7 +141,7 @@ impl GateWithoutControl {
 }
 
 
-fn draw_gate_with_text<T: RaylibDraw>(drawer: &mut GuiDrawer<T>, parameter: &DrawingPar, gui_data: &GuiGateData) -> bool {
+fn draw_gate_with_text<T: RaylibDraw>(drawer: &mut GuiDrawer<T>, parameter: &Style, gui_data: &GuiGateData) -> bool {
     let mouse_position = drawer.mouse_info.world_pos;
     let transformed_outline = drawer.transform_rectangle(&gui_data.outline);
 
@@ -163,7 +159,7 @@ fn draw_gate_with_text<T: RaylibDraw>(drawer: &mut GuiDrawer<T>, parameter: &Dra
     hover
 }
 
-fn draw_not_gate<T: RaylibDraw>(drawer: &mut GuiDrawer<T>, parameter: &DrawingPar, gui_data: &GuiGateData) -> bool {
+fn draw_not_gate<T: RaylibDraw>(drawer: &mut GuiDrawer<T>, parameter: &Style, gui_data: &GuiGateData) -> bool {
     let circle_radius = gui_data.gate_size * 0.5;
     let hover = drawer.is_mouse_in_disk(&gui_data.center, circle_radius);
 
@@ -183,7 +179,7 @@ fn draw_not_gate<T: RaylibDraw>(drawer: &mut GuiDrawer<T>, parameter: &DrawingPa
     hover
 }
 
-fn draw_swap_gate<T: RaylibDraw>(drawer: &mut GuiDrawer<T>, parameter: &DrawingPar, gui_data: &GuiGateData, target1: &u8, target2: &u8) -> Option<u8> {
+fn draw_swap_gate<T: RaylibDraw>(drawer: &mut GuiDrawer<T>, parameter: &Style, gui_data: &GuiGateData, target1: &u8, target2: &u8) -> Option<u8> {
     let target_y_pos1 = parameter.qbit_y_offset(*target1);
     let target_y_pos2 = parameter.qbit_y_offset(*target2);
     let size = gui_data.gate_size * 0.5;
@@ -199,7 +195,7 @@ fn draw_swap_gate<T: RaylibDraw>(drawer: &mut GuiDrawer<T>, parameter: &DrawingP
     hover1.then(|| { *target1 }).or_else(|| { hover2.then(|| { *target2 }) })
 }
 
-fn draw_swap_cross<T: RaylibDraw>(drawer: &mut GuiDrawer<T>, center: Vector2, size: f32, parameter: &DrawingPar) -> bool {
+fn draw_swap_cross<T: RaylibDraw>(drawer: &mut GuiDrawer<T>, center: Vector2, size: f32, parameter: &Style) -> bool {
     let size = size * 0.5;
     let mut point1 = center.clone();
     let mut point2 = center.clone();

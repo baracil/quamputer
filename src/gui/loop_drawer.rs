@@ -2,18 +2,18 @@ use raylib::color::Color;
 use raylib::drawing::RaylibDraw;
 use vec_tree::VecTree;
 
-use crate::gui::{Drawable, DrawingPar};
-use crate::gui::gui_circuit::{GuiCircuitElement, GuiLoop, GuiLoopData, HoverData};
+use crate::gui::{Drawable, Style};
+use crate::gui::gui_circuit::{GuiCircuitElement, GuiLoop, GuiLoopData, HoverData, DrawableParameter};
 use crate::gui::gui_drawer::GuiDrawer;
 
 impl Drawable for GuiLoop {
 
-    fn layout(&self, nb_qbits: u8, parameter: &DrawingPar, tree: &VecTree<GuiCircuitElement>) -> f32 {
-        let children = self.index.map(|i| { tree.children(i) });
+    fn layout(&self, parameter: &DrawableParameter) -> f32 {
+        let children = self.index.map(|i| { parameter.tree.children(i) });
 
         let circuit_width: f32 = if let Some(iter) = children {
-            iter.filter_map(|i| tree.get(i))
-                .map(|l| l.layout(nb_qbits, parameter, tree))
+            iter.filter_map(|i| parameter.tree.get(i))
+                .map(|l| l.layout(parameter))
                 .sum()
         } else {
             0.0
@@ -27,7 +27,7 @@ impl Drawable for GuiLoop {
         data.width = width;
         data.outline.x = margin;
         data.outline.y = -parameter.register_spacing;
-        data.outline.height = parameter.full_circuit_height(nb_qbits);
+        data.outline.height = parameter.full_circuit_height(parameter.nb_qbits);
         data.outline.width = circuit_width;
         data.outline_background = Color::new(128, 128, 128, 255);
 
@@ -36,16 +36,16 @@ impl Drawable for GuiLoop {
         width
     }
 
-    fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, nb_qbits: u8, parameter: &DrawingPar, tree: &VecTree<GuiCircuitElement>) -> Option<HoverData> {
+    fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter: &DrawableParameter) -> Option<HoverData> {
 
         if !self.raw_circuit {
             drawer.draw_rectangle_rec(&self.gui_data.borrow().outline, self.gui_data.borrow().outline_background);
             drawer.draw_rectangle_lines_ex(&self.gui_data.borrow().outline, parameter.register_thickness as i32, parameter.foreground_color);
         }
 
-        drawer.draw_all_registers(nb_qbits, parameter, self.gui_data.borrow().width);
+        drawer.draw_all_registers(parameter, self.gui_data.borrow().width);
 
-        let children = self.index.map(|i| tree.children(i));
+        let children = self.index.map(|i| parameter.children(i));
         if children.is_none() {
             return None;
         }
@@ -57,11 +57,10 @@ impl Drawable for GuiLoop {
 
         let mut hoover_result = None;
         for idx in children {
-            let element = tree.get(idx);
-            if let Some(e) = element {
-                let child_hoover = e.draw(drawer, nb_qbits, parameter, tree);
+            if let Some(element) = parameter.get_element(idx) {
+                let child_hoover = element.draw(drawer, parameter);
                 hoover_result = hoover_result.or(child_hoover);
-                drawer.shift_by(e.width());
+                drawer.shift_by(element.width());
             }
         }
 

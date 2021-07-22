@@ -1,14 +1,14 @@
 use raylib::prelude::*;
 use vec_tree::VecTree;
 
-use crate::gui::{Drawable, DrawingPar, HEIGHT_SPACING_RATIO};
-use crate::gui::gui_circuit::{GuiCircuitElement, GuiMeasure, GuiMeasureData, HoverData};
+use crate::gui::{Drawable, HEIGHT_SPACING_RATIO, Style};
+use crate::gui::gui_circuit::{DrawableParameter, GuiCircuitElement, GuiMeasure, GuiMeasureData, HoverData};
 use crate::gui::gui_drawer::GuiDrawer;
 
 const GOLDEN_RATIO: f32 = 1.618033988749894;
 
 impl Drawable for GuiMeasure {
-    fn layout(&self, _nb_qbits:u8, parameter: &DrawingPar, _tree: &VecTree<GuiCircuitElement>) -> f32 {
+    fn layout(&self, parameter: &DrawableParameter) -> f32 {
         let gate_height = parameter.register_spacing * HEIGHT_SPACING_RATIO;
         let gate_width = gate_height * GOLDEN_RATIO;
 
@@ -28,11 +28,11 @@ impl Drawable for GuiMeasure {
     }
 
 
-    fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, nb_qbits:u8, parameter: &DrawingPar, _tree: &VecTree<GuiCircuitElement>) -> Option<HoverData> {
+    fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter: &DrawableParameter) -> Option<HoverData> {
         let transformed_outline = drawer.transform_rectangle(&self.gui_data.borrow().outline);
         let mouse_pos = drawer.mouse_info.world_pos;
 
-        drawer.draw_all_registers(nb_qbits, parameter, self.gui_data.borrow().width);
+        drawer.draw_all_registers(parameter, self.gui_data.borrow().width);
 
         drawer.draw_rectangle_rec(&self.gui_data.borrow().outline, Color::BLACK);
         drawer.draw_rectangle_lines_ex(&self.gui_data.borrow().outline, parameter.register_thickness as i32, parameter.foreground_color);
