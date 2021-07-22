@@ -6,25 +6,20 @@ use crate::gui::{Drawable, DrawingPar};
 use crate::gui::gui_circuit::{GuiCircuitElement, GuiLoop, GuiLoopData, HoverData};
 use crate::gui::gui_drawer::GuiDrawer;
 
-
 impl Drawable for GuiLoop {
 
-    fn layout(&self, nb_qbits:u8, parameter: &DrawingPar, tree: &VecTree<GuiCircuitElement>) -> f32 {
+    fn layout(&self, nb_qbits: u8, parameter: &DrawingPar, tree: &VecTree<GuiCircuitElement>) -> f32 {
         let children = self.index.map(|i| { tree.children(i) });
 
-        let circuit_width: f32 = match children {
-            Some(iter) => {
-                iter.map(|i| tree.get(i))
-                    .filter(|m| m.is_some())
-                    .map(|o| o.unwrap())
-                    .map(|l| l.layout(nb_qbits, parameter, tree))
-                    .sum()
-            }
-            None => 0.0
+        let circuit_width: f32 = if let Some(iter) = children {
+            iter.filter_map(|i| tree.get(i))
+                .map(|l| l.layout(nb_qbits, parameter, tree))
+                .sum()
+        } else {
+            0.0
         };
 
         let margin = if self.raw_circuit { 0.0 } else { parameter.margin };
-
         let width = circuit_width + margin * 2.0;
 
         let mut data = GuiLoopData::default();
@@ -41,17 +36,14 @@ impl Drawable for GuiLoop {
         width
     }
 
-    fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, nb_qbits:u8, parameter: &DrawingPar, tree: &VecTree<GuiCircuitElement>) -> Option<HoverData> {
-        let raw_circuit = self.raw_circuit;
+    fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, nb_qbits: u8, parameter: &DrawingPar, tree: &VecTree<GuiCircuitElement>) -> Option<HoverData> {
 
-        if !raw_circuit {
+        if !self.raw_circuit {
             drawer.draw_rectangle_rec(&self.gui_data.borrow().outline, self.gui_data.borrow().outline_background);
             drawer.draw_rectangle_lines_ex(&self.gui_data.borrow().outline, parameter.register_thickness as i32, parameter.foreground_color);
         }
 
-
-        drawer.draw_all_registers(nb_qbits,parameter, self.gui_data.borrow().width);
-
+        drawer.draw_all_registers(nb_qbits, parameter, self.gui_data.borrow().width);
 
         let children = self.index.map(|i| tree.children(i));
         if children.is_none() {
@@ -62,33 +54,28 @@ impl Drawable for GuiLoop {
 
         drawer.push_offset();
         drawer.shift_by(self.gui_data.borrow().margin);
-        drawer.push_offset();
 
         let mut hoover_result = None;
         for idx in children {
             let element = tree.get(idx);
-            match element {
-                Some(e) => {
-                    let child_hoover = e.draw(drawer, nb_qbits, parameter, tree);
-                    hoover_result = hoover_result.or(child_hoover);
-                    drawer.shift_by(e.width());
-                }
-                None => {}
+            if let Some(e) = element {
+                let child_hoover = e.draw(drawer, nb_qbits, parameter, tree);
+                hoover_result = hoover_result.or(child_hoover);
+                drawer.shift_by(e.width());
             }
         }
 
         drawer.pop_offset();
-        drawer.pop_offset();
 
 
-        if hoover_result.is_none() && !raw_circuit {
+        if hoover_result.is_none() && !self.raw_circuit {
             let transformed_outline = drawer.transform_rectangle(&self.gui_data.borrow().outline);
             let mouse_position = drawer.mouse_info.world_pos;
             let hover = transformed_outline.check_collision_point_rec(mouse_position);
 
-            if  hover {
+            if hover {
                 drawer.draw_rectangle_lines_ex(&self.gui_data.borrow().outline, parameter.register_thickness as i32, parameter.hover_color);
-                return self.index.map(|index| { HoverData::for_loop(index)})
+                return self.index.map(|index| { HoverData::for_loop(index) });
             }
         }
 
