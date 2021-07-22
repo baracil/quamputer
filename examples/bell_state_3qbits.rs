@@ -1,5 +1,5 @@
 use quamputer::computer::QuantumComputer;
-use quamputer::condition::StopCondition::{MaxOneSample, MaxZeroSampling, Or};
+
 use quamputer::standard_gate::StandardGate::{CNot, Hadamard};
 
 fn main() -> Result<(), String> {

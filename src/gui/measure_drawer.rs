@@ -1,7 +1,7 @@
 use raylib::prelude::*;
 
 use crate::gui::{Drawable, HEIGHT_SPACING_RATIO};
-use crate::gui::gui_circuit::{DrawableParameter, GuiCircuitElement, GuiMeasure, GuiMeasureData, HoverData};
+use crate::gui::gui_circuit::{DrawableParameter, GuiMeasure, HoverData};
 use crate::gui::gui_drawer::GuiDrawer;
 
 const GOLDEN_RATIO: f32 = 1.618033988749894;
