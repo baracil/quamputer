@@ -19,7 +19,7 @@ pub struct GuiDrawer<'a, T: RaylibDraw> {
 impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
 
     pub(crate) fn is_mouse_in_disk(&self, center: &Vector2, radius: f32) -> bool {
-        let mut mouse_position = self.inv_transform_vector(&self.mouse_info.world_pos);
+        let mouse_position = self.inv_transform_vector(&self.mouse_info.world_pos);
         let mouse_distance = (mouse_position.x - center.x).hypot(mouse_position.y - center.y);
         mouse_distance <= radius
     }
@@ -69,21 +69,21 @@ impl<'a, T: RaylibDraw> GuiDrawer<'a, T> {
 
     fn transform_vector_in_place(&self, target: &mut Vector2) {
         let x = target.x * (self.scale as f32) + self.offset.x;
-        let mut y = target.y * (self.scale as f32) + self.offset.y;
+        let y = target.y * (self.scale as f32) + self.offset.y;
         target.x = x;
         target.y = y;
     }
 
     pub fn inv_transform_vector_in_place(&self, target: &mut Vector2) {
         let x = (target.x - self.offset.x) / (self.scale as f32);
-        let mut y = (target.y - self.offset.y)/ (self.scale as f32);
+        let y = (target.y - self.offset.y)/ (self.scale as f32);
         target.x = x;
         target.y = y;
     }
 
     pub fn transform_rectangle_in_place(&self, reference: &mut Rectangle) {
         let x = reference.x * (self.scale as f32) + self.offset.x;
-        let mut y = reference.y * (self.scale as f32) + self.offset.y;
+        let y = reference.y * (self.scale as f32) + self.offset.y;
         let width = reference.width * (self.scale as f32);
         let height = reference.height * (self.scale as f32);
         reference.x = x;

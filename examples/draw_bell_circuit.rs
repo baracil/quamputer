@@ -6,9 +6,9 @@ use quamputer::condition::StopCondition::MaxIteration;
 use quamputer::gui::gui_circuit::{GuiRoot, HoverData, GuiCircuitElement};
 use quamputer::circuit::Circuit;
 use quamputer::gui::camera_manager::CameraManager;
-use quamputer::gui::gui_drawer::GuiDrawer;
+
 use quamputer::standard_gate::StandardGate::{Toffoli, Fredkin, Hadamard, CNot};
-use std::f32::consts::PI;
+
 use quamputer::gui::mouse_information::MouseInformation;
 
 fn circuit1(computer:&QuantumComputer) -> Result<Circuit,String> {

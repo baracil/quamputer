@@ -8,7 +8,7 @@ use crate::gui::gui_drawer::GuiDrawer;
 const GOLDEN_RATIO: f32 = 1.618033988749894;
 
 impl Drawable for GuiMeasure {
-    fn layout(&self, nb_qbits:u8, parameter: &DrawingPar, _tree: &VecTree<GuiCircuitElement>) -> f32 {
+    fn layout(&self, _nb_qbits:u8, parameter: &DrawingPar, _tree: &VecTree<GuiCircuitElement>) -> f32 {
         let gate_height = parameter.register_spacing * HEIGHT_SPACING_RATIO;
         let gate_width = gate_height * GOLDEN_RATIO;
 

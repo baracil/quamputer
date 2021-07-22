@@ -5,8 +5,7 @@ use vec_tree::VecTree;
 use crate::gui::{Drawable, DrawingPar};
 use crate::gui::gui_circuit::{GuiCircuitElement, GuiLoop, GuiLoopData, HoverData};
 use crate::gui::gui_drawer::GuiDrawer;
-use std::borrow::Borrow;
-use std::alloc::handle_alloc_error;
+
 
 impl Drawable for GuiLoop {
 

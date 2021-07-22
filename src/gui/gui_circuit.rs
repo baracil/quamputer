@@ -16,7 +16,7 @@ use crate::measure::Measure;
 use crate::operation::CircuitElement;
 use crate::gui::DrawingPar;
 use std::fmt::{Display, Formatter};
-use crate::execution::State::Measured;
+
 
 /// Information about hoover gate/control point
 pub enum HoverData {
@@ -205,7 +205,7 @@ impl Display for GuiCircuitElement {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             GuiCircuitElement::GuiLoop(_) => f.write_str("GuiLoop"),
-            GuiCircuitElement::GuiGate(p) => f.write_str("GuiGate "),
+            GuiCircuitElement::GuiGate(_p) => f.write_str("GuiGate "),
             GuiCircuitElement::GuiMeasure(_) => f.write_str("GuiMeasure"),
         }
     }

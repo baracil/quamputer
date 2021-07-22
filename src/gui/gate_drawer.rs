@@ -1,9 +1,9 @@
-use std::cmp::Ordering;
+
 
 use raylib::drawing::RaylibDraw;
 use raylib::math::Vector2;
-use raylib::prelude::Rectangle;
-use rsgui::alignment::HAlignment;
+
+
 use rsgui::size::Size;
 use vec_tree::VecTree;
 
@@ -13,7 +13,7 @@ use crate::gui::gui_circuit::{GuiCircuitElement, GuiGate, GuiGateData, HoverData
 use crate::gui::gui_drawer::GuiDrawer;
 
 impl Drawable for GuiGate {
-    fn layout(&self, nb_qbits: u8, parameter: &DrawingPar, _tree: &VecTree<GuiCircuitElement>) -> f32 {
+    fn layout(&self, _nb_qbits: u8, parameter: &DrawingPar, _tree: &VecTree<GuiCircuitElement>) -> f32 {
         let gate_size = self.gate.width(parameter);
         let gate_y_center = self.gate.y_middle(parameter);
         let text = self.gate.text();
@@ -76,7 +76,7 @@ impl GuiGate {
         let radius = parameter.register_spacing * 0.06;
 
 
-        for (i, control_bit) in control_bits.iter().enumerate() {
+        for (_i, control_bit) in control_bits.iter().enumerate() {
             cpos_end.y = parameter.qbit_y_offset(*control_bit);
             drawer.draw_line_ex(&self.gui_data.borrow().center, &cpos_end, parameter.register_thickness, parameter.foreground_color);
         };
