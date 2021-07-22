@@ -5,7 +5,6 @@ use quamputer::common_gate::CommonGate::{CNot, Hadamard};
 fn main() -> Result<(), String> {
     let computer = QuantumComputer::new(3);
 
-
     let circuit = computer.new_circuit_builder()
         .add_operation(Hadamard(0))
         .add_operation(CNot(1, [0]))

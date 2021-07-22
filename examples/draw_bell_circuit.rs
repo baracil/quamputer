@@ -1,18 +1,16 @@
 use raylib::prelude::*;
-use quamputer::computer::QuantumComputer;
-use quamputer::gui::{Style};
 use rsgui::font::FontInfo;
-use quamputer::condition::StopCondition::MaxIteration;
-use quamputer::gui::gui_circuit::{GuiRoot, HoverData};
+
 use quamputer::circuit::Circuit;
+use quamputer::common_gate::CommonGate::{CNot, Fredkin, Hadamard, Toffoli};
+use quamputer::computer::QuantumComputer;
+use quamputer::condition::StopCondition::MaxIteration;
+use quamputer::gui::Style;
 use quamputer::gui::camera_manager::CameraManager;
-
-use quamputer::standard_gate::CommonGate::{Toffoli, Fredkin, Hadamard, CNot};
-
+use quamputer::gui::gui_circuit::{GuiRoot, HoverData};
 use quamputer::gui::mouse_information::MouseInformation;
 
-fn circuit1(computer:&QuantumComputer) -> Result<Circuit,String> {
-
+fn circuit1(computer: &QuantumComputer) -> Result<Circuit, String> {
     let circuit = computer.bell_state()
         .add_operation(Toffoli(2, [1, 0]))
         .add_operation(Fredkin(0, 1, [2]))
@@ -20,13 +18,13 @@ fn circuit1(computer:&QuantumComputer) -> Result<Circuit,String> {
         .build()?;
 
 
-     computer.new_circuit_builder()
-         .add_operation(Toffoli(2, [1,0]))
+    computer.new_circuit_builder()
+        .add_operation(Toffoli(2, [1, 0]))
         .add_loop(circuit, MaxIteration(10))
         .build()
 }
 
-fn _circuit2(computer:&QuantumComputer) -> Result<Circuit,String> {
+fn _circuit2(computer: &QuantumComputer) -> Result<Circuit, String> {
     computer.new_circuit_builder()
         .add_operation(Hadamard(0))
         .add_operation(CNot(1, [0]))
@@ -36,9 +34,6 @@ fn _circuit2(computer:&QuantumComputer) -> Result<Circuit,String> {
 
 
 fn main() -> Result<(), String> {
-
-
-
     let (mut rl, thread) = raylib::init()
         .size(640, 480)
         .title("3 Qbits Bell Circuit")
@@ -66,7 +61,7 @@ fn main() -> Result<(), String> {
 
     let computer = QuantumComputer::new(6);
 
-    let mut circuit  = GuiRoot::new(&circuit1(&computer)?, &reference);
+    let mut circuit = GuiRoot::new(&circuit1(&computer)?, &reference);
 
     let mut camera_manager = CameraManager::default();
 
@@ -86,7 +81,6 @@ fn main() -> Result<(), String> {
     let mut mouse_info = MouseInformation::new();
 
     while !rl.window_should_close() {
-
         if rl.is_window_resized() {
             init_camera(&mut camera, &rl);
             screen_size.0 = rl.get_screen_width();
@@ -94,9 +88,9 @@ fn main() -> Result<(), String> {
         }
 
 
-        mouse_info.update(&rl,&camera);
+        mouse_info.update(&rl, &camera);
 
-        camera_manager.handle_camera(&rl,&mut camera,&mouse_info.middle_drag);
+        camera_manager.handle_camera(&rl, &mut camera, &mouse_info.middle_drag);
 
 
         {
@@ -115,17 +109,13 @@ fn main() -> Result<(), String> {
             let hover = circuit.draw(&mut d, &mouse_info);
 
             if let Some(h) = &hover {
-
                 if let HoverData::Gate(id, _, Some(_c)) = h {
                     if d.is_key_pressed(crate::consts::KeyboardKey::KEY_DELETE) {
-                        println!("Remove {:?}",id)
+                        println!("Remove {:?}", id)
                     }
                 }
-
             }
         }
-
-
     };
 
     Ok(())
