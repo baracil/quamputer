@@ -4,7 +4,7 @@ use rsgui::size::Size;
 
 use crate::gate_without_control::GateWithoutControl;
 use crate::gui::{Drawable, HEIGHT_SPACING_RATIO, Style};
-use crate::gui::gui_circuit::{DrawableParameter, GuiCircuitElement, GuiGate, GuiGateData, HoverData};
+use crate::gui::gui_circuit::{DrawableParameter, GuiGate, GuiGateData, HoverData};
 use crate::gui::gui_drawer::GuiDrawer;
 
 impl Drawable for GuiGate {

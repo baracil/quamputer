@@ -3,7 +3,7 @@ use quamputer::computer::QuantumComputer;
 use quamputer::gui::{Style};
 use rsgui::font::FontInfo;
 use quamputer::condition::StopCondition::MaxIteration;
-use quamputer::gui::gui_circuit::{GuiRoot, HoverData, GuiCircuitElement};
+use quamputer::gui::gui_circuit::{GuiRoot, HoverData};
 use quamputer::circuit::Circuit;
 use quamputer::gui::camera_manager::CameraManager;
 
@@ -116,7 +116,7 @@ fn main() -> Result<(), String> {
 
             if let Some(h) = &hover {
 
-                if let HoverData::Gate(id, _, Some(c)) = h {
+                if let HoverData::Gate(id, _, Some(_c)) = h {
                     if d.is_key_pressed(crate::consts::KeyboardKey::KEY_DELETE) {
                         println!("Remove {:?}",id)
                     }

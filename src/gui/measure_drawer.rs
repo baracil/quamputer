@@ -1,6 +1,6 @@
 use raylib::prelude::*;
 
-use crate::gui::{Drawable, HEIGHT_SPACING_RATIO, Style};
+use crate::gui::{Drawable, HEIGHT_SPACING_RATIO};
 use crate::gui::gui_circuit::{DrawableParameter, GuiCircuitElement, GuiMeasure, GuiMeasureData, HoverData};
 use crate::gui::gui_drawer::GuiDrawer;
 

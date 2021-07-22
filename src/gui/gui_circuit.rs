@@ -1,8 +1,8 @@
-use std::cell::RefCell;
+
 use std::fmt::{Display, Formatter};
 use std::ops::{Deref, DerefMut};
 
-use generational_arena::Index;
+
 use raylib::core::drawing::RaylibDraw;
 use raylib::math::Rectangle;
 use raylib::prelude::{Color, Vector2};
@@ -18,7 +18,7 @@ use crate::gui::gui_drawer::GuiDrawer;
 use crate::measure::Measure;
 use crate::operation::CircuitElement;
 use crate::gui::id_generator::IdGenerator;
-use std::process::id;
+
 
 /// Information about hoover gate/control point
 pub enum HoverData {
@@ -141,7 +141,7 @@ impl GuiRoot {
         let gui_circuit = GuiCircuit::new(circuit, &mut id_generator);
 
         let parameter = DrawableParameter { nb_qbits: circuit.nb_qbits, style: reference.clone() };
-        let mut root = GuiRoot { position: Vector2::default(), parameter, circuit:gui_circuit };
+        let root = GuiRoot { position: Vector2::default(), parameter, circuit:gui_circuit };
 
         root
     }

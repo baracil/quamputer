@@ -3,7 +3,7 @@ use rsgui::font::FontInfo;
 
 use crate::gui::gui_circuit::{GuiCircuitElement, HoverData, DrawableParameter};
 use crate::gui::gui_drawer::GuiDrawer;
-use std::ops::Deref;
+
 
 mod circuit_drawer;
 mod gate_drawer;

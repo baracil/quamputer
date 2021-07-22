@@ -1,7 +1,7 @@
 use raylib::color::Color;
 use raylib::drawing::RaylibDraw;
 
-use crate::gui::{Drawable, Style};
+use crate::gui::{Drawable};
 use crate::gui::gui_circuit::{DrawableParameter, GuiCircuitElement, GuiLoop, GuiLoopData, HoverData};
 use crate::gui::gui_drawer::GuiDrawer;
 

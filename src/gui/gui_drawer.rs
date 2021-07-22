@@ -5,7 +5,7 @@ use raylib::prelude::{Color, Rectangle, Vector2};
 use rsgui::font::FontInfo;
 use rsgui::size::Size;
 
-use crate::gui::{Style};
+
 use crate::gui::mouse_information::MouseInformation;
 use crate::gui::gui_circuit::DrawableParameter;
 
