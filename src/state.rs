@@ -28,8 +28,10 @@ impl DerefMut for QuantumState {
 
 impl Debug for QuantumState {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        let threshold = 1e-6/((1<<self.nb_qbits) as f64);
         let wave_function = self.amplitudes.iter()
             .enumerate()
+            .filter(|(i,a)| {a.norm()>=threshold})
             .map(|(i, a)| { format!(" ({0:.6},{1:.6})x|{2:0>3$b}>", a.re, a.im, i, self.nb_qbits as usize) })
             .reduce(|s1, s2| s1.add(&s2))
             .unwrap_or("".to_string());
