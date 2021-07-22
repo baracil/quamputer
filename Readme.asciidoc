@@ -59,7 +59,7 @@ The available variant of `BaseGate` are:
  * Hadamard
  * Swap
 
-BaseGate has the Into<Gate> trait which convert it to a `Gate` without control qbits. For instance:
+BaseGate has the Into<Gate> trait that converts it into a `Gate` without control qbits. For instance:
 
 ```rust
 use quamputer::base_gate::BaseGate::{Hadamard};
