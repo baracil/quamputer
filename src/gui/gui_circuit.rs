@@ -12,7 +12,7 @@ use crate::_loop::Loop;
 use crate::circuit::Circuit;
 use crate::condition::StopCondition;
 use crate::gate::Gate;
-use crate::gate_without_control::GateWithoutControl;
+use crate::base_gate::BaseGate;
 use crate::gui::{Drawable, Style};
 use crate::gui::gui_drawer::GuiDrawer;
 use crate::measure::Measure;
@@ -168,7 +168,7 @@ pub struct GuiLoop {
 pub struct GuiGate {
     pub id: u32,
     pub gui_data: GuiGateData,
-    pub gate: GateWithoutControl,
+    pub gate: BaseGate,
     pub control_bits: Vec<u8>,
 }
 

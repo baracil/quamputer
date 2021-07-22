@@ -10,10 +10,10 @@ pub mod condition;
 
 //#[cfg(feature = "gui")]
 pub mod gui;
-pub mod standard_gate;
 pub mod measure;
 pub mod execution;
-pub mod gate_without_control;
+pub mod base_gate;
+pub mod common_gate;
 mod _loop;
 
 // with 16 qbits, one state holds 1MBytes of data

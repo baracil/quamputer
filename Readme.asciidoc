@@ -8,38 +8,100 @@ WARNING: Work in Progress
 
 ```rust
 use quamputer::computer::QuantumComputer;
-use quamputer::gate::Gate::{Hadamard, CNot};
-use quamputer::measure::Measure;
 
-fn main() {
+use quamputer::common_gate::CommonGate::{CNot, Hadamard};
+
+fn main() -> Result<(), String> {
     let computer = QuantumComputer::new(3);
-    let mut circuit_builder = computer.new_circuit_builder();
-
-    circuit_builder
-        .start_advanced_loop(|_,c| c.get_nb_zero("q0") >= 10 )
-        .push(Hadamard(0))
-        .push(CNot(0,[1]))
-        .push(CNot(1,[2]))
-        .push(Measure::new("q0",0))
-        .end_loop()
-        .unwrap();
 
 
-
-    let executable = computer.compile(&circuit_builder.build().unwrap());
+    let circuit = computer.new_circuit_builder()
+        .add_operation(Hadamard(0))
+        .add_operation(CNot(1, [0]))
+        .add_operation(CNot(2, [0]))
+        .build()?;
 
     let initial_state = computer.zero_state();
-    let result = executable.execute(&initial_state);
 
-    println!("input     : {:?}", initial_state);
-    println!("result    : {:?}", result.current_state());
-    println!("result q0 : {:?}", result.get_count("q0"));
+    let result = circuit.execute(&initial_state);
+
+    println!("{:?}", result.current_state());
+    Ok(())
 }
 ```
 
 This will print:
 ```
-input  : State 2 qbits :  (1.000000,0.000000)x|00> (0.000000,0.000000)x|01> (0.000000,0.000000)x|10> (0.000000,0.000000)x|11>
-result : State 2 qbits :  (0.707107,0.000000)x|00> (0.000000,0.000000)x|01> (0.000000,0.000000)x|10> (0.707107,0.000000)x|11>
+input  : State 3 qbits :  (1.000000,0.000000)x|000>
+output : State 3 qbits :  (0.707107,0.000000)x|000> (0.707107,0.000000)x|111>
+```
 
+== Circuit elements
+
+Three types of elements can be added to a circuit:
+
+ * Gate: the base operation on a small set of qbit (like Hadamard or Swap)
+ * Measure : A measurement made on a qbit
+ * Loop : a circuit and a stop condition
+
+== Gates
+
+The framework contains two types of gates: `BaseGate` and `Gate`.
+
+A `BaseGate` does not have any control qbits. A `Gate` is built by adding control qbits (or not) to a `BaseGate`.
+
+The available variant of `BaseGate` are:
+
+ * Not
+ * X
+ * Y
+ * Z
+ * Hadamard
+ * Swap
+
+BaseGate has the Into<Gate> trait which convert it to a `Gate` without control qbits. For instance:
+
+```rust
+use quamputer::base_gate::BaseGate::{Hadamard};
+
+fn main() -> Result<(), String> {
+    let gate = Hadamard(1);
+    Ok(())
+}
+```
+
+is equivalent (when used as a `Gate`) to:
+
+```rust
+use quamputer::base_gate::BaseGate::{Hadamard};
+use quamputer::operation::CircuitElement::Gate;
+
+fn main() -> Result<(), String> {
+    let gate = Gate::new(Hadamard(1),vec![]);
+    Ok(())
+}
+```
+
+Below are two ways to create a CNot gate on qbit 0 controlled by qbit 1:
+
+```rust
+use quamputer::base_gate::BaseGate::{Hadamard,Not};
+use quamputer::operation::CircuitElement::Gate;
+
+fn main() -> Result<(), String> {
+    let cnot1 = Gate::new(Not(0),vec![1]);
+    let cnot2 = Not(0).with_one_control(1);
+    Ok(())
+}
+```
+
+CNot, CSwap, Toffoli (CCNot), Fredkin (CSwap) are common gates and as such an enum `CommonGate` with the trait Into<Gate> defines those. For instance a Fredkin can be defined with:
+
+```rust
+use quamputer::common_gate::CommonGate::Fredkin;
+
+fn main() -> Result<(), String> {
+    let gate = Fredkin(0,1,[2]);
+    Ok(())
+}
 ```

@@ -7,7 +7,7 @@ use quamputer::gui::gui_circuit::{GuiRoot, HoverData};
 use quamputer::circuit::Circuit;
 use quamputer::gui::camera_manager::CameraManager;
 
-use quamputer::standard_gate::StandardGate::{Toffoli, Fredkin, Hadamard, CNot};
+use quamputer::standard_gate::CommonGate::{Toffoli, Fredkin, Hadamard, CNot};
 
 use quamputer::gui::mouse_information::MouseInformation;
 

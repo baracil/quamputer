@@ -2,7 +2,7 @@ use raylib::drawing::RaylibDraw;
 use raylib::math::Vector2;
 use rsgui::size::Size;
 
-use crate::gate_without_control::GateWithoutControl;
+use crate::base_gate::BaseGate;
 use crate::gui::{Drawable, HEIGHT_SPACING_RATIO, Style};
 use crate::gui::gui_circuit::{DrawableParameter, GuiGate, GuiGateData, HoverData};
 use crate::gui::gui_drawer::GuiDrawer;
@@ -86,50 +86,50 @@ impl GuiGate {
     }
 }
 
-impl GateWithoutControl {
+impl BaseGate {
     pub fn width(&self, style: &Style) -> f32 {
         let factor: f32 = match self {
-            GateWithoutControl::Not(_) => 0.5,
-            GateWithoutControl::Swap(_, _) => 0.5,
-            GateWithoutControl::X(_) => 1.0,
-            GateWithoutControl::Y(_) => 1.0,
-            GateWithoutControl::Z(_) => 1.0,
-            GateWithoutControl::Hadamard(_) => 1.0
+            BaseGate::Not(_) => 0.5,
+            BaseGate::Swap(_, _) => 0.5,
+            BaseGate::X(_) => 1.0,
+            BaseGate::Y(_) => 1.0,
+            BaseGate::Z(_) => 1.0,
+            BaseGate::Hadamard(_) => 1.0
         };
         return style.register_spacing * factor * HEIGHT_SPACING_RATIO;
     }
 
     pub fn text(&self) -> Option<String> {
         match self {
-            GateWithoutControl::Not(_) => None,
-            GateWithoutControl::X(_) => Some(String::from("X")),
-            GateWithoutControl::Y(_) => Some(String::from("Y")),
-            GateWithoutControl::Z(_) => Some(String::from("Z")),
-            GateWithoutControl::Swap(_, _) => None,
-            GateWithoutControl::Hadamard(_) => Some(String::from("H"))
+            BaseGate::Not(_) => None,
+            BaseGate::X(_) => Some(String::from("X")),
+            BaseGate::Y(_) => Some(String::from("Y")),
+            BaseGate::Z(_) => Some(String::from("Z")),
+            BaseGate::Swap(_, _) => None,
+            BaseGate::Hadamard(_) => Some(String::from("H"))
         }
     }
 
     pub fn y_middle(&self, parameter: &Style) -> f32 {
         match self {
-            GateWithoutControl::Not(t) => parameter.qbit_y_offset(*t),
-            GateWithoutControl::X(t) => parameter.qbit_y_offset(*t),
-            GateWithoutControl::Y(t) => parameter.qbit_y_offset(*t),
-            GateWithoutControl::Z(t) => parameter.qbit_y_offset(*t),
-            GateWithoutControl::Swap(t1, t2) => (parameter.qbit_y_offset(*t1) + parameter.qbit_y_offset(*t2)) * 0.5,
-            GateWithoutControl::Hadamard(t) => parameter.qbit_y_offset(*t),
+            BaseGate::Not(t) => parameter.qbit_y_offset(*t),
+            BaseGate::X(t) => parameter.qbit_y_offset(*t),
+            BaseGate::Y(t) => parameter.qbit_y_offset(*t),
+            BaseGate::Z(t) => parameter.qbit_y_offset(*t),
+            BaseGate::Swap(t1, t2) => (parameter.qbit_y_offset(*t1) + parameter.qbit_y_offset(*t2)) * 0.5,
+            BaseGate::Hadamard(t) => parameter.qbit_y_offset(*t),
         }
     }
 
     fn draw<T: RaylibDraw>(&self, drawer: &mut GuiDrawer<T>, parameter: &Style, gui_data: &GuiGateData) -> Option<u8> {
         match self {
-            GateWithoutControl::X(target) => draw_gate_with_text(drawer, parameter, gui_data).then(|| { *target }),
-            GateWithoutControl::Y(target) => draw_gate_with_text(drawer, parameter, gui_data).then(|| { *target }),
-            GateWithoutControl::Z(target) => draw_gate_with_text(drawer, parameter, gui_data).then(|| { *target }),
-            GateWithoutControl::Hadamard(target) => draw_gate_with_text(drawer, parameter, gui_data).then(|| { *target }),
+            BaseGate::X(target) => draw_gate_with_text(drawer, parameter, gui_data).then(|| { *target }),
+            BaseGate::Y(target) => draw_gate_with_text(drawer, parameter, gui_data).then(|| { *target }),
+            BaseGate::Z(target) => draw_gate_with_text(drawer, parameter, gui_data).then(|| { *target }),
+            BaseGate::Hadamard(target) => draw_gate_with_text(drawer, parameter, gui_data).then(|| { *target }),
 
-            GateWithoutControl::Not(target) => draw_not_gate(drawer, parameter, gui_data).then(|| { *target }),
-            GateWithoutControl::Swap(target1, target2) => draw_swap_gate(drawer, parameter, gui_data, target1, target2),
+            BaseGate::Not(target) => draw_not_gate(drawer, parameter, gui_data).then(|| { *target }),
+            BaseGate::Swap(target1, target2) => draw_swap_gate(drawer, parameter, gui_data, target1, target2),
         }
     }
 }

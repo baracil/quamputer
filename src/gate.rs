@@ -1,17 +1,17 @@
 use serde::{Deserialize, Serialize};
 
 use crate::execution::ExecutionContext;
-use crate::gate_without_control::GateWithoutControl;
+use crate::base_gate::BaseGate;
 use crate::operation::{CircuitElement, QuantumOperation};
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Gate {
-    gate: GateWithoutControl,
+    gate: BaseGate,
     control_bits: Vec<u8>,
 }
 
 impl Gate {
-    pub fn new(gate: GateWithoutControl, control_bits: Vec<u8>) -> Self {
+    pub fn new(gate: BaseGate, control_bits: Vec<u8>) -> Self {
         Gate { gate, control_bits }
     }
 
@@ -19,7 +19,7 @@ impl Gate {
         &self.control_bits
     }
 
-    pub fn get_gate(&self) -> GateWithoutControl {
+    pub fn get_gate(&self) -> BaseGate {
         self.gate
     }
 }

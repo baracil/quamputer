@@ -1,5 +1,5 @@
 use crate::builder::QuantumCircuitBuilder;
-use crate::standard_gate::StandardGate::{CNot, Hadamard};
+use crate::common_gate::CommonGate::{CNot, Hadamard};
 use crate::state::QuantumState;
 
 pub struct QuantumComputer {

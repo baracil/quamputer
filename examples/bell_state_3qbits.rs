@@ -1,6 +1,6 @@
 use quamputer::computer::QuantumComputer;
 
-use quamputer::standard_gate::StandardGate::{CNot, Hadamard};
+use quamputer::common_gate::CommonGate::{CNot, Hadamard};
 
 fn main() -> Result<(), String> {
     let computer = QuantumComputer::new(3);
@@ -16,7 +16,8 @@ fn main() -> Result<(), String> {
 
     let result = circuit.execute(&initial_state);
 
-    println!("{:?}", result.current_state());
+    println!("input  : {:?}", initial_state);
+    println!("output : {:?}", result.current_state());
     Ok(())
 }
 

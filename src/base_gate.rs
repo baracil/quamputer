@@ -8,7 +8,7 @@ use crate::gate_op::swap::apply_controlled_swap;
 use crate::operation::CircuitElement;
 
 #[derive(Copy, Clone, Serialize, Deserialize)]
-pub enum GateWithoutControl {
+pub enum BaseGate {
     Not(u8),
     X(u8),
     Y(u8),
@@ -24,26 +24,26 @@ pub enum GateWithoutControl {
     // Rz(f64,u8)
 }
 
-impl Into<Gate> for GateWithoutControl {
+impl Into<Gate> for BaseGate {
     fn into(self) -> Gate {
         Gate::new(self, vec![])
     }
 }
 
-impl Into<CircuitElement> for GateWithoutControl {
+impl Into<CircuitElement> for BaseGate {
     fn into(self) -> CircuitElement {
         CircuitElement::Gate(self.into())
     }
 }
 
-impl GateWithoutControl {
+impl BaseGate {
     /// Create a [`Gate`] from this gate
     /// that uses only one control qbit
     ///
     /// # Examples
     ///
     /// ```
-    /// use quamputer::gate_without_control::GateWithoutControl::Not;
+    /// use quamputer::base_gate::BaseGate::Not;
     /// let not = Not(2); // create a Not Gate on qbit(2)
     /// let cnot = not.with_one_control(0); // create a CNot gate. Control is qbit(0) and target qbit(2)
     /// ```
@@ -58,7 +58,7 @@ impl GateWithoutControl {
     /// # Examples
     ///
     /// ```
-    /// use quamputer::gate_without_control::GateWithoutControl::Not;
+    /// use quamputer::base_gate::BaseGate::Not;
     /// let not = Not(2); // create a Not Gate on qbit(2)
     /// let toffoli = not.with_two_controls(0,1); // create a Toffoli
     /// ```
@@ -77,38 +77,38 @@ impl GateWithoutControl {
         let mut result = Vec::new();
         result.extend_from_slice(others);
         match self {
-            GateWithoutControl::Not(t) => result.push(*t),
-            GateWithoutControl::X(t) => result.push(*t),
-            GateWithoutControl::Y(t) => result.push(*t),
-            GateWithoutControl::Z(t) => result.push(*t),
-            GateWithoutControl::Swap(t1, t2) => {
+            BaseGate::Not(t) => result.push(*t),
+            BaseGate::X(t) => result.push(*t),
+            BaseGate::Y(t) => result.push(*t),
+            BaseGate::Z(t) => result.push(*t),
+            BaseGate::Swap(t1, t2) => {
                 result.push(*t1);
                 result.push(*t2);
             }
-            GateWithoutControl::Hadamard(t) => result.push(*t),
+            BaseGate::Hadamard(t) => result.push(*t),
         };
         result
     }
 
     pub fn max_qbit_idx(&self) -> u8 {
         match self {
-            GateWithoutControl::Not(target) => *target,
-            GateWithoutControl::X(target) => *target,
-            GateWithoutControl::Y(target) => *target,
-            GateWithoutControl::Z(target) => *target,
-            GateWithoutControl::Hadamard(target) => *target,
-            GateWithoutControl::Swap(target1, target2) => *target1.max(target2),
+            BaseGate::Not(target) => *target,
+            BaseGate::X(target) => *target,
+            BaseGate::Y(target) => *target,
+            BaseGate::Z(target) => *target,
+            BaseGate::Hadamard(target) => *target,
+            BaseGate::Swap(target1, target2) => *target1.max(target2),
         }
     }
 
     pub(crate) fn apply_controlled(&self, control_qbits: &[u8], context: &mut ExecutionContext) {
         match self {
-            GateWithoutControl::Not(target) => apply_controlled_not(*target, control_qbits, context),
-            GateWithoutControl::X(target) => apply_controlled_pauli_x(*target, control_qbits, context),
-            GateWithoutControl::Y(target) => apply_controlled_pauli_y(*target, control_qbits, context),
-            GateWithoutControl::Z(target) => apply_controlled_pauli_z(*target, control_qbits, context),
-            GateWithoutControl::Hadamard(target) => apply_controlled_hadamard(control_qbits, *target, context),
-            GateWithoutControl::Swap(target1, target2) => apply_controlled_swap(control_qbits, *target1, *target2, context),
+            BaseGate::Not(target) => apply_controlled_not(*target, control_qbits, context),
+            BaseGate::X(target) => apply_controlled_pauli_x(*target, control_qbits, context),
+            BaseGate::Y(target) => apply_controlled_pauli_y(*target, control_qbits, context),
+            BaseGate::Z(target) => apply_controlled_pauli_z(*target, control_qbits, context),
+            BaseGate::Hadamard(target) => apply_controlled_hadamard(control_qbits, *target, context),
+            BaseGate::Swap(target1, target2) => apply_controlled_swap(control_qbits, *target1, *target2, context),
         }
     }
 }
