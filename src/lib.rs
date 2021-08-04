@@ -1,3 +1,5 @@
+extern crate druid;
+
 pub mod state;
 pub mod builder;
 pub mod computer;
@@ -8,13 +10,12 @@ pub mod operation;
 pub mod condition;
 
 
-//#[cfg(feature = "gui")]
-pub mod gui;
 pub mod measure;
 pub mod execution;
 pub mod base_gate;
 pub mod common_gate;
 mod _loop;
+pub mod gui;
 
 // with 16 qbits, one state holds 1MBytes of data
 const N: usize = 21;
