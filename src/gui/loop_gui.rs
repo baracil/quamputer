@@ -30,15 +30,22 @@ impl LoopGuiLayout {
 
 impl From<&Loop> for LoopGui {
     fn from(lp: &Loop) -> Self {
-        let circuit = &lp.circuit;
-        LoopGui { layout:None, circuit: circuit.into(), stop_condition: lp.stop_condition.clone() }
+        LoopGui::new(&lp.circuit, &lp.stop_condition)
     }
 }
 
 impl From<&LoopGui> for Loop {
     fn from(lp: &LoopGui) -> Loop {
-        Loop { circuit: (&lp.circuit).into(), stop_condition: lp.stop_condition.clone() }
+        Loop::new(&lp.circuit,&lp.stop_condition)
     }
+}
+
+impl LoopGui {
+
+    pub fn new(circuit:impl Into<CircuitGui>, stop_condition:&StopCondition) -> Self {
+        LoopGui{layout:None,circuit:circuit.into(),stop_condition:stop_condition.clone()}
+    }
+
 }
 
 impl GuiWidget for LoopGui {
@@ -64,8 +71,10 @@ impl GuiWidget for LoopGui {
             ctx.with_save(|c| {
                 let bkg_color = env.get(LOOP_BKG_COLOR);
                 let stroke_color = env.get(STROKE_COLOR);
+
                 c.fill(layout.rect, &bkg_color);
                 c.stroke(layout.rect, &stroke_color, 1.0);
+
                 c.transform(Affine::translate(Vec2{x:layout.margin,y:0.0}));
                 self.circuit.paint(c, env)
             })

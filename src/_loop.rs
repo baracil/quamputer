@@ -8,9 +8,15 @@ use crate::operation::{CircuitElement, QuantumOperation};
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Loop {
     /// the circuit that makes the content of the loop
-    pub circuit: Circuit,
+    pub(crate) circuit: Circuit,
     /// the condition used to stop the loop
-    pub stop_condition: StopCondition,
+    pub(crate) stop_condition: StopCondition,
+}
+
+impl Loop {
+    pub fn new(circuit:impl Into<Circuit>, stop_condition:&StopCondition) -> Self {
+        Loop{circuit:circuit.into(), stop_condition:stop_condition.clone()}
+    }
 }
 
 impl Into<CircuitElement> for Loop {
